@@ -1,12 +1,12 @@
 package szhzz.Netty.Cluster.Net;
 
-import szhzz.App.AppManager;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import szhzz.App.AppManager;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Utils.DawLogger;
@@ -38,14 +38,14 @@ public class ExchangeDataEncoder extends MessageToMessageEncoder<CharSequence> i
 
     void stop() {
         isClosed = true;
-        if(pushBuffer !=null) {
+        if (pushBuffer != null) {
             pushBuffer.close();
         }
         pushBuffer = null;
     }
 
     private void active(Channel channel, List<Object> out) {
-        if(privateChannel == null) {
+        if (privateChannel == null) {
             privateChannel = channel;
             this.out = out;
             privateChannel.closeFuture().addListeners(new GenericFutureListener() {
@@ -72,7 +72,7 @@ public class ExchangeDataEncoder extends MessageToMessageEncoder<CharSequence> i
         }
 
         if (!privateChannel.isWritable()) {
-            if(!isClosed){
+            if (!isClosed) {
                 AppManager.logit("[Proxy]" + privateChannel.remoteAddress().toString() + " 推送故障! " + outNo + "/" + inNo);
             }
         } else {
@@ -81,7 +81,7 @@ public class ExchangeDataEncoder extends MessageToMessageEncoder<CharSequence> i
                 //阻塞式写入
                 ChannelFuture future = privateChannel.writeAndFlush(obj.toString());
                 future.await(1, TimeUnit.SECONDS);
-                if(!future.isSuccess()){
+                if (!future.isSuccess()) {
                     logger.error("[Proxy]" + privateChannel.remoteAddress().toString() + " 推送故障! " + outNo + "/" + inNo, future.cause());
                 }
             } catch (InterruptedException e) {
@@ -92,11 +92,11 @@ public class ExchangeDataEncoder extends MessageToMessageEncoder<CharSequence> i
     }
 
     protected void encode(ChannelHandlerContext ctx, CharSequence msg, List<Object> out) throws Exception {
-        if(privateChannel == null){
+        if (privateChannel == null) {
             active(ctx.channel(), out);
         }
 
-        if(msg != null) {
+        if (msg != null) {
             push(msg);
         }
     }

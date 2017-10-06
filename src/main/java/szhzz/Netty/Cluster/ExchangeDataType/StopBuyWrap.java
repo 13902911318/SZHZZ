@@ -6,6 +6,7 @@ package szhzz.Netty.Cluster.ExchangeDataType;
  */
 public class StopBuyWrap {
     NettyExchangeData data = null;
+
     public StopBuyWrap(NettyExchangeData data) {
         this.data = data;
     }

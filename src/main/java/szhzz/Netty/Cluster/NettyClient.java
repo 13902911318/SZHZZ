@@ -1,7 +1,5 @@
 package szhzz.Netty.Cluster;
 
-import szhzz.App.AppManager;
-import szhzz.App.BeQuit;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -11,6 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.channel.socket.oio.OioSocketChannel;
+import szhzz.App.AppManager;
+import szhzz.App.BeQuit;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.Net.ClientInitializer;
@@ -195,6 +195,10 @@ public class NettyClient {
         }
     }
 
+    /**
+     * @param obj
+     * @return requID 回执号!
+     */
     public long send(NettyExchangeData obj) {
         if (!isConnected()) {
             return -1;
@@ -205,9 +209,10 @@ public class NettyClient {
         }
         NettyExchangeData d = ((NettyExchangeData) obj);
         synchronized (locker) {
-            d.setRequestID(++requID);
+//            d.setRequestID(++requID);
             channel.writeAndFlush(d.encode());
-            return requID;
+//            return requID;
+            return 1;
         }
     }
 

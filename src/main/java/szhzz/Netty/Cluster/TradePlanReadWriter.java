@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster;
 import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Config.CfgProvider;
+import szhzz.Netty.Cluster.ExchangeDataType.CfgFileWrap;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.TradePlanWrap;
 import szhzz.Netty.Cluster.ExchangeDataType.TxtFileWrap;
@@ -19,14 +20,16 @@ public class TradePlanReadWriter extends CfgProvider {
     private static AppManager App = AppManager.getApp();
     private static TradePlanReadWriter onlyOne = null;
     private HashSet<NettyExchangeData> files = new HashSet<>();
+    private HashSet<NettyExchangeData> amAuctionFiles = new HashSet<>();
     private String folder = null;
 
     private TradePlanReadWriter() {
     }
 
-    public static CfgProvider getInstance(String groupName){
+    public static CfgProvider getInstance(String groupName) {
         return getInstance();
     }
+
     public static TradePlanReadWriter getInstance() {
         if (onlyOne == null) {
             onlyOne = new TradePlanReadWriter();
@@ -40,16 +43,17 @@ public class TradePlanReadWriter extends CfgProvider {
 
 
     public synchronized void addData(NettyExchangeData data) {
-//        if (szhzz.App.isOnTrade() || szhzz.App.isDebug()) return;
+        if (App.isOnTrade() || App.isDebug()) return;
 
         files.add(data);
         delayTimer.setCircleTime(10 * 1000);
     }
 
 
+
     void deleteFiles() {
         File dir = new File(getSavePath());
-//        szhzz.App.logEvent("delete files in " + dir);
+        App.logEvent("delete files in " + dir);
 
         File[] files = dir.listFiles();
         if (files != null) {
@@ -60,7 +64,7 @@ public class TradePlanReadWriter extends CfgProvider {
             }
         }
         dir = new File(getBackupPath());
-//        szhzz.App.logEvent("delete files in " + dir);
+        App.logEvent("delete files in " + dir);
         files = dir.listFiles();
         if (files != null) {
             for (File f : files) {
@@ -97,7 +101,6 @@ public class TradePlanReadWriter extends CfgProvider {
     }
 
 
-
     public HashSet<NettyExchangeData> getUpdateFiles() {
         HashSet<NettyExchangeData> updateFiles = new HashSet<>();
         File dir = new File(getSavePath());
@@ -114,11 +117,21 @@ public class TradePlanReadWriter extends CfgProvider {
     }
 
 
-    CircleTimer delayTimer = new CircleTimer(){
+    CircleTimer delayTimer = new CircleTimer() {
 
         @Override
         public synchronized void execTask() {
-            if (files == null || files.size() == 0) return;
+            String dir = null;
+
+            if (amAuctionFiles.size() > 0) {
+                dir = getBackupPath();
+                for (NettyExchangeData d : amAuctionFiles) {
+                    new TxtFileWrap(d).writeToTextFile(dir);
+                }
+            }
+            amAuctionFiles.clear();
+
+            if (files.size() == 0) return;
 
             deleteFiles();
             try {
@@ -126,7 +139,7 @@ public class TradePlanReadWriter extends CfgProvider {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            String dir = getSavePath();
+            dir = getSavePath();
             for (NettyExchangeData d : files) {
                 new TxtFileWrap(d).writeToTextFile(dir);
             }
@@ -135,8 +148,8 @@ public class TradePlanReadWriter extends CfgProvider {
             for (NettyExchangeData d : files) {
                 new TxtFileWrap(d).writeToTextFile(dir);
             }
-
             files.clear();
+
         }
     };
 }

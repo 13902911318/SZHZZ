@@ -3,13 +3,8 @@ package szhzz.Netty.Cluster.UDP;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
 import szhzz.Netty.Cluster.Net.ClientHandler;
 import szhzz.Netty.Cluster.Net.ExchangeDataDecoder;
-
-import java.nio.charset.Charset;
 
 
 /**

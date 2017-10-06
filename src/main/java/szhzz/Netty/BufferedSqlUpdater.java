@@ -32,7 +32,7 @@ public class BufferedSqlUpdater implements DataConsumer {
             dataBuffer = null;
             return;
         }
-        if(dataBuffer != null) return;
+        if (dataBuffer != null) return;
 
         dataBuffer = new ObjBufferedIO();
         try {
@@ -44,6 +44,7 @@ public class BufferedSqlUpdater implements DataConsumer {
             dataBuffer = null;
         }
     }
+
     public void push(Object data) {
         try {
             if (dataBuffer != null) {
@@ -55,14 +56,15 @@ public class BufferedSqlUpdater implements DataConsumer {
         }
     }
 
-    public long size(){
-        if(dataBuffer == null) return 0;
+    public long size() {
+        if (dataBuffer == null) return 0;
         return dataBuffer.size();
     }
+
     private void sqlUpdate(NettyExchangeData eData) {
         //同一机器上不需SQL更新
-        if(Cluster.getCpuID().equals(eData.getCpuID())){
-            return ;
+        if (Cluster.getCpuID().equals(eData.getCpuID())) {
+            return;
         }
 
 //        Database db = DbStack.getDb(this.getClass());
@@ -98,7 +100,7 @@ public class BufferedSqlUpdater implements DataConsumer {
     public long in(Object obj) {
         if (obj instanceof NettyExchangeData) {
             sqlUpdate((NettyExchangeData) obj);
-        }else{
+        } else {
             sqlUpdate(obj.toString());
         }
         return 0;

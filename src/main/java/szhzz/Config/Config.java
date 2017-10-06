@@ -50,8 +50,8 @@ public abstract class Config {
     }
 
     public Config copyTo(Config target) {
-        if(target == null){
-            target = new ConfigF() ;
+        if (target == null) {
+            target = new ConfigF();
         }
         target.loadDataVal(getTxt());
         return target;
@@ -79,7 +79,10 @@ public abstract class Config {
     public boolean saveAs(String file) {
         return saveAs(new File(file), false);
     }
-    public void setConfigFileName(String configFileName){}
+
+    public void setConfigFileName(String configFileName) {
+    }
+
     public abstract void reLoad();
 
     public LinkedList<item> getIndex() {
@@ -353,7 +356,6 @@ public abstract class Config {
 
         return defalt;
     }
-
 
 
     public long getLongVal(String name) {

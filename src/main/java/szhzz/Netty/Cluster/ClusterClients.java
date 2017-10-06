@@ -2,7 +2,6 @@ package szhzz.Netty.Cluster;
 
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
-import szhzz.Netty.Cluster.ExchangeDataType.ClusterProtocal;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
 
@@ -49,7 +48,7 @@ public class ClusterClients {
             r = requests.remove(responseID);
         }
         if (r != null) {
-//            szhzz.App.logit(" Drop responseID=" + responseID);
+//            App.logit(" Drop responseID=" + responseID);
             r.clearRequestID();
         } else {
             logger.info(" Drop TradeJni connect with Error, ID=" + responseID);
@@ -81,18 +80,14 @@ public class ClusterClients {
         if (obj != null) {
             synchronized (requests) {
                 w_RequestID = client.send(obj);
-//            if (!isClientOnly()) {
                 if (w_RequestID > 0) {
-                    requestor.setRequestID(w_RequestID);
-                    requests.put(w_RequestID, requestor);
-//                    szhzz.App.logit("Put request ID=" + w_RequestID);
+//                    requestor.setRequestID(w_RequestID);
+//                    requests.put(w_RequestID, requestor);
+
                     return true;
                 } else {
                     AppManager.getApp().logEvent(" Query(" + requestor.getFunID() + ") Error ");
                 }
-//            } else {
-//                return w_RequestID > 0;
-//            }
             }
             return w_RequestID > 0;
         } else {
@@ -106,12 +101,13 @@ public class ClusterClients {
      * 提交查询到远程服务器
      * 无需等待回答
      */
-    public boolean tell(String stationName, NettyExchangeData msg) {
+    public long tell(String stationName, NettyExchangeData msg) {
         NettyClient client = clients.get(stationName);
         if (client == null) {
-            return false;
+            return -1;
         }
-        return client.send(msg) > 0;
+        System.out.println("tell " + stationName);
+        return client.send(msg);
     }
 
     public boolean isConnect(String address) {
@@ -136,79 +132,47 @@ public class ClusterClients {
         NettyRequystor requestor = null;
         long id = 0;
 
-//        if (isClientOnly()) {
-//            if (StationPropertyWrap.isAnswerServer(data)) {
-//                //线程隔断
-//                BusinessRuse.getInstance().acceptBroadcast(data);
-//                if (messageCount++ > 5) {
-//                    messageCount = 0;
-//                    AppManager.logit("连接到自动交易 On Trade=" + StationPropertyWrap.isOnTrade(data));
-//                }
-//            }
+
+        BusinessRuse.getInstance().push(data);
+        return 0;
+
+//        if (!ClusterProtocal.isCluster(data.getEventType())) {
+//            BusinessRuse.getInstance().push(data);
 //            return 0;
 //        }
-
-        /**
-         * 远程主动推送的信息
-         */
-        if (ClusterProtocal.isBroadcast(data.getEventType())) {
-//            AppManager.logit("Remote Broadcast call from " + data.getIpAddress() +
-//                    " " + data.getHostName() +
-//                    " NettyType=" + data.getNettyType() + " String=" + data.getMessageString());
-            BusinessRuse.getInstance().acceptBroadcast(data);
-            return 0;
-        }
-
-        /**
-         * 查询异步回调
-         */
-        try {
-            id = data.getRequestID();
-
-            requestor = deQueue(id);
-            if (requestor != null) {
-//                szhzz.App.logit(" 集群查询回调 " + data.getFunID() + " RequestID=" + id +
-//                        " 返回" + data.getDataRowCount() + "行记录");
-                requestor.push(data);
-            } else {
-                AppManager.logit(" 集群查询回调 " + data.getNettyType() + " RequestID=" + id + " 回调代码失配");
-            }
-
-        } catch (Exception e) {
-            logger.error(e);
-        }
-        if (requestor != null) {
-//            BrokerApp.getApp().setStatuText(MiscDate.timeMM() + " T-" + id);
-        } else {
-            if (abandoned.remove(id)) {
-                String errMsg = " 集群查询返回数据超时:" + id;
-                AppManager.logit(errMsg + "\n" + data.toString());
-            } else {
-                String errMsg = " 集群查询回调代码失配:" + id;
-                AppManager.logit(errMsg + "\n" + data.toString());
-            }
-        }
-        return id;
-    }
-
-
-//    public void startControlCenter(Config cfg) {
-//        AppManager.logit("开启集群监测");
-//        int port_ = cfg.getIntVal("ControlCenter", defaultPort);
 //
-//        String local = AppManager.getHostName();
-//        for (String computer : cfg.getChildrenNames()) {
-//            try {
-//                Config child = cfg.getChild(computer);
-//                if (!computer.equalsIgnoreCase(local)) {
-//                    registerClient(computer, child.getProperty("IP", "").split(";"), port_);
-//                    AppManager.logit("启动客户端 " + computer + " " + port_);
-//                }
-//            } catch (Exception e) {
-//                logger.error(e);
+//        /**
+//         * 查询异步回调
+//         */
+//        try {
+//            id = data.getRequestID();
+//
+//            requestor = deQueue(id);
+//            if (requestor != null) {
+////                App.logit(" 集群查询回调 " + data.getFunID() + " RequestID=" + id +
+////                        " 返回" + data.getDataRowCount() + "行记录");
+//                requestor.push(data);
+//            } else {
+//                AppManager.logit(" 集群查询回调 NettyType=" + data.getNettyType() + " RequestID=" + id + " 回调代码失配");
+//            }
+//
+//        } catch (Exception e) {
+//            logger.error(e);
+//        }
+//        if (requestor != null) {
+////            BrokerApp.getApp().setStatuText(MiscDate.timeMM() + " T-" + id);
+//        } else {
+//            if (abandoned.remove(id)) {
+//                String errMsg = " 集群查询返回数据超时:" + id;
+//                AppManager.logit(errMsg + "\n" + data.toString());
+//            } else {
+//                String errMsg = " 集群查询回调代码失配:" + id;
+//                AppManager.logit(errMsg + "\n" + data.toString());
 //            }
 //        }
-//    }
+//        return id;
+    }
+
 
     public NettyClient registerClient(String computerName, String[] address, int port) {
         NettyClient client = clients.get(computerName);

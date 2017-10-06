@@ -13,15 +13,15 @@ public class CfgFileWrap {
     private static DawLogger logger = DawLogger.getLogger(TxtFileWrap.class);
     private static final String charset = "UTF-8";
 
-    public static NettyExchangeData getCfgWrap(Config cfg, String toFile ) {
+    public static NettyExchangeData getCfgWrap(Config cfg, String toFile) {
         NettyExchangeData eData = new NettyExchangeData();
-        if(toFile == null){
+        if (toFile == null) {
             toFile = cfg.getConfigUrl();
         }
         eData.setErrorCode(0);
         eData.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
         eData.setRequestID(0);
-        eData.setNettyType(ClusterProtocal.FUNCTION.TradeConfigFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
+        eData.setNettyType(ClusterProtocal.FUNCTION.AmAuctionConfigFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
         eData.setMessage("Config File");
 
         eData.setExtData("write", 1);
@@ -30,7 +30,7 @@ public class CfgFileWrap {
         eData.appendRow();
 
         String[] lines = cfg.getTxt().split("\n");
-        for(String s : lines){
+        for (String s : lines) {
             eData.appendRow();
             eData.addData(s);
         }
@@ -43,7 +43,7 @@ public class CfgFileWrap {
         eData.setErrorCode(0);
         eData.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
         eData.setRequestID(0);
-        eData.setNettyType(ClusterProtocal.FUNCTION.TradeConfigFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
+        eData.setNettyType(ClusterProtocal.FUNCTION.AmAuctionConfigFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
         eData.setMessage("Config File");
 
         eData.setExtData("delete", 1);
@@ -75,9 +75,9 @@ public class CfgFileWrap {
 
         File file = new File(fileName);
 
-        if("delete".equals(wORd)){
+        if ("delete".equals(wORd)) {
             isSuccess = file.delete();
-        }else {
+        } else {
             try {
                 out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, false), charset));
                 String line;

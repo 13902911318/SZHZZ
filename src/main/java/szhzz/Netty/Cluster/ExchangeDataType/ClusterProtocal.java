@@ -1,7 +1,9 @@
 package szhzz.Netty.Cluster.ExchangeDataType;
 
-import szhzz.Utils.NU;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.NU;
+
+import static szhzz.Netty.Cluster.ExchangeDataType.ClusterProtocal.EVENT.Broadcast;
 
 /**
  * Created by HuangFang on 2015/4/5.
@@ -35,19 +37,48 @@ public class ClusterProtocal {
         OrderHandDown,
         CancelHandDown,
         LogInformation,
-        TradeConfigFile,
-        SetupUDP;
+        AmAuctionConfigFile,
+        SetupUDP,
+        LoginThroughGate,  //
+        AnswerLoginFromGate, //
+        ClientQuery,
+        AnswerClient,
+        PushSynCallBack,
+        ////////////////////////////////////////////////////
+        ProxyOrder,
+        ProxySubmited,
+        ProxyOrderCallBack,
+        ProxyCancel,
+        ProxyCancelDeleved,
+        ProxyCancelCallBack; //
     }
 
     public enum EVENT {
-        Normal,
+        Cluster,
         Broadcast,
-        HandDown;
+        HandDown,
+        TradeProxy;
     }
 
     public static boolean isBroadcast(Object event) {
-        if (NU.parseInt(event, 0) > 1) return false;
-        return EVENT.values()[NU.parseInt(event, 0)] == EVENT.Broadcast;
+        if (NU.parseInt(event, -1) < 0) return false;
+        return EVENT.values()[NU.parseInt(event, 0)] == Broadcast;
     }
 
+    public static boolean isCluster(Object event) {
+        if (NU.parseInt(event, -1) < 0) return false;
+        return EVENT.values()[NU.parseInt(event, -1)] == EVENT.Cluster;
+    }
+
+    public static boolean isTradeProxy(Object event) {
+        if (NU.parseInt(event, -1) < 0) return false;
+        return EVENT.values()[NU.parseInt(event, -1)] == EVENT.TradeProxy;
+    }
+
+    public static EVENT getEvent(Object event) {
+        int eventOrdinal = NU.parseInt(event, -1);
+        if (eventOrdinal < 0) return Broadcast;
+        return EVENT.values()[eventOrdinal];
+
+    }
 }

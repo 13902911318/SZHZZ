@@ -5,5 +5,6 @@ package szhzz.DataBuffer;
  */
 public interface ObjectCoder {
     public Object decode(String msg);
+
     public String encode(Object obj);
 }

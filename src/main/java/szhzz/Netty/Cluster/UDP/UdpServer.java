@@ -1,12 +1,12 @@
 package szhzz.Netty.Cluster.UDP;
 
-import szhzz.App.AppManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import szhzz.App.AppManager;
 import szhzz.Utils.DawLogger;
 
 import java.net.InetSocketAddress;
@@ -18,7 +18,7 @@ import java.net.InetSocketAddress;
 public class UdpServer {
     private static DawLogger logger = DawLogger.getLogger(UdpServer.class);
     private static AppManager App = AppManager.getApp();
-    private final int port ;
+    private final int port;
     private boolean onServer = false;
 
     private EventLoopGroup wookerGroup = null;
@@ -26,7 +26,7 @@ public class UdpServer {
     public static void main(String[] args) throws InterruptedException {
         try {
             App.setLog4J();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
         new UdpServer(7530).startServer();

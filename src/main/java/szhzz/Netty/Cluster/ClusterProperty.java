@@ -9,6 +9,7 @@ public class ClusterProperty {
     String type = "本地";
     boolean connected = false;
     boolean onTrade = false;
+    boolean isGate = false;
     boolean offline = false;
     boolean canShutdown = false;
     String lastUpdate = "";
@@ -17,9 +18,10 @@ public class ClusterProperty {
     String mack = "";
     int level = 0;
     String closeDate = "";
-    int positionError = 0;
+    int errorCode = 0;
 
     int group = 0;
     String cpuID = "";
     String appClass = "";
+    String tradeProxy = null;
 }

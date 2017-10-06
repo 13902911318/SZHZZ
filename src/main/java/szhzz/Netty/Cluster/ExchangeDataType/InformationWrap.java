@@ -1,7 +1,5 @@
 package szhzz.Netty.Cluster.ExchangeDataType;
 
-import szhzz.Netty.Cluster.Cluster;
-
 /**
  * Created by Administrator on 2015/7/6.
  */

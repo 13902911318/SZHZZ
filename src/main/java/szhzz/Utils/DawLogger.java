@@ -219,7 +219,7 @@ public class DawLogger {
 
     public void error(String s) {
         errorCount++;
-        if(errorCount <= 2) {
+        if (errorCount <= 2) {
             try {
                 Utilities.String2File(MyDate.getToday().getDateTime() + ">" + s, "error.txt", true);
             } catch (IOException e) {
@@ -236,7 +236,7 @@ public class DawLogger {
 
     public void error(String s, Throwable e) {
         errorCount++;
-        if(errorCount <= 2) {
+        if (errorCount <= 2) {
             try {
                 Writer result = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(result);
@@ -250,7 +250,7 @@ public class DawLogger {
             if (level < ERROR) return;
             pr(s, e);
         } else {
-            logger.error(s , e);
+            logger.error(s, e);
 //            Writer result = new StringWriter();
 //            PrintWriter printWriter = new PrintWriter(result);
 //            e.printStackTrace(printWriter);
@@ -260,7 +260,7 @@ public class DawLogger {
 
     public void error(Throwable e) {
         errorCount++;
-        if(errorCount <= 2) {
+        if (errorCount <= 2) {
             try {
                 Writer result = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(result);

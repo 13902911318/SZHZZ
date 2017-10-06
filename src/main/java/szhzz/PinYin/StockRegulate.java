@@ -16,7 +16,6 @@ public class StockRegulate {
     }
 
 
-
     public static String regulatePinYinCode(String code) {
         String c = code.replace("Ｂ", "B");
         c = c.replace("Ａ", "A");

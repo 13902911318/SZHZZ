@@ -246,7 +246,7 @@ public class ExchangeData implements Serializable {
         setTitleCol(msg, colEventType);
     }
 
-    public int getColumnIndex(String label){
+    public int getColumnIndex(String label) {
         return table.get(1).indexOf(label);
     }
 
@@ -281,7 +281,7 @@ public class ExchangeData implements Serializable {
     }
 
     public boolean isEmpty() {
-        return (table == null|| table.size() == 0);
+        return (table == null || table.size() == 0);
     }
 
 
@@ -290,9 +290,9 @@ public class ExchangeData implements Serializable {
     }
 
 
-    public void sort(Comparator comparator){
+    public void sort(Comparator comparator) {
         Vector<Vector> tRows = new Vector<Vector>();
-        for(int i = table.size()-1; i > 1; i--){
+        for (int i = table.size() - 1; i > 1; i--) {
             tRows.add(table.remove(i));
         }
         Collections.sort(tRows, comparator);
@@ -308,12 +308,12 @@ public class ExchangeData implements Serializable {
     }
 
     public String getDbgMsg() {
-        if(this.dbgMsg == null)return "";
+        if (this.dbgMsg == null) return "";
         return dbgMsg.toString();
     }
 
     public void setDbgMsg(String dbgMsg_) {
-        if(this.dbgMsg == null){
+        if (this.dbgMsg == null) {
             this.dbgMsg = new StringBuilder();
         }
         this.dbgMsg.append("->").append(dbgMsg_);

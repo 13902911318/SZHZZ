@@ -1,12 +1,10 @@
 package szhzz.Mail;
 
 
-
 import szhzz.App.AppManager;
 import szhzz.Calendar.MiscDate;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
-
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.Utilities;
@@ -25,7 +23,7 @@ public class Mailer implements DataConsumer {
     BatchSender batchSender = null;
     private static final Object locker = new Object();
     String lineSeparator = System.lineSeparator();
-//            java.security.AccessController.doPrivileged(
+    //            java.security.AccessController.doPrivileged(
 //            new sun.security.action.GetPropertyAction("line.separator"));
     private String title = "";
 
@@ -38,7 +36,7 @@ public class Mailer implements DataConsumer {
     }
 
     public void sendBatchMail(String title, String msg) {
-        if(batchSender == null){
+        if (batchSender == null) {
             batchSender = new BatchSender();
         }
         synchronized (locker) {
@@ -47,7 +45,7 @@ public class Mailer implements DataConsumer {
             }
             sb.append("\r\n").append(msg);
             this.title = title;
-            batchSender.setCircleTime(30*1000); //10秒之内没有新的信息，批量信息一起发出1封邮件
+            batchSender.setCircleTime(30 * 1000); //10秒之内没有新的信息，批量信息一起发出1封邮件
         }
     }
 
@@ -66,7 +64,7 @@ public class Mailer implements DataConsumer {
 
     private void sendMail_(MailMsg mail) {
         int tryCount = 4;
-        while(--tryCount > 0) {
+        while (--tryCount > 0) {
             try {
                 SendMail theMail = new SendMail(mail.getSmtp());
                 theMail.createMimeMessage();
@@ -91,7 +89,7 @@ public class Mailer implements DataConsumer {
                         logger.info("Send OK");
                         break;
                     }
-                }catch (Exception e0){
+                } catch (Exception e0) {
                     logger.error(e0);
                 }
             } catch (Exception e) {
@@ -124,7 +122,7 @@ public class Mailer implements DataConsumer {
                 } catch (IOException e) {
 
                 }
-                if(title == null || title.length() == 0){
+                if (title == null || title.length() == 0) {
                     title = "见附件";
                 }
                 sendMail_(MailMsg.copy(title, f));

@@ -2,8 +2,6 @@ package szhzz.Netty.Cluster;
 
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
-import szhzz.Config.Config;
-import szhzz.Netty.Cluster.ExchangeDataType.CfgFileWrap;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ServerHandler;
@@ -82,7 +80,7 @@ public class ClusterServer {
         ObjectOutputStream serverOutputStream = new
                 ObjectOutputStream(pipe.getOutputStream());
 
-        NettyExchangeData data= (NettyExchangeData)serverInputStream.readObject();
+        NettyExchangeData data = (NettyExchangeData) serverInputStream.readObject();
     }
 
     /**
@@ -98,17 +96,8 @@ public class ClusterServer {
             case QueryServerLevel:
                 exDate = StationPropertyWrap.getStationProperty(data);
                 break;
-            case OrderHandDown:
-//                OrderAbstract.orderHandDown(data);
-                break;
-            case CancelHandDown:
-//                OrderAbstract.cancelHandDown(data);
-                break;
-            case TradeConfigFile:
-                Config cfg = CfgFileWrap.getCfg(data);
-//                OrderConfigListView.getInstance().loadAmAuctionCfg(cfg);
-
-                break;
+            default:
+                BusinessRuse.getInstance().push(data);
         }
         return exDate;
     }
@@ -118,7 +107,7 @@ public class ClusterServer {
     }
 
     boolean startServer() {
-        if(server==null) {
+        if (server == null) {
 
             server = new NettyServer(port);
             try {
@@ -154,7 +143,7 @@ public class ClusterServer {
     };
 
     public void setServerName(String serverName) {
-        if(this.serverName == null){
+        if (this.serverName == null) {
             this.serverName = serverName;
         }
     }
@@ -164,7 +153,7 @@ public class ClusterServer {
     }
 
     public void setPort(int port) {
-        if(this.port == 0){
+        if (this.port == 0) {
             this.port = port;
         }
     }

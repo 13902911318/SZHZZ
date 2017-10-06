@@ -1,12 +1,12 @@
 package szhzz.Netty.Cluster.UDP;
 
-import szhzz.App.AppManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import szhzz.App.AppManager;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
@@ -31,11 +31,12 @@ public class UdpClient_Netty extends UdpClient_Abstract {
     }
 
 
-    UdpClient_Netty(){}
+    UdpClient_Netty() {
+    }
 
     @Override
     public void addRemote(String host) {
-        if(host.isEmpty()){
+        if (host.isEmpty()) {
             host = "127.0.0.1";
         }
         host = host.replace("/", "");

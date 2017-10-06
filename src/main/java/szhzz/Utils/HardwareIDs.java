@@ -120,6 +120,7 @@ public class HardwareIDs {
 
     /**
      * 该方法很慢!!
+     *
      * @return
      */
     public static String getMACAddress(String signature) {
@@ -165,6 +166,7 @@ public class HardwareIDs {
 
     /**
      * 该方法很慢!!
+     *
      * @return
      */
     public static String getMACAddress() {

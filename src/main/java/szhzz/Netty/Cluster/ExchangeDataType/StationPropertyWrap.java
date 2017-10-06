@@ -2,24 +2,25 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 
 
 import szhzz.App.AppManager;
-import szhzz.Utils.NU;
 import szhzz.Netty.Cluster.Cluster;
+import szhzz.StatusInspect.StatusInspector;
 import szhzz.Utils.HardwareIDs;
+import szhzz.Utils.NU;
 
 /**
  * Created by Administrator on 2015/7/6.
  */
 public class StationPropertyWrap {
-//    NettyExchangeData data = null;
     private static NettyExchangeData closeOthersMsg = null;
     private static NettyExchangeData queryLevel = null;
+    private static StationPropertyWrap extender = null;
 
     public static NettyExchangeData getStationLevelQuery() {
         if (queryLevel == null) {
             queryLevel = new NettyExchangeData();
 
             queryLevel.setErrorCode(0);
-            queryLevel.setEvenType(0);
+            queryLevel.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
             queryLevel.setRequestID(0);
             queryLevel.setMessage("QueryServerLevel");
             queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);
@@ -50,14 +51,19 @@ public class StationPropertyWrap {
 
     /**
      * 返回本节点的级别
+     *
      * @param data
      * @return
      */
     public static NettyExchangeData getStationProperty(NettyExchangeData data) {
+        if (extender != null) {
+            return extender.getStationProperty(data);
+        }
+
         NettyExchangeData eData = new NettyExchangeData();
 
         eData.setErrorCode(Cluster.getInstance().isOnTrade() ? 1 : 0);
-        eData.setEvenType(0);
+        eData.setEvenType(ClusterProtocal.EVENT.Cluster.ordinal());
         eData.setIpAddress(data.getIpAddress()); //数据进入本站的时候设置了 data.getIpAddress()
         eData.setRequestID(data.getRequestID().intValue());
         eData.setMessage("AnswerServerLevel");
@@ -68,19 +74,21 @@ public class StationPropertyWrap {
         eData.appendRow();
         eData.addData(Cluster.getInstance().getLocalLevel());
 
+        String closeDate = "";
 //        String closeDate = AppEventExchange.getInstance().getEvent("DayClose");
 //        if(closeDate == null) closeDate = "";
-        String closeDate = "";
 
         eData.addData(closeDate);  // Col = 1
 //        int e = NU.parseInt(AppEventExchange.getInstance().getEvent("持仓修正"),0);
-        int e = 0;
-        eData.addData(e);       // Col = 2
+        eData.addData(StatusInspector.getInstance().getErrorCount());       // Col = 2
+//        eData.addData(AppManager.getApp().canRemoteShutdown() ? "true" : "false");  // Col = 3
         eData.addData("false");  // Col = 3
-        eData.addData((Cluster.getInstance().isOnTrade()  ? 1 : 0));    // Col = 4
+        eData.addData((Cluster.getInstance().isOnTrade() ? 1 : 0));    // Col = 4
         eData.addData((AppManager.getApp().isDebug() ? 1 : 0));         // Col = 5
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
+        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
+
 
         return eData;
     }
@@ -117,28 +125,20 @@ public class StationPropertyWrap {
         if (data == null) return "";
         if (isAnswerServer(data)) {
             Object o = data.getDataValue(0, 1);
-            if(o != null){
+            if (o != null) {
                 d = o.toString();
             }
         }
         return d;
     }
 
-    public static int getPositionError(NettyExchangeData data) {
+    public static int getAppErrorCode(NettyExchangeData data) {
         if (data == null) return 0;
         if (isAnswerServer(data)) {
             return NU.parseInt(data.getDataValue(0, 2), 0);
         }
         return 0;
     }
-
-    public static boolean isClusterData(NettyExchangeData data) {
-        ClusterProtocal.FUNCTION funID = data.getNettyType();
-        return funID == ClusterProtocal.FUNCTION.AnswerServerLevel ||
-                funID == ClusterProtocal.FUNCTION.CloseOthers ||
-                funID == ClusterProtocal.FUNCTION.QueryServerLevel;
-    }
-
 
     public static String getMack(NettyExchangeData data) {
         if (data == null) return "";
@@ -148,7 +148,17 @@ public class StationPropertyWrap {
 
     public static boolean canRemoteShutdown(NettyExchangeData data) {
         if (data == null) return false;
-        return "true".equalsIgnoreCase((String) data.getDataValue(0,3));
+        return "true".equalsIgnoreCase((String) data.getDataValue(0, 3));
+    }
+
+
+    public static String tradeProxy(NettyExchangeData data) {
+        if (data == null) return "";
+        return (String) data.getDataValue(0, 8, "");
+    }
+
+    public static void setExtender(StationPropertyWrap extender) {
+        StationPropertyWrap.extender = extender;
     }
 }
 

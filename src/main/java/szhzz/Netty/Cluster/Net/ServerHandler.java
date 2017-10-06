@@ -1,6 +1,5 @@
 package szhzz.Netty.Cluster.Net;
 
-import szhzz.App.BeQuit;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,6 +7,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import szhzz.App.AppManager;
+import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.Netty.Cluster.ClusterServer;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
@@ -45,7 +46,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         if (Cluster.getInstance().isOffLine()) return;
 
         for (Channel channel : channels) {
-            if(channel.isWritable()){
+            if (channel.isWritable()) {
                 channel.writeAndFlush(msg.encode());
             }
 //            channel.writeAndFlush(msg.encode()).addListeners(new GenericFutureListener() {
@@ -139,7 +140,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
     ///////////////////////////////////////////////
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
-//        if (AppManager.isQuitApp()) return;
+        if (AppManager.isQuitApp()) return;
         NettyExchangeData exDate = clusterServer.answer(msg);
         if (exDate != null) {
             ctx.writeAndFlush(exDate.encode());
@@ -223,7 +224,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
                 sayBye();
                 count++;
             }
-            if(channels.size() > 0){
+            if (channels.size() > 0) {
                 logger.error("Cluster Server forced disconnect ");
             }
             return true;

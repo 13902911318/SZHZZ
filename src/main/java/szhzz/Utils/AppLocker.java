@@ -1,7 +1,6 @@
 package szhzz.Utils;
 
 
-
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.Config.CfgProvider;

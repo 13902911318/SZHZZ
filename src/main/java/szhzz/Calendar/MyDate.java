@@ -4,10 +4,13 @@ package szhzz.Calendar;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Days;
-import szhzz.Utils.NU;
+import szhzz.App.AppManager;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.NU;
+import szhzz.sql.database.Database;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -177,31 +180,31 @@ public class MyDate implements Serializable {
      * TODO marked from Stock
      */
     private static void initCalendar() {
-//        if (stockCalendar == null) {
-//            ResultSet rs = null;
-//            stockCalendar = new HashSet<String>();
-//            String sql = "select  CalendarDate from stockCalendar  " +
-////                    " where CalendarDate  <= '" + getToday().getDate() + "'" +
-//                    " order by 1 ";
-//            Database db = AppManager.getApp().getDatabase(MyDate.class);
-//            AppManager.getApp().tryOpendb(db);
-//
-//            try {
-//                rs = db.dynamicSQL(sql);
-//                while (rs.next()) {
-//                    lastTradeDay = rs.getObject(1).toString();
-//                    if (minTradeDay == null) {
-//                        minTradeDay = lastTradeDay;
-//                    }
-//                    stockCalendar.add(lastTradeDay);
-//                }
-//            } catch (Exception e) {
-//                logger.error(e);
-//            } finally {
-//                Database.closeResultSet(rs);
-//                db.close();
-//            }
-//        }
+        if (stockCalendar == null) {
+            ResultSet rs = null;
+            stockCalendar = new HashSet<String>();
+            String sql = "select  CalendarDate from stockCalendar  " +
+//                    " where CalendarDate  <= '" + getToday().getDate() + "'" +
+                    " order by 1 ";
+            Database db = AppManager.getApp().getDatabase(MyDate.class);
+            AppManager.getApp().tryOpendb(db);
+
+            try {
+                rs = db.dynamicSQL(sql);
+                while (rs.next()) {
+                    lastTradeDay = rs.getObject(1).toString();
+                    if (minTradeDay == null) {
+                        minTradeDay = lastTradeDay;
+                    }
+                    stockCalendar.add(lastTradeDay);
+                }
+            } catch (Exception e) {
+                logger.error(e);
+            } finally {
+                Database.closeResultSet(rs);
+                db.close();
+            }
+        }
     }
 
     public static MyDate getLastClosedDay() {
@@ -762,7 +765,7 @@ public class MyDate implements Serializable {
      * TODO marked from Stock
      */
 //    public synchronized void setToFutureOpenDay(Database db) {
-//        String sql = "select  CalendarDate from stockCalendar  " +
+//        String szhzz.sql = "select  CalendarDate from stockCalendar  " +
 //                " where CalendarDate  > '" + getDate() + "'" +
 //                " order by CalendarDate " +
 //                " limit 1 ";
@@ -772,7 +775,7 @@ public class MyDate implements Serializable {
 //
 //
 //        try {
-//            rs = db.dynamicSQL(sql);
+//            rs = db.dynamicSQL(szhzz.sql);
 //            if (rs.next()) {
 //                String nextTradeDay = rs.getObject(1).toString();
 //                this.setDate(nextTradeDay);
@@ -783,7 +786,6 @@ public class MyDate implements Serializable {
 //            Database.closeResultSet(rs);
 //        }
 //    }
-
     public void addTimeInMinuts(int minuts) {
         if (readOnly) {
             logger.error("READONLY TODAY CAN NOT BE CHANGED!");
@@ -872,7 +874,6 @@ public class MyDate implements Serializable {
     }
 
     /**
-     *
      * @param format yyyy-MM-dd HH:mm:ss.SSS
      * @return
      */
@@ -922,6 +923,7 @@ public class MyDate implements Serializable {
     public long getMillisOfDay() {
         return in.getMillisOfDay();
     }
+
     public int getMillisOfSecond() {
         return in.getMillisOfSecond();
     }
@@ -1068,7 +1070,7 @@ public class MyDate implements Serializable {
      * TODO marked from Stock
      */
     public void getFutureOpenDay() {
-//        String sql = "select  CalendarDate from stockCalendar  " +
+//        String szhzz.sql = "select  CalendarDate from stockCalendar  " +
 //                " where CalendarDate  > '" + getToday().getDate() + "'" +
 //                " order by CalendarDate " +
 //                " limit 1 ";
@@ -1078,7 +1080,7 @@ public class MyDate implements Serializable {
 //        ResultSet rs = null;
 //
 //        try {
-//            rs = db.dynamicSQL(sql);
+//            rs = db.dynamicSQL(szhzz.sql);
 //            while (rs.next()) {
 //                String nextTradeDay = rs.getObject(1).toString();
 //                this.setDate(nextTradeDay);

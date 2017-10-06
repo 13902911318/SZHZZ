@@ -40,7 +40,7 @@ public class TxtFileWrap {
 
     public static NettyExchangeData getTextFile(String fileName, String toFile) {
         String encode = fileEncode(fileName);//可以确保文件已经生成并关闭.
-//        encode = "UTF-8";
+        encode = "UTF-8";
 
         if (toFile == null) toFile = fileName;
 

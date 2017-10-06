@@ -1,8 +1,8 @@
 package szhzz.DataBuffer;
 
+import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
-import EDU.oswego.cs.dl.util.concurrent.BoundedBuffer;
 import szhzz.Utils.DawLogger;
 
 import java.util.concurrent.TimeUnit;
@@ -84,7 +84,7 @@ public class ObjBufferedIO implements Runnable {
         waringSize = (int) (0.95 * bufferSize);
         if (waringSize < 1) waringSize = 1;
 
-        if(bufferSize > 1000){
+        if (bufferSize > 1000) {
             int a = 0;
         }
         logger.info(dataReader.getClass().getName() + " set buffer size = " + bufferSize);
@@ -117,7 +117,7 @@ public class ObjBufferedIO implements Runnable {
                     lostCount++;
                     if (dataReader != null) {
                         logger.info(data.toString());
-                        logger.error(new Exception(" 缓存(" + queue.size() +  "/" + bufferSize + ")溢出(1) = " + lostCount + " rows 记录丢失\n" +
+                        logger.error(new Exception(" 缓存(" + queue.size() + "/" + bufferSize + ")溢出(1) = " + lostCount + " rows 记录丢失\n" +
                                 "请加大缓存或超时. reader is " + dataReader.getClass()));
                     }
                 }
@@ -189,22 +189,21 @@ public class ObjBufferedIO implements Runnable {
     }
 
     public long size() {
-        if(queue == null) return 0;
+        if (queue == null) return 0;
         return queue.size();
     }
 
     /**
-     *
      * @param blockTimeout miniSecond
      */
     public void setBlockTimeout(long blockTimeout) {
         this.blockTimeout = blockTimeout;
     }
 
-    public String toString(){
-        if(dataReader == null){
+    public String toString() {
+        if (dataReader == null) {
             return this.getClass().getName() + "->?";
-        }else{
+        } else {
             return this.getClass().getName() + "->" + dataReader.toString();
         }
     }

@@ -1,12 +1,11 @@
 package szhzz.Netty.Cluster.ExchangeDataType;
 
-import szhzz.Netty.Cluster.Cluster;
-
 /**
  * Created by Administrator on 2015/7/7.
  */
 public class StopSaleWrap {
     NettyExchangeData data = null;
+
     public StopSaleWrap(NettyExchangeData data) {
         this.data = data;
     }
@@ -27,8 +26,8 @@ public class StopSaleWrap {
         return eData;
     }
 
-    public boolean isStopSale(){
-        Object stopSale = data.getDataValue(0,0);
-        return stopSale!= null && "true".equalsIgnoreCase(stopSale.toString());
+    public boolean isStopSale() {
+        Object stopSale = data.getDataValue(0, 0);
+        return stopSale != null && "true".equalsIgnoreCase(stopSale.toString());
     }
 }

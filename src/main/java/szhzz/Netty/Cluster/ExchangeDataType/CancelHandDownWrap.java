@@ -17,7 +17,7 @@ public class CancelHandDownWrap {
         eData.setErrorCode(0);
         eData.setEvenType(ClusterProtocal.EVENT.HandDown.ordinal());
         eData.setRequestID(0);
-        eData.setMessage( Cluster.getHostName() + "CANCEL:" + (++sirialNumber));
+        eData.setMessage(Cluster.getHostName() + "CANCEL:" + (++sirialNumber));
         eData.setNettyType(ClusterProtocal.FUNCTION.CancelHandDown);
 
         eData.appendRow();

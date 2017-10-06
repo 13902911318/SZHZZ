@@ -148,7 +148,7 @@ public class MailMsg {
         if (index >= mailBox.size()) {
             index = 0;
         }
-        if(mailBox.size() > 0){
+        if (mailBox.size() > 0) {
             currentMailBox = mailBox.get(index);
         }
         if (currentMailBox == null) {

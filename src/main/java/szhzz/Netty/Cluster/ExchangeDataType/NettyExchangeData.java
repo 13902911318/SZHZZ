@@ -1,12 +1,11 @@
 package szhzz.Netty.Cluster.ExchangeDataType;
 
 
-
 import JNI.ExchangeData;
 import szhzz.Calendar.MyDate;
-import szhzz.Utils.NU;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.NU;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +42,7 @@ public class NettyExchangeData extends ExchangeData {
     public static final int colAppClass = 14;  //
     public static final int colMac = 15;  //
 
-    public  static final int colExt = 20;  //
+    public static final int colExt = 20;  //
 
     private String language = "语言认证";  //防止通讯后出现乱码
     String encodeString = null;
@@ -75,9 +74,9 @@ public class NettyExchangeData extends ExchangeData {
 
     public boolean isSameCharset() {
         String l = getValue(0, colLanguage).toString();
-        if(language.equals(l) || "ASC_II".equals(l)){
+        if (language.equals(l) || "ASC_II".equals(l)) {
             return true;
-        }else{
+        } else {
             logger.error(new Exception("语言编码冲突"));
             logger.info(this.toString());
             return false;
@@ -125,6 +124,10 @@ public class NettyExchangeData extends ExchangeData {
         return NU.parseLong(getValue(0, colEventType), 0L);
     }
 
+    public ClusterProtocal.EVENT getEvent() {
+        return ClusterProtocal.getEvent(getValue(0, colEventType, "-1"));
+    }
+
     public Long getLogonID() {
         return NU.parseLong(getValue(0, colLogonID), 0L);
     }
@@ -152,11 +155,11 @@ public class NettyExchangeData extends ExchangeData {
         return n;
     }
 
-    public long getTimeLap(){
+    public long getTimeLap() {
         try {
             MyDate d = new MyDate(getValue(0, colTimeStamp).toString());
             return adjustedTime().getMillisOfDay() - d.getMillisOfDay();
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
             int a = 0;
         }
         return 0;
@@ -166,12 +169,12 @@ public class NettyExchangeData extends ExchangeData {
         setTitleCol(o, (colExt + col));
     }
 
-    public void setSerialNo(long serialNo){
+    public void setSerialNo(long serialNo) {
         setTitleCol(serialNo, colSerialNo);
     }
 
-    public long getSerialNo(){
-        return NU.parseLong(getValue(0, colSerialNo),0L);
+    public long getSerialNo() {
+        return NU.parseLong(getValue(0, colSerialNo), 0L);
     }
 
 
@@ -182,32 +185,34 @@ public class NettyExchangeData extends ExchangeData {
 
     /**
      * default 0
+     *
      * @return
      */
-    public int getGroup(){
+    public int getGroup() {
         return NU.parseInt(getValue(0, colGroupID), 0);
     }
-    private void setGroup(int group){
+
+    private void setGroup(int group) {
         setTitleCol(group, colGroupID);
     }
 
-    public String getCpuID(){
+    public String getCpuID() {
         return (String) getValue(0, colCpuID);
     }
 
-    private void setCpuID(String cpuID){
+    private void setCpuID(String cpuID) {
         setTitleCol(cpuID, colCpuID);
     }
 
-    public String getAppClassName(){
+    public String getAppClassName() {
         return (String) getValue(0, colAppClass);
     }
 
-    private void setAppClassName(String cpuID){
+    private void setAppClassName(String cpuID) {
         setTitleCol(cpuID, colCpuID);
     }
 
-    private void setMac(String cpuID){
+    private void setMac(String cpuID) {
         setTitleCol(cpuID, colMac);
     }
 

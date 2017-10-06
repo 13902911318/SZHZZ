@@ -19,6 +19,7 @@ public class UdpEncoder extends MessageToMessageEncoder<NettyExchangeData> {
     public UdpEncoder(InetSocketAddress remoteAddress) {
         this.remoteAddress = remoteAddress;
     }
+
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext,
                           NettyExchangeData logEvent, List<Object> out)

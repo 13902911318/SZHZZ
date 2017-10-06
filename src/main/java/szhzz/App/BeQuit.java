@@ -14,6 +14,7 @@ public abstract class BeQuit implements Comparable {
         this.prio = prio;
         AppManager.registerBeQuit(this);
     }
+
     public BeQuit() {
         AppManager.registerBeQuit(this);
     }

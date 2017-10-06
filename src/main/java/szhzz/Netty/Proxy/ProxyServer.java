@@ -1,6 +1,5 @@
 package szhzz.Netty.Proxy;
 
-import szhzz.App.AppManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -9,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
+import szhzz.App.AppManager;
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
 import szhzz.Timer.CircleTimer;
@@ -79,7 +79,7 @@ public class ProxyServer {
             wookerGroup.shutdownGracefully().sync();
             AppManager.getApp().logEvent("[Proxy] Server closed ! " + port);
 
-            if(!serverClosed){
+            if (!serverClosed) {
                 connectionListener.setCircleTime(10000);
             }
         }
@@ -89,7 +89,6 @@ public class ProxyServer {
         serverClosed = true;
         serverChannel.close(); //disconnect();
     }
-
 
 
     public void startup() {
@@ -119,7 +118,7 @@ public class ProxyServer {
         @Override
         public void execTask() {
             try {
-                if(!serverClosed){
+                if (!serverClosed) {
                     startup();
                 }
             } finally {

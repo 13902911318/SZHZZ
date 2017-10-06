@@ -17,6 +17,8 @@ package szhzz.PinYin;
  * 2004-10-25??
  * @(#)CnToSpellGUI.java kindani
  * 2004-10-25??
+ * @(#)CnToSpellGUI.java kindani
+ * 2004-10-25??
  */
 /**
  * @(#)CnToSpellGUI.java

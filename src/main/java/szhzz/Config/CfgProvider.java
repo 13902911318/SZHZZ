@@ -1,7 +1,9 @@
 package szhzz.Config;
 
 
+import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
+import szhzz.Utils.DawLogger;
 import szhzz.Utils.Utilities;
 
 import java.io.File;
@@ -17,6 +19,7 @@ import java.util.LinkedList;
  * To change this template use File | Settings | File Templates.
  */
 public class CfgProvider {
+    private static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
     private static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
     private Config cfg = null;
     private Hashtable<Object, Config> allCfgs;
@@ -25,6 +28,7 @@ public class CfgProvider {
     private String cfgFolder = null;
     private String groupName = null;
     private static String configFolder = null;
+    private static String appClass = "";
 
     public static CfgProvider getInstance(String groupName) {
         CfgProvider onlyOne = provider.get(groupName);
@@ -38,13 +42,15 @@ public class CfgProvider {
 
     public static String getRootFolder() {
         if (configFolder == null) {
-            configFolder = System.getProperty("user.dir") + "\\configs";
+            configFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
         }
         return configFolder;
     }
 
-    public static void setConfigFolder(String configFolder) {
-        CfgProvider.configFolder = configFolder;
+    public static void setAppClass(Class appClass) {
+        CfgProvider.appClass = appClass.getSimpleName();
+        configFolder = null;
+        getRootFolder() ;
     }
 
     public Config getNewCfg(String asName) {
@@ -102,7 +108,7 @@ public class CfgProvider {
 
 
     public String getDir() {
-        return  getRootFolder() + "/" + groupName + "/";
+        return getRootFolder() + "/" + groupName + "/";
     }
 
     protected void laodCfgs(String name) {
@@ -195,7 +201,7 @@ public class CfgProvider {
                 try {
                     Utilities.String2File("// Create " + MyDate.getToday().getDateTime(), fileName, false);
                 } catch (IOException e) {
-
+                    logger.error(e);
                 }
             }
             ConfigF cfgF = new ConfigF();

@@ -1,6 +1,5 @@
 package szhzz.Netty.Cluster;
 
-import szhzz.App.AppManager;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -8,11 +7,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
+import szhzz.App.AppManager;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
-
 
 /**
  * Created by HuangFang on 2015/3/15.

@@ -9,5 +9,6 @@ package szhzz.DataBuffer;
  */
 public interface DataConsumer {
     public long in(Object obj);
+
     public long in(long dataID, Object obj);
 }

@@ -7,8 +7,6 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
-import java.util.Hashtable;
-
 /**
  * Created by IntelliJ IDEA.
  * User: Administrator
@@ -17,8 +15,8 @@ import java.util.Hashtable;
  * To change this template use File | Settings | File Templates.
  */
 public class getPingYin {
-//    private static Hashtable<String, String> DuoYinZi = null;
-    private static final String[] dyc = new String[]{"银行","YH", "重庆", "CQ", "西藏", "XZ", "大厦", "DS", "广厦", "GS", "成长", "CZ", "空调", "KT"};
+    //    private static Hashtable<String, String> DuoYinZi = null;
+    private static final String[] dyc = new String[]{"银行", "YH", "重庆", "CQ", "西藏", "XZ", "大厦", "DS", "广厦", "GS", "成长", "CZ", "空调", "KT"};
 
     public static String getPingYin(String src) {
         char[] t1 = null;
@@ -56,8 +54,8 @@ public class getPingYin {
 //        }
 
         String convert = "";
-        for(int i = 0; i < dyc.length; i+=2 ){
-            str = str.replace(dyc[i], dyc[i+1]);
+        for (int i = 0; i < dyc.length; i += 2) {
+            str = str.replace(dyc[i], dyc[i + 1]);
         }
 
         for (int j = 0; j < str.length(); j++) {
@@ -67,12 +65,12 @@ public class getPingYin {
 //                if (h != null) {
 //                    convert += h;
 //                } else {
-                    String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
-                    if (pinyinArray != null) {
-                        convert += pinyinArray[0].charAt(0);
-                    } else {
-                        convert += word;
-                    }
+                String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
+                if (pinyinArray != null) {
+                    convert += pinyinArray[0].charAt(0);
+                } else {
+                    convert += word;
+                }
 //                }
             } catch (Exception e) {
                 e.printStackTrace();

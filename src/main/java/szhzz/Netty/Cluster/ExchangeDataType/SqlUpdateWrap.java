@@ -12,7 +12,7 @@ public class SqlUpdateWrap {
         this.data = data;
     }
 
-    public static NettyExchangeData getSqlUpdate(Iterable<String> data, String key){
+    public static NettyExchangeData getSqlUpdate(Iterable<String> data, String key) {
         NettyExchangeData eData = getSqlUpdate(data);
         eData.setExtData(key, 1);
         return eData;
@@ -44,6 +44,7 @@ public class SqlUpdateWrap {
         eData.setExtData(key, 1);
         return eData;
     }
+
     public static NettyExchangeData getSqlUpdate(String data) {
         NettyExchangeData eData = new NettyExchangeData();
 

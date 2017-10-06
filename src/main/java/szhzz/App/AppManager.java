@@ -1,10 +1,17 @@
 package szhzz.App;
 
-//import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
-//import java.util.concurrent.*;
 
 
 import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
+import org.jdesktop.swingx.JXBusyLabel;
+import org.jdesktop.swingx.icon.EmptyIcon;
+import org.jdesktop.swingx.painter.BusyPainter;
+import szhzz.Calendar.MyDate;
+import szhzz.Timer.AlarmClock;
+import szhzz.Timer.TimerEvent;
+import szhzz.sql.database.DBException;
+import szhzz.sql.database.DBProperties;
+import szhzz.sql.database.Database;
 import szhzz.Calendar.MiscDate;
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
@@ -22,16 +29,15 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -55,19 +61,22 @@ public class AppManager implements DataConsumer {
     private static DawLogger logger = DawLogger.getLogger(AppManager.class);
     private static Vector<BeQuit> beQuits = new Vector<BeQuit>();
     private static boolean quitApp = false;
-//    static private JXBusyLabel Busy = null;
-//    static private AlarmClock alarmClock = null;
+    static private JXBusyLabel Busy = null;
+    static private AlarmClock alarmClock = null;
     private static boolean stopProcess = true;
     private static String hostName = null;
+    private static boolean autoGc = true;
+    private static String configFolder = "configs";
     private static JLabel threadLabel = null;
-    protected Config cfg = new ConfigF();
-     Vector<JProgressBar> progress = new Vector<JProgressBar>();
-    String cfgFile = "";
+    protected Config cfg;
+    Vector<JProgressBar> progress = new Vector<JProgressBar>();
+    String file = "";
     JFrame frame = null;
     MemoBar memoBar = null;
     private JTextComponent eventLogAre = null;
     private StringBuffer eventBuffer = new StringBuffer();
     private boolean locked = false;
+    private boolean midleClose = false;
     private JLabel StatuBar = null;
     private JLabel DigitalClock = null;
     private static String cpuID = null;
@@ -75,19 +84,19 @@ public class AppManager implements DataConsumer {
     private String macID = null;
     private String HD_ID = null;
     private String localIP = null;
-    private String appName = null;
-//    private DBProperties targetDbProp = null;
+    private String appName = null;  //出版名称
+    private DBProperties targetDbProp = null;
     private String icoUrl = null;
     private static ObjBufferedIO logBuffer = null;
     private static EventLoger eventLoger;
 
     //    private static Shutdown dialog = null;
     private boolean debug = false;
-    private boolean autoGc = false;
 
     private static Mailer mailer = null;
     private MailMsg mailMsg = null;
     private static HashSet<String> localIPs = null;
+    private Boolean openEmail = null;
     private static long systemTimeDiff = 0L;
     private static String currentDisk = null;
     private static Class appClass = null;
@@ -142,27 +151,39 @@ public class AppManager implements DataConsumer {
         return System.getProperty("user.dir");
     }
 
-//    public static void reshape(JXBusyLabel Busy, float height) {
-//        float barLength = (height) * 8 / 26;
-//        Shape trajectory = null;
-//        trajectory = new Ellipse2D.Float(barLength / 2, barLength / 2, height - barLength, height - barLength);
-//
-//        Shape pointShape = new Ellipse2D.Float(0, 0, barLength, barLength * 0.318f);
-//
-//        BusyPainter bp = new BusyPainter(pointShape, trajectory);
-//
-//        BusyPainter old = Busy.getBusyPainter();
-//        bp.setTrailLength(old.getTrailLength());
-//        bp.setPoints(old.getPoints());
-//        bp.setFrame(old.getFrame());
-//        Busy.setPreferredSize(new Dimension((int) (height), (int) (height)));
-//        Busy.setIcon(new EmptyIcon((int) (height), (int) (height)));
-//        Busy.setBusyPainter(bp);
-//        bp.setHighlightColor(old.getHighlightColor());
-//        bp.setBaseColor(old.getBaseColor());
-//        Busy.repaint();
+    public static void reshape(JXBusyLabel Busy, float height) {
+        float barLength = (height) * 8 / 26;
+        Shape trajectory = null;
+        trajectory = new Ellipse2D.Float(barLength / 2, barLength / 2, height - barLength, height - barLength);
+
+        Shape pointShape = new Ellipse2D.Float(0, 0, barLength, barLength * 0.318f);
+
+        BusyPainter bp = new BusyPainter(pointShape, trajectory);
+
+        BusyPainter old = Busy.getBusyPainter();
+        bp.setTrailLength(old.getTrailLength());
+        bp.setPoints(old.getPoints());
+        bp.setFrame(old.getFrame());
+        Busy.setPreferredSize(new Dimension((int) (height), (int) (height)));
+        Busy.setIcon(new EmptyIcon((int) (height), (int) (height)));
+        Busy.setBusyPainter(bp);
+        bp.setHighlightColor(old.getHighlightColor());
+        bp.setBaseColor(old.getBaseColor());
+        Busy.repaint();
+    }
+
+    public static String getConfigFolder() {
+        return configFolder;
+    }
+
+//    public void setConfigFolder(String configFolder) {
+//        AppManager.configFolder = configFolder;
+//        loadConfig();
 //    }
 
+    public static void setAutoGc(boolean b) {
+        autoGc = b;
+    }
 
     public static boolean isStopProcess() {
         return stopProcess;
@@ -200,10 +221,10 @@ public class AppManager implements DataConsumer {
     }
 
     private static void setIndeterminate(boolean b) {
-//        if (Busy == null) return;
-//        Busy.setVisible(b);
-//        Busy.setEnabled(b);
-//        Busy.setBusy(b);
+        if (Busy == null) return;
+        Busy.setVisible(b);
+        Busy.setEnabled(b);
+        Busy.setBusy(b);
     }
 
     public static boolean isQuitApp() {
@@ -225,7 +246,7 @@ public class AppManager implements DataConsumer {
                 executor.setKeepAliveTime(1000); //1min
             }
             setStopProcess(false);
-//            executor.execute(new RunCell(r, isManaged));
+            executor.execute(new RunCell(r, isManaged));
             startAProcess();
         } else {
             if (sysExecutor == null) {
@@ -236,7 +257,7 @@ public class AppManager implements DataConsumer {
                 sysExecutor.setKeepAliveTime(1000);
             }
             setStopProcess(false);
-//            sysExecutor.execute(new RunCell(r, isManaged));
+            sysExecutor.execute(new RunCell(r, isManaged));
         }
     }
 
@@ -312,9 +333,26 @@ public class AppManager implements DataConsumer {
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
-            logit("Couldn't find cfgFile: " + path);
+            logit("Couldn't find file: " + path);
             return null;
         }
+    }
+
+    public Database getDatabase(Class caller) {
+        if (getTargetDbProp() != null)
+            return Database.getInstance(getTargetDbProp(), caller);
+        return null;
+    }
+
+    public static boolean canShutdown() {
+        //排除编程失误,误操作等造成的关机. 下述机器不得关闭
+        return !("DellE5".equalsIgnoreCase(getHostName()) ||
+                "DELL690".equalsIgnoreCase(getHostName()));
+    }
+
+    public boolean canRemoteShutdown() {
+        if (cfg == null) return false;
+        return cfg.getBooleanVal("RemoteShutdown", false);
     }
 
     /**
@@ -322,7 +360,7 @@ public class AppManager implements DataConsumer {
      * <p>
      * 持续长时间间断的数据库操作不要使用本功能,以免降低效率
      *
-//     * @param requestor
+     //     * @param requestor
      * @return
      */
 //    public Database getDb(Class requestor) {
@@ -338,25 +376,43 @@ public class AppManager implements DataConsumer {
 //    }
 
 
+    private DBProperties getTargetDbProp() {
+        if (targetDbProp == null) {
+            try {
+                targetDbProp = new DBProperties(getCurrentDBCfg());
+            } catch (DBException e) {
+                targetDbProp = null;
+                logger.error(e);
+            }
+        }
+        return targetDbProp;
+    }
 
+    public void resetTargetDbProp() {
+        targetDbProp = null;
+    }
 
-//    public boolean tryOpendb(Database db) {
-//        boolean isOpened = false;
-//        if (db == null)
-//            return false;
-//        try {
-//            isOpened = db.openDB();
-//        } catch (Exception e) {
-//            logger.error(e);
-//        }
-//        return isOpened;
-//    }
+    public String getCurrentDBCfg() {
+        return getConfigFolder() + "/" + cfg.getProperty("DatabaseCfgFile");
+    }
+
+    public boolean tryOpendb(Database db) {
+        boolean isOpened = false;
+        if (db == null)
+            return false;
+        try {
+            isOpened = db.openDB();
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return isOpened;
+    }
 
     public void setLog4J() {
         if (cfg == null) {
             loadConfig();
         }
-        DawLogger.useLog4J(CfgProvider.getRootFolder() + "/logger.xml");
+        DawLogger.useLog4J(getConfigFolder() + "/logger.xml");
         logger = DawLogger.getLogger(AppManager.class);
         logger.setLevel(cfg.getIntVal("Logger-level", 5));
         logger.info("================ 启动 ===================");
@@ -367,22 +423,34 @@ public class AppManager implements DataConsumer {
     public void loadConfig() {
         String cName = this.getClass().getSimpleName();
         this.appName = cName;
-        loadConfig(this.appName);
+
+        this.file = configFolder + "/" + appClass.getSimpleName() + ".ini";
+
+        System.out.println(new File(".").getAbsolutePath());
+        System.out.println(new File(file).getAbsolutePath());
+
+        cfg = new ConfigF();
+        cfg.load(this.file);
         prepareIDs();
     }
 
     public void loadConfig(String appName) {
         this.appName = appName;
 
-        String cName = this.getClass().getSimpleName();
-        cfg = CfgProvider.getInstance(appName).getCfg(appName);
-        this.cfgFile = cfg.getConfigUrl();
+//        String cName = this.getClass().getSimpleName();
+        this.file = configFolder + "/" + appClass.getSimpleName() + ".ini";
+        cfg = new ConfigF();
+        cfg.load(this.file);
+
+        configFolder = cfg.getConfigFolder();
+
+        this.file = cfg.getConfigUrl();
         prepareIDs();
         System.out.println(new File(".").getAbsolutePath());
-        System.out.println(new File(cfgFile).getAbsolutePath());
+        System.out.println(new File(file).getAbsolutePath());
     }
 
-    public void saveCfg() {
+    public void save() {
         cfg.save();
         logit("Aplication Status saved.");
     }
@@ -398,6 +466,8 @@ public class AppManager implements DataConsumer {
     public void setMainFram(JFrame frame) {
         this.frame = frame;
         if (icoUrl != null) {
+            URL url =  getClass().getResource(".");
+            String path = url.getPath();
             ImageIcon ico = new ImageIcon(getClass().getResource(icoUrl));
             frame.setIconImage(ico.getImage());
         }
@@ -426,8 +496,95 @@ public class AppManager implements DataConsumer {
         return null;
     }
 
+    public String getRestoreFolder() {
+        return cfg.getProperty("RestoreFolder");
+    }
+
+    public void setRestoreFolder(String restoreFolder) {
+        cfg.setProperty("RestoreFolder", restoreFolder);
+        cfg.save();
+    }
+
+    public String getBackupFolder() {
+        return cfg.getProperty("BackupFolder");
+    }
+
+    public void setBackupFolder(String dir) {
+        cfg.setProperty("BackupFolder", dir);
+    }
+
+    public String getTHS_UserFolder() {
+        String currentDir = cfg.getProperty("THSFolder", "");
+        return Utilities.slashify(currentDir) + getTHS_User() + "/";
+    }
+
+    public String getDropBoxFolder() {
+        File DropboxFolder = new File(cfg.getProperty("DropboxFolder", "D:/Dropbox/Bag.STOCK"));
+        try {
+            if (!DropboxFolder.exists()) {
+                DropboxFolder = dirChoise("Dropbox Folder? ", DropboxFolder);
+                if (DropboxFolder.exists()) {
+                    cfg.setProperty("DropboxFolder", DropboxFolder.getCanonicalPath());
+                }
+            }
+            return Utilities.slashify(DropboxFolder.getCanonicalPath());
+        } catch (IOException ignored) {
+
+        }
+        return null;
+    }
+
+    public String getTHSFolder() {
+        String currentDir = cfg.getProperty("THSFolder", "");
+        return Utilities.slashify(currentDir);
+    }
+
+    public void setTHSFolder(String dir) {
+        cfg.setProperty("THSFolder", dir);
+    }
+
+    public String getTHS_User() {
+        return cfg.getProperty("THS_User", "szhzz");
+    }
+
+    public void setTHS_User(String uName) {
+        cfg.setProperty("THS_User", uName);
+    }
+
+    public String getF10File() {
+        return cfg.getProperty("F10File");
+    }
+
+    public void setF10File(String file) {
+        cfg.setProperty("F10File", file);
+    }
+
+    public void setEnv(String name, String val) {
+        cfg.setProperty(name, val);
+    }
+
+    public String getEnv(String name) {
+        return cfg.getProperty(name);
+    }
+
     public Config getCfg() {
         return cfg;
+    }
+
+    public Config getPreferCfg(Class aClass) {
+        return CfgProvider.getInstance("Windows").getCfg(aClass.getSimpleName());
+    }
+
+    public void print(String msg) {
+        logger.info(msg);
+        if (logAre != null) {
+            try {
+                logAre.getDocument().insertString(logAre.getDocument().getLength(), msg, null);
+                logAre.setCaretPosition(logAre.getDocument().getLength());
+            } catch (BadLocationException e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+        }
     }
 
     public void setDigitalClock(JLabel digitalClock) {
@@ -457,8 +614,11 @@ public class AppManager implements DataConsumer {
         if (StatuBar != null) StatuBar.setText("Ready");
     }
 
+    public JTextComponent getMessageBox() {
+        return logAre;
+    }
 
-    public void setLogAre(JTextComponent logAre) {
+    public void setMessageBox(JTextComponent logAre) {
         this.logAre = logAre;
     }
 
@@ -490,14 +650,107 @@ public class AppManager implements DataConsumer {
         }
     }
 
+    public boolean isMidleClose() {
+        return midleClose;
+    }
+
+    public void setMidleClose(boolean midleClose) {
+        this.midleClose = midleClose;
+    }
+
     public void setThreadLabel(JLabel threadLabel) {
         this.threadLabel = threadLabel;
     }
 
+    public Object addAlarmClock(int hour, int minute, int seconds, Runnable requestor, boolean loop, int priority) {
+        if (alarmClock == null) {
+            alarmClock = AlarmClock.getInstance();
+            alarmClock.setApp(this);
+        }
+
+        return alarmClock.setAlarm(hour, minute, seconds, requestor, loop, priority);
+    }
+
+    public Object addAlarmClock(int hour, int minute, int seconds, int millis, Runnable requestor, boolean loop, int priorol) {
+        if (alarmClock == null) {
+            alarmClock = AlarmClock.getInstance();
+            alarmClock.setApp(this);
+        }
+
+        return alarmClock.setAlarm(hour, minute, seconds, millis, requestor, loop, priorol);
+    }
+
+    public void suspendAllAlarmClock(boolean suspend) {
+        if (alarmClock != null) {
+            alarmClock.suspendAll(suspend);
+        }
+    }
+
+    public Object addAlarmClock(TimerEvent event) {
+        if (alarmClock == null) {
+            alarmClock = AlarmClock.getInstance();
+            alarmClock.setApp(this);
+        }
+        return alarmClock.setAlarm(event);
+    }
+
+    public Object addAlarmClock(MyDate timer, Runnable requestor, boolean loop, int priority) {
+        try {
+            if (alarmClock == null) {
+                alarmClock = AlarmClock.getInstance();
+                alarmClock.setApp(this);
+            }
+            return alarmClock.setAlarm(timer, requestor, loop, priority);
+
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return null;
+    }
+
+    public void setFreeTimeJob(Runnable requestor) {
+        if (alarmClock == null) {
+            alarmClock = AlarmClock.getInstance();
+            alarmClock.setApp(this);
+        }
+        alarmClock.setFreeTimeJob(requestor);
+    }
+
+    public void removeAlarmClock(Object o) {
+        if (alarmClock != null) {
+            alarmClock.removeAlarm(o);
+        }
+    }
 
     private AppManager Parent() {
         return this;
     }
+
+    public JXBusyLabel getBusy() {
+        return Busy;
+    }
+
+    public void setBusy(JXBusyLabel busy) {
+        Busy = busy;
+    }
+
+//    private class EventLoop implements Runnable {
+//        MessageCode messageID;
+//        Object caller;
+//        Object message;
+//
+//        void setMessage(MessageCode messageID, Object caller, Object message) {
+//            this.messageID = messageID;
+//            this.caller = caller;
+//            this.message = message;
+//        }
+//
+//        public void run() {
+//            for (MessageAbstract o : messageObject) {
+//                o.acceptMessage(messageID, caller, message);
+//            }
+//        }
+//    }
 
     public boolean Quit() {
         quitApp = true;
@@ -510,12 +763,12 @@ public class AppManager implements DataConsumer {
             Collections.sort(beQuits);
             for (int i = 0; i < beQuits.size(); i++) {
                 BeQuit bq = beQuits.get(i);
-                System.out.println(bq.getClass().getName());
+                logit((beQuits.size()-i) + "\t" + bq.getClass().getName());
                 bq.Quit();
             }
-            logger.info("程序退出 " + beQuits.size() + " beQuits ...");
+            logger.info("BeQuit 程序退出 " + beQuits.size() + " beQuits ...");
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         if (executor != null) {
@@ -543,9 +796,10 @@ public class AppManager implements DataConsumer {
             }
         }
         //最后才可以关闭db
-//        logger.info("程序退出 " + Database.getConnectCount() + " Database.Quit() ...");
-//        Database.Quit();
+        logger.info("程序退出 " + Database.getConnectCount() + " Database.Quit() ...");
+        Database.Quit();
         logger.info("程序正常退出");
+        System.out.println("程序正常退出");
         return true;
     }
 
@@ -576,7 +830,7 @@ public class AppManager implements DataConsumer {
             }
         }
         //最后才可以关闭db
-//        Database.Quit();
+        Database.Quit();
         return true;
     }
 
@@ -615,7 +869,7 @@ public class AppManager implements DataConsumer {
 
     public String getTelNo() {
         if (telNo == null) {
-            telNo = cfg.getProperty("TelNo", "");
+            telNo = cfg.getProperty("TelNo", "13902911318");
         }
         return telNo;
     }
@@ -644,7 +898,7 @@ public class AppManager implements DataConsumer {
     public String getIP(String signature) {
         localIP = HardwareIDs.getIP(signature);
         if (localIP == null) {
-            localIP = cfg.getProperty("LOCALIP", "127.0.0.1");
+            localIP = cfg.getProperty("LOCALIP", "183.62.98.27");
         }
         return localIP;
     }
@@ -719,14 +973,6 @@ public class AppManager implements DataConsumer {
                 break;
             }
         }
-    }
-
-    public boolean isAutoGc() {
-        return autoGc;
-    }
-
-    public void setAutoGc(boolean autoGc) {
-        this.autoGc = autoGc;
     }
 
 
@@ -877,6 +1123,8 @@ public class AppManager implements DataConsumer {
     }
 
     public void sendMailNow(String msg, String attFile) {
+        if (!isOpenMailBox()) return;
+
         if (mailer == null) {
             mailer = new Mailer();
             mailer.setBuffer(10);
@@ -885,8 +1133,20 @@ public class AppManager implements DataConsumer {
         mailer.sendMailNow(mailMsg.copy(msg, attFile));
     }
 
+    public void sendMail(String msg, String attFile) {
+        if (!isOpenMailBox()) return;
+
+        if (mailer == null) {
+            mailer = new Mailer();
+            mailer.setBuffer(10);
+            mailMsg = new MailMsg();
+        }
+        mailer.sendMail(mailMsg.copy(msg, attFile));
+    }
 
     public void sendBatchMail(String title, String msg) {
+        if (!isOpenMailBox()) return;
+
         if (mailer == null) {
             mailer = new Mailer();
             mailer.setBuffer(10);
@@ -925,7 +1185,7 @@ public class AppManager implements DataConsumer {
                 logger.error(e);
             }
         }
-        
+
         String hostName = getHostName();
         for(String ip : ips) {
             if(hostName.equalsIgnoreCase(ip))return true;
@@ -939,11 +1199,29 @@ public class AppManager implements DataConsumer {
         return isLocalIP(new String[]{ip});
     }
 
+    public boolean isOpenMailBox() {
+        if (openEmail == null) {
+            openEmail = (cfg != null && cfg.getBooleanVal("SendMail", false));
+        }
+        return openEmail;
+    }
+
+    public void setOpenMail(boolean open) {
+        openEmail = open;
+        if (cfg != null) {
+            cfg.setProperty("SendMail", openEmail);
+            cfg.save();
+        }
+
+    }
+
     public static Class getAppClass(){
         return appClass;
     }
     public static void setAppClass(Class c){
         appClass = c;
+        CfgProvider.setAppClass(c);
+        configFolder = CfgProvider.getRootFolder();
     }
 
     public static boolean isRunning(String processName, String title) {

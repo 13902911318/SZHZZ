@@ -37,9 +37,10 @@ public abstract class MessageAbstract implements Comparable {
         postConstruct();
     }
 
-    public void postConstruct(){
+    public void postConstruct() {
 
     }
+
     private static synchronized void sendMessage_(MessageCode messageID, Object caller, Object message) {
         if (messageWatch == null) {
             messageWatch = new WatchMessage();
@@ -108,34 +109,34 @@ public abstract class MessageAbstract implements Comparable {
 //            long maxTime = 0;
 //            String timeConsumer = "";
             if (msg != null) {
-                    if (newObject.size() > 0) {
-                        logger.info("message user added " + newObject.size());
-                        synchronized (newObject) {
-                            messageObject.addAll(newObject);
-                            newObject.clear();
-                            Collections.sort(messageObject);
-                        }
+                if (newObject.size() > 0) {
+                    logger.info("message user added " + newObject.size());
+                    synchronized (newObject) {
+                        messageObject.addAll(newObject);
+                        newObject.clear();
+                        Collections.sort(messageObject);
                     }
+                }
 
-                    for (int i = 0; i < messageObject.size(); i++) {
-                        try {
-                            MessageAbstract o = messageObject.get(i);
-                            if (o != null && o != msg.caller) {
-                                long startT = System.nanoTime();
-                                if (o.acceptMessage(msg.messageID, msg.caller, msg.message)) {
+                for (int i = 0; i < messageObject.size(); i++) {
+                    try {
+                        MessageAbstract o = messageObject.get(i);
+                        if (o != null && o != msg.caller) {
+                            long startT = System.nanoTime();
+                            if (o.acceptMessage(msg.messageID, msg.caller, msg.message)) {
 //                                    long t = System.nanoTime() - startT;
 //                                    if(t > maxTime){
 //                                        maxTime = t;
 //                                        timeConsumer = o.getClass().getName();
 //                                    }
-                                    break;
-                                }
+                                break;
                             }
-                        } catch (Exception ignored) {
-                            //prevent any Error may break this thread
                         }
+                    } catch (Exception ignored) {
+                        //prevent any Error may break this thread
                     }
                 }
+            }
 
 //                if(maxTime > 0) {
 //                    //找出最耗时的事件消费者

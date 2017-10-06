@@ -21,8 +21,8 @@ public class StopAppWrap {
         return eData;
     }
 
-    public boolean isStopThisApp(NettyExchangeData data){
-        return (data.getNettyType() ==  ClusterProtocal.FUNCTION.StopApp &&
-                AppManager.getApp().getAppName().equals(data.getDataValue(0,0)));
+    public boolean isStopThisApp(NettyExchangeData data) {
+        return (data.getNettyType() == ClusterProtocal.FUNCTION.StopApp &&
+                AppManager.getApp().getAppName().equals(data.getDataValue(0, 0)));
     }
 }

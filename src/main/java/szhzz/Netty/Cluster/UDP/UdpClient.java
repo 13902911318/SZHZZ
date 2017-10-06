@@ -1,18 +1,19 @@
 package szhzz.Netty.Cluster.UDP;
 
-import io.netty.buffer.ByteBuf;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Hashtable;
 
 /**
  * Created by Administrator on 2017/3/29.
  */
-public class UdpClient extends UdpClient_Abstract{
+public class UdpClient extends UdpClient_Abstract {
     private static DawLogger logger = DawLogger.getLogger(UdpClient.class);
     DatagramSocket client = null;
 
@@ -23,7 +24,7 @@ public class UdpClient extends UdpClient_Abstract{
     public void addRemote(String host) {
         try {
             host = host.replace("/", "");
-            if(host.indexOf(":") > 0){
+            if (host.indexOf(":") > 0) {
                 host = host.substring(0, host.indexOf(":"));
             }
             if (remoteAdress.containsKey(host)) return;
@@ -33,12 +34,13 @@ public class UdpClient extends UdpClient_Abstract{
             logger.error(e);
         }
     }
+
     public void removeRemote(String host) {
         remoteAdress.remove(host);
     }
 
 
-    public void send(NettyExchangeData data)  {
+    public void send(NettyExchangeData data) {
         send(data.encode());
     }
 

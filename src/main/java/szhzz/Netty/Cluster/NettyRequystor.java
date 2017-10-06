@@ -37,7 +37,7 @@ public class NettyRequystor {
 //        if (args.length > 0)
 //            ipAddress = args[0];
 //        if (args.length > 1)
-            this.stationName = stationName;
+        this.stationName = stationName;
 
     }
 

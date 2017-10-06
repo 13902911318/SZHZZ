@@ -18,8 +18,8 @@ public class CfgUpdateWrap {
     }
 
 
-    public static NettyExchangeData getCfgUpdate(String fileName, String col, String val, String comment){
-        return getCfgUpdate(fileName, new String[]{col}, new String[]{val},new String[]{comment});
+    public static NettyExchangeData getCfgUpdate(String fileName, String col, String val, String comment) {
+        return getCfgUpdate(fileName, new String[]{col}, new String[]{val}, new String[]{comment});
     }
 
     public static NettyExchangeData getCfgUpdate(String fileName, String col[], String val[], String comment[]) {
@@ -39,7 +39,7 @@ public class CfgUpdateWrap {
             eData.appendRow();
             eData.addData(col[i]);
             eData.addData(val[i]);
-            if(i < comment.length){
+            if (i < comment.length) {
                 eData.addData(comment[i]);
             }
         }
