@@ -1,6 +1,7 @@
 package szhzz.Utils;
 
 import org.apache.commons.io.FileUtils;
+import org.mozilla.universalchardet.UniversalDetector;
 import szhzz.Calendar.MyDate;
 import szhzz.Files.ExtensionFileFilter;
 
@@ -15,9 +16,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -387,52 +386,52 @@ public class Utilities {
         return s;
     }
 
-//    public static String detectCharset(String file) throws IOException {
-//        return detectCharset(new File(file));
-//    }
+    public static String detectCharset(String file) throws IOException {
+        return detectCharset(new File(file));
+    }
 
-//    public static String detectCharset(File file) {
-//        String encoding = null;
-//        byte[] buf = new byte[4096];
-//
-//        FileInputStream fis = null;
-//        try {
-//            fis = new FileInputStream(file);
-//            // (1)
-//            UniversalDetector detector = new UniversalDetector(null);
-//            // (2)
-//            int nread;
-//            while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
-//                detector.handleData(buf, 0, nread);
-//            }
-//            // (3)
-//            detector.dataEnd();
-//            // (4)
-//            encoding = detector.getDetectedCharset();
-//            if (encoding == null) {
-//                Charset cs = detectCharset_(file);
-//                if (cs != null)
-//                    encoding = cs.name();
-//            }
-//            if ("GB18030".equals(encoding)) {
-//                encoding = "GBK";
-//            }
-//            // (5)
-//            detector.reset();
-//        } catch (IOException ignored) {
-//
-//        } finally {
-//            if (fis != null) {
-//                try {
-//                    fis.close();
-//                } catch (IOException e) {
-//
-//                }
-//            }
-//        }
-//        return encoding;
-//        //return detectCharset(new File(f));
-//    }
+    public static String detectCharset(File file) {
+        String encoding = null;
+        byte[] buf = new byte[4096];
+
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            // (1)
+            UniversalDetector detector = new UniversalDetector(null);
+            // (2)
+            int nread;
+            while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+                detector.handleData(buf, 0, nread);
+            }
+            // (3)
+            detector.dataEnd();
+            // (4)
+            encoding = detector.getDetectedCharset();
+            if (encoding == null) {
+                Charset cs = detectCharset_(file);
+                if (cs != null)
+                    encoding = cs.name();
+            }
+            if ("GB18030".equals(encoding)) {
+                encoding = "GBK";
+            }
+            // (5)
+            detector.reset();
+        } catch (IOException ignored) {
+
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
+        return encoding;
+        //return detectCharset(new File(f));
+    }
 
 
     private static Charset detectCharset_(File f) {

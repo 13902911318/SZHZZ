@@ -19,9 +19,31 @@ public class TxtFileWrap {
         this.data = data;
     }
 
+    public static NettyExchangeData getDeleteFile(String fileName) {
+        NettyExchangeData eData = new NettyExchangeData();
+
+        eData.setErrorCode(0);
+        eData.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
+        eData.setRequestID(0);
+        eData.setNettyType(ClusterProtocal.FUNCTION.TextFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
+        eData.setExtData("delete", 1);
+
+        eData.appendRow();
+        eData.appendRow();
+        eData.addData(fileName);
+        return eData;
+    }
 
     public static NettyExchangeData getTextFile(String fileName) {
-        String encode = fileEncode(fileName);
+        return getTextFile(fileName, null);
+    }
+
+    public static NettyExchangeData getTextFile(String fileName, String toFile) {
+        String encode = fileEncode(fileName);//可以确保文件已经生成并关闭.
+//        encode = "UTF-8";
+
+        if (toFile == null) toFile = fileName;
+
         NettyExchangeData eData = new NettyExchangeData();
 
         eData.setErrorCode(0);
@@ -29,23 +51,25 @@ public class TxtFileWrap {
         eData.setRequestID(0);
         eData.setNettyType(ClusterProtocal.FUNCTION.TextFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
         eData.setMessage(encode);
+        eData.setExtData("write", 1);
 
         eData.appendRow();
         eData.appendRow();
-        eData.addData(fileName);
+        eData.addData(toFile);
 
         FileInputStream in = null;
+
         try {
             in = new FileInputStream(fileName);
             BufferedReader buff = new BufferedReader(new InputStreamReader(in, encode));
-
             String tk;
             while ((tk = buff.readLine()) != null) {
                 eData.appendRow();
                 eData.addData(tk);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            eData = null;
         } finally {
             if (in != null) {
                 try {
@@ -60,21 +84,26 @@ public class TxtFileWrap {
     }
 
     protected static String fileEncode(String fileName) {
-        String cs = "UTF-8";
-//        try {
-//            cs = Utilities.detectCharset(fileName);
-//            if (cs == null) {
-//                cs = System.getProperty("file.encoding");
-//            }
-//        } catch (IOException e) {
-//            logger.error(e);
-//        }
+        String cs = null;
+        try {
+            cs = Utilities.detectCharset(fileName);
+            if (cs == null) {
+                cs = System.getProperty("file.encoding");
+            }
+        } catch (IOException e) {
+            logger.error(e);
+        }
         return cs;
     }
+
 
     public String getFileName() {
         if (data == null) return null;
         return (String) data.getDataValue(0, 0);
+    }
+
+    public boolean isDeleteFile() {
+        return "delete".equals(data.getExtData(1));
     }
 
     public String getEncode() {
@@ -97,21 +126,30 @@ public class TxtFileWrap {
 
 
     public void writeToTextFile(String path) {
-        String fileName;
+        String fileName = null;
         PrintWriter f = null;
-
-        if (getFileName() == null) return;
-
-        String encode = getEncode();
-        if (encode == null) {
-            encode = System.getProperty("file.encoding");
-        }
 
         if (path != null) {
             File file = new File(getFileName());
             fileName = path + file.getName();
         } else {
             fileName = getFileName();
+        }
+
+        if (fileName == null) return;
+
+
+        if (isDeleteFile()) {
+            logger.info(fileName + " delete Timelaps=" + data.getTimeLap());
+            new File(fileName).delete();
+            return;
+        }
+        logger.info(fileName + " saved Timelaps=" + data.getTimeLap());
+
+
+        String encode = getEncode();
+        if (encode == null) {
+            encode = System.getProperty("file.encoding");
         }
 
         try {
@@ -127,6 +165,7 @@ public class TxtFileWrap {
                 f.close();
             }
         }
+
     }
 
     public Config getAsConfig() {

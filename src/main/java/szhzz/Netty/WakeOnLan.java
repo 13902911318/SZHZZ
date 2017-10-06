@@ -19,7 +19,10 @@ public class WakeOnLan {
 
         String ipStr = args[0];
         String macStr = args[1];
+        wakeup(ipStr, macStr);
+    }
 
+    public static void wakeup(String ipStr, String macStr) {
         try {
             byte[] macBytes = getMacBytes(macStr);
             byte[] bytes = new byte[6 + 16 * macBytes.length];

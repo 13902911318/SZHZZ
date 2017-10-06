@@ -33,7 +33,7 @@ public class ConfigF extends Config {
         } catch (Exception ignored) {
 
         }
-        if(!Utilities.isFileClosed(file, 100)) return;
+//        if (!Utilities.isFileClosed(file, 100)) return;
 
         datas = new Hashtable<String, item>();
         index = new LinkedList<item>();
@@ -41,10 +41,13 @@ public class ConfigF extends Config {
         FileInputStream in = null;
         BufferedReader buff = null;
         try {
+            String cs = Utilities.detectCharset(configFileName);
+            if (cs == null) {
+                cs = System.getProperty("file.encoding");
+            }
 
             in = new FileInputStream(configFileName);
-            buff = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-
+            buff = new BufferedReader(new InputStreamReader(in, cs));
             loadDataVal(buff);
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +61,6 @@ public class ConfigF extends Config {
             }
         }
     }
-
 
 
     @Override

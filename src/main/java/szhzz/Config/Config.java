@@ -1,13 +1,19 @@
 package szhzz.Config;
 
 
+import org.apache.commons.io.FileUtils;
 import szhzz.Calendar.MiscDate;
+import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import static szhzz.Utils.Utilities.String2File;
@@ -21,6 +27,8 @@ import static szhzz.Utils.Utilities.getEquation;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Config {
+    private static DawLogger logger = DawLogger.getLogger(Config.class);
+
     static int masterIndex = 0;
     Hashtable<String, item> datas;
     LinkedList<item> index;
@@ -40,8 +48,17 @@ public abstract class Config {
     public boolean isMerged() {
         return false;
     }
-    public void copyTo(Config target) {
+
+    public Config copyTo(Config target) {
+        if(target == null){
+            target = new ConfigF() ;
+        }
         target.loadDataVal(getTxt());
+        return target;
+    }
+
+    public Config copyTo() {
+        return copyTo(null);
     }
 
     public Config merge(Config c) {
@@ -54,6 +71,7 @@ public abstract class Config {
 
     public abstract void load(String cfgID);
 
+
     public boolean saveAs(File file) {
         return saveAs(file, false);
     }
@@ -61,7 +79,7 @@ public abstract class Config {
     public boolean saveAs(String file) {
         return saveAs(new File(file), false);
     }
-
+    public void setConfigFileName(String configFileName){}
     public abstract void reLoad();
 
     public LinkedList<item> getIndex() {
@@ -336,6 +354,8 @@ public abstract class Config {
         return defalt;
     }
 
+
+
     public long getLongVal(String name) {
         return getLongVal(name, 0l);
     }
@@ -465,7 +485,6 @@ public abstract class Config {
     }
 
 
-
     public boolean saveAs(File file, boolean append) {
         StringBuffer sb = new StringBuffer("");
         PrintWriter f = null;
@@ -473,7 +492,7 @@ public abstract class Config {
 
         sb.append("//# LastUpdate ").append(MiscDate.now()).append("\n");
         for (item e : index) {
-            if(!e.toString().startsWith("//# LastUpdate")) {
+            if (!e.toString().startsWith("//# LastUpdate")) {
                 sb.append(e.toString());
                 sb.append("\n");
             }
@@ -482,23 +501,17 @@ public abstract class Config {
             this.setProperty("锁定", false);
         }
 
-        if(childrenIndex!=null) {
+        if (childrenIndex != null) {
             for (String key : childrenIndex) {
                 Config child = children.get(key);
                 sb.append("\n").append("[").append(key).append("]\n").append(child.getTxt());
             }
         }
         try {
-            f = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, append), "UTF-8"));//            f = new PrintWriter(new FileWriter(fileName, ab_append));
-            f.println(sb.toString().trim());
+            FileUtils.writeStringToFile(file, sb.toString(), Charset.forName("UTF-8"), false);
             saved = true;
         } catch (IOException e) {
-            e.printStackTrace();
-
-        } finally {
-            if (f != null) {
-                f.close();
-            }
+            logger.error(e);
         }
         cfgDirty = !saved;
 
@@ -514,7 +527,7 @@ public abstract class Config {
 
 //        sb.append("//# LastUpdate ").append(MiscDate.now()).append("\n");
         for (item e : index) {
-            if(!e.toString().startsWith("//# LastUpdate")) {
+            if (!e.toString().startsWith("//# LastUpdate")) {
                 sb.append(e.toString());
                 sb.append("\n");
             }
@@ -528,6 +541,7 @@ public abstract class Config {
     public void setNanoTime() {
         setProperty("System_nanoTime", String.valueOf(System.nanoTime()));
     }
+
     public long getNanoTime() {
         return getLongVal("System_nanoTime", 0);
     }
@@ -538,7 +552,7 @@ public abstract class Config {
             while ((tk = in.readLine()) != null) {
                 if (tk.trim().length() == 0) continue;
                 String trim = tk.trim();
-                if(trim.startsWith("[") && trim.endsWith("]")){
+                if (trim.startsWith("[") && trim.endsWith("]")) {
                     return tk.trim();
                 }
                 item e = new item(tk);
@@ -554,27 +568,29 @@ public abstract class Config {
         return "";
     }
 
-    public Set<String> getChildrenNames(){
-        if(children == null) return null;
+    public Set<String> getChildrenNames() {
+        if (children == null) return null;
         return children.keySet();
     }
-    public Config getChild(String sectionName){
-        if(children == null) return null;
+
+    public Config getChild(String sectionName) {
+        if (children == null) return null;
         return children.get(sectionName);
     }
+
     public void loadDataVal(BufferedReader in) {
         String tk;
         try {
             while ((tk = in.readLine()) != null) {
                 String trim = tk.trim();
-                while(trim.startsWith("[") && trim.endsWith("]")){
-                    if(children == null){
+                while (trim.startsWith("[") && trim.endsWith("]")) {
+                    if (children == null) {
                         children = new Hashtable<>();
                         childrenIndex = new LinkedList<String>();
                     }
                     Config cfg = new ConfigF();
                     String name = trim.replace("[", "").replace("]", "").toUpperCase();
-                    children.put(name,cfg);
+                    children.put(name, cfg);
                     childrenIndex.add(name);
                     trim = cfg.loadChild(in);
                 }
