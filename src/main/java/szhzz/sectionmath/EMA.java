@@ -31,4 +31,13 @@ public class EMA implements Serializable {
         }
         return (2 * newVal + (period - 1) * oldV) / (period + 1);
     }
+
+    public double Next(double newVal, double oldV, int period) {
+        if (oldV == 0) {
+            oldV = newVal;
+            length = 1;
+        }
+        return (2 * newVal + (period - 1) * oldV) / (period + 1);
+    }
+
 }

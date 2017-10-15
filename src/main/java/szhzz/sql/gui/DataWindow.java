@@ -154,11 +154,17 @@ public class DataWindow extends JTable {
 
     public Object getValueAt(int row, String col) {
         return getValueAt(convertRowIndexToModel(row), convertColumnIndexToView(dm.colMap(col)));
-        //return getValueAt(convertRowIndexToModel(row),dm.colMap(col));
-
-//        return dm.getValueAt(convertRowIndexToModel(row), col);
     }
 
+    public Object getValueAt(int row, String col, Object defaultVal) {
+        return getValueAt(convertRowIndexToModel(row), convertColumnIndexToView(dm.colMap(col)), defaultVal);
+    }
+
+    public Object getValueAt(int row, int col, Object defaultVal) {
+        Object val = getValueAt(row, col);
+        if(val == null) return defaultVal;
+        return val;
+    }
 
     public void setValueAt(Object o, int row, String col) {
         setValueAt(o, convertRowIndexToModel(row), convertColumnIndexToView(dm.colMap(col)));

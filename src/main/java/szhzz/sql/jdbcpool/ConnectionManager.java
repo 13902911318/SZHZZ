@@ -199,6 +199,7 @@ public class ConnectionManager {
     public static Connection getConnection(String url, String user, String password)
             throws ClassNotFoundException, InterruptedException,
             IllegalAccessException, InstantiationException, SQLException {
+
         ConnectionParam param = new ConnectionParam(url, user);
         param.setPassword(password);
         return getConnection(param);

@@ -44,6 +44,22 @@ public class ConnectionParam implements Serializable {
         debug = d;
     }
 
+    public static int getDefaultPoolSize() {
+        return defaultPoolSize;
+    }
+
+    public static void setDefaultPoolSize(int defaultPoolSize) {
+        ConnectionParam.defaultPoolSize = defaultPoolSize;
+    }
+
+    public static int getMaxConnections() {
+        return maxConnections;
+    }
+
+    public static void setMaxConnections(int maxConnections) {
+        ConnectionParam.maxConnections = maxConnections;
+    }
+
     public String getUrl() {
         return properties.getProperty("url");
     }

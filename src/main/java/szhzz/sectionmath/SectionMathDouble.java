@@ -52,28 +52,26 @@ public class SectionMathDouble implements Serializable {
 
     public void add(double val) {
         Double lastElement = 0d;
-
-        if (sectionLength == section.size()) {
+        section.addFirst(val);
+        lastValue = val;
+        accumulate += val;
+        if (section.size() > sectionLength) {
             lastElement = section.removeLast();
             droped = lastElement;
         }
-        section.addFirst(val);
         sumValue += (val - lastElement);
-        lastValue = val;
-        accumulate += val;
     }
 
     public void addToEnd(double val) {
         Double lastElement = 0d;
-
-        if (sectionLength == section.size()) {
+        section.add(val);
+        lastValue = val;
+        accumulate += val;
+        if (section.size() > sectionLength) {
             lastElement = section.removeFirst();
             droped = lastElement;
         }
-        section.add(val);
         sumValue += (val - lastElement);
-        lastValue = val;
-        accumulate += val;
     }
 
     public void setFirt(double val) {
@@ -399,6 +397,10 @@ public class SectionMathDouble implements Serializable {
 
     public int elementCount() {
         return section.size();
+    }
+
+    public boolean isFull() {
+        return section.size() == sectionLength;
     }
 
     public int countContinuedLargeThan(float last_n_Elements) {

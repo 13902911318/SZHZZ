@@ -20,7 +20,6 @@ import java.util.HashSet;
  */
 public class BusinessRuse implements DataConsumer {
     private static DawLogger logger = DawLogger.getLogger(BusinessRuse.class);
-    static AppManager App = AppManager.getApp();
     static BusinessRuse onlyOne = null;
 
     protected ObjBufferedIO dataBuffer = null;
@@ -68,7 +67,7 @@ public class BusinessRuse implements DataConsumer {
         }
     }
 
-    private void broadcast(NettyExchangeData data) {
+    public void broadcast(NettyExchangeData data) {
         if (!Cluster.getInstance().isOffLine()) {
             ClusterServer.getInstance().broadcast(data);
         }
@@ -100,7 +99,7 @@ public class BusinessRuse implements DataConsumer {
 
     public void broadcastInformation(String information) {
         broadcast(InformationWrap.getInformationObject(information));
-        App.logit(information);
+        AppManager.logit(information);
     }
 
     public void broadcastStopBuy(boolean stopBuy) {
@@ -123,9 +122,9 @@ public class BusinessRuse implements DataConsumer {
         }
     }
 
-    public void broadcastShutdown(String statu) {
-        broadcast(ShutdownWrap.getShutdownWrap(statu));
-    }
+//    public void broadcastShutdown(String statu) {
+//        broadcast(ShutdownWrap.getShutdownWrap(statu));
+//    }
 
     public void broadcastAccountQuery(NettyExchangeData data) {
         if (Cluster.connectToProxy()) return;
@@ -142,6 +141,9 @@ public class BusinessRuse implements DataConsumer {
 
     }
 
+    public String getPassword(String key ){
+        return "";
+    }
     int acceptCluster(NettyExchangeData eData) {
         switch (eData.getNettyType()) {
             case AnswerServerLevel:
@@ -214,7 +216,7 @@ public class BusinessRuse implements DataConsumer {
         return (AppManager.isLocalIP(ip));
     }
 
-    private MessageAbstract msg = new MessageAbstract() {
+    MessageAbstract msg = new MessageAbstract() {
         @Override
         public boolean acceptMessage(MessageCode messageID, Object caller, Object message) {
             if (caller == this) return false;
@@ -228,9 +230,9 @@ public class BusinessRuse implements DataConsumer {
     };
 
     void reportStatus() {
-        if (onlyOne != null) {
-            onlyOne.reportStatus();
-        }
+//        if (onlyOne != null) {
+//            onlyOne.reportStatus();
+//        }
     }
 }
 

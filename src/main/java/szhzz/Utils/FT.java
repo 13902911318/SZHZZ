@@ -13,10 +13,17 @@ import java.text.SimpleDateFormat;
 public class FT {
     private static DecimalFormat fTk00 = new DecimalFormat("##,##0.00");
     private static DecimalFormat fT00 = new DecimalFormat("##0.00");
+    private static DecimalFormat fT0000 = new DecimalFormat("##0.0000");
     private static DecimalFormat fTk = new DecimalFormat("##,##0");
     private static DecimalFormat fT = new DecimalFormat("##0.00");
     private static SimpleDateFormat fTDate = new SimpleDateFormat("yyyy-MM-dd");
     private static SimpleDateFormat fTTime = new SimpleDateFormat("HH:mm:ss");
+
+    private static DecimalFormat fTLong = new DecimalFormat("##0");
+
+    public static String formatLong(Number n) {
+        return fTLong.format(n);
+    }
 
     public static String format00(Number n) {
         return fT00.format(n);
@@ -24,6 +31,10 @@ public class FT {
 
     public static String formatK00(Number n) {
         return fTk00.format(n);
+    }
+
+    public static String format0000(Number n) {
+        return fT0000.format(n);
     }
 
     public static String format(Number n) {

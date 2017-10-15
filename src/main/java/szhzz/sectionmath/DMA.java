@@ -12,10 +12,10 @@ import java.io.Serializable;
 public class DMA implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    float oldVal = 0f;
+    double oldVal = 0f;
     int length = 0;
 
-    public float Next(float X, float A) {
+    public double Next(double X, double A) {
         if (length == 0) {
             oldVal = X;
             length = 1;
@@ -25,14 +25,31 @@ public class DMA implements Serializable {
         return oldVal;
     }
 
-    public float Try(float X, float A) {
+    public double Try(double X, double A) {
         if (length == 0) {
             oldVal = X;
         }
         return (A * X + (1 - A) * oldVal);
     }
 
-    public float Next(float X, float oldX, float A) {
+    public double Next(float X, float A) {
+        if (length == 0) {
+            oldVal = X;
+            length = 1;
+        }
+
+        oldVal = (A * X + (1 - A) * oldVal);
+        return oldVal;
+    }
+
+    public double Try(float X, float A) {
+        if (length == 0) {
+            oldVal = X;
+        }
+        return (A * X + (1 - A) * oldVal);
+    }
+
+    public double Next(float X, float oldX, float A) {
         if (oldX == 0) {
             oldX = X;
         }

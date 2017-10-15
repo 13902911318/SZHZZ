@@ -5,7 +5,6 @@ package szhzz.Utils;
 import szhzz.App.AppManager;
 import szhzz.Calendar.MiscDate;
 import szhzz.Config.CfgProvider;
-import szhzz.Config.configData;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -116,7 +115,7 @@ public class ShutdownManager {
                     }
 
                     if (STATE_SHUTDOWN && allowedShutdown()) {
-                        configData.save();
+                        
                         if (ECCHO) logger.info("All tasks closed");
                         System.exit(3);
                     } else {

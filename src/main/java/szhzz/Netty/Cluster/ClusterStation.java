@@ -178,34 +178,40 @@ public class ClusterStation extends JDialog {
         ds.setColName("名称", col);
         ds.setColTypeName("String", col);
         ds.setColLength(col, 1);
+        ds.setDefaltValues(col, "");
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
         ds.setColName("类型", col);
         ds.setColTypeName("String", col);
         ds.setColLength(col, 10);
+        ds.setDefaltValues(col, "");
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
         ds.setColName("级别", col);
         ds.setColTypeName("Integer", col);
         ds.setColLength(col, 10);
+        ds.setDefaltValues(col, -1);
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
         ds.setColName("分组", col);
         ds.setColTypeName("Integer", col);
         ds.setColLength(col, 10);
+        ds.setDefaltValues(col, -1);
 
         col++;
         ds.setColName("已连接", col);
         ds.setColTypeName("Boolean", col);
         ds.setColLength(col, 10);
+        ds.setDefaltValues(col, false);
 
         col++;
         ds.setColName("离线", col);
         ds.setColTypeName("Boolean", col);
         ds.setColLength(col, 10);
+        ds.setDefaltValues(col, true);
 
         col++;
         ds.setColName("交易中", col);
@@ -356,13 +362,13 @@ public class ClusterStation extends JDialog {
             if (c instanceof JLabel) {
                 JLabel label = (JLabel) c;
 
-                if ((Integer) dw.getValueAt(row, "错误") > 0) {
+                if ((Integer) dw.getValueAt(row, "错误", 0) > 0) {
                     label.setForeground(Color.RED);
-                } else if ((boolean) dw.getValueAt(row, "交易中")) {
+                } else if ((boolean) dw.getValueAt(row, "交易中", false)) {
                     label.setForeground(Color.BLUE);
-                } else if ((Integer) dw.getValueAt(row, "级别") < 0) {
+                } else if ((Integer) dw.getValueAt(row, "级别", -1) < 0) {
                     label.setForeground(Color.RED);
-                } else if (!(boolean) dw.getValueAt(row, "已连接")) {
+                } else if (!(boolean) dw.getValueAt(row, "已连接", false)) {
                     label.setForeground(Color.GRAY);
                 } else {
                     label.setForeground(Color.BLACK);

@@ -50,7 +50,8 @@ public class ClusterProtocal {
         ProxyOrderCallBack,
         ProxyCancel,
         ProxyCancelDeleved,
-        ProxyCancelCallBack; //
+        ProxyCancelCallBack,
+        TradeConfigFile; //
     }
 
     public enum EVENT {

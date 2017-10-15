@@ -582,7 +582,7 @@ public class Database {
             return rows;
         } catch (SQLException ex) {
             //lastError = ex;
-            Utilities.playSound(".\\AlertSound\\alert.wav");
+            Utilities.playSound("/resources/alert.wav");
             throw new DBException(ex);
 //            throw new DBException("The query: " + szhzz.sql + "\n"
 //                    + "could not be executed! Probably "
@@ -684,6 +684,18 @@ public class Database {
         return tables;
     }
 
+    public boolean tableHasColumn(String tableName, String col) {
+        try {
+            LinkedList<String> cols = getTableColumns(tableName);
+            if (cols != null) {
+                return cols.contains(col);
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return false;
+    }
+
     public LinkedList<String> getTableColumns(String tableName) throws SQLException {
         LinkedList<String> columns = new LinkedList<String>();
         ResultSet resultSet = null;
@@ -717,6 +729,27 @@ public class Database {
         }
 
         return types;
+    }
+
+    public String getTableComment(String tableName) {
+        ResultSet rs = null;
+
+
+        String comment = "";
+        String sql = "SELECT TABLE_COMMENT FROM information_schema.TABLES " +
+                " WHERE TABLE_NAME = '" + tableName + "'";
+        try {
+            checkConnection();
+            rs = dynamicSQL(sql);
+            if (rs.next()) {
+                comment = rs.getString(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeResultSet(rs);
+        }
+        return comment;
     }
 
     public LinkedList<String> getPrimaryKeys(String tableName) throws SQLException {

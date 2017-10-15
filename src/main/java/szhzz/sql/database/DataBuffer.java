@@ -1,9 +1,11 @@
 package szhzz.sql.database;
 
+import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -40,6 +42,8 @@ public class DataBuffer implements Serializable {
 
     public void copyTo(DataBuffer tagetDf) {
         tagetDf.table.addAll(table);
+        tagetDf.currentRowNumber = -1;
+        tagetDf.setColumnCount(getColumnCount());
     }
 
     public int getColumnCount() {
@@ -132,6 +136,42 @@ public class DataBuffer implements Serializable {
         return val;
     }
 
+    public Double peekDouble(int row, int col) {
+        if (row < 0) {
+            return null;
+        } else if (row >= table.size()) {
+            return null;
+        }
+
+        Object val = (table.get(row)).get(col);
+        if (JDBCType.isNULL == val) return null;
+        return NU.parseDouble(val, null);
+    }
+
+    public Integer peekInt(int row, int col) {
+        if (row < 0) {
+            return null;
+        } else if (row >= table.size()) {
+            return null;
+        }
+
+        Object val = (table.get(row)).get(col);
+        if (JDBCType.isNULL == val) return null;
+        return NU.parseInt(val, null);
+    }
+
+    public Long peekLong(int row, int col) {
+        if (row < 0) {
+            return null;
+        } else if (row >= table.size()) {
+            return null;
+        }
+
+        Object val = (table.get(row)).get(col);
+        if (JDBCType.isNULL == val) return null;
+        return NU.parseLong(val, null);
+    }
+
 //    public Float getFloat(int row, int col, float ifnull) {
 //        Object o = peekObject(row, col);
 //        if(o == null) return ifnull;
@@ -144,7 +184,7 @@ public class DataBuffer implements Serializable {
         currentRecord = null;
     }
 
-//    public boolean next() {
+//    public boolean nextStep() {
 //        pointer++;
 //
 //        if (pointer >= table.size()) {
@@ -206,12 +246,45 @@ public class DataBuffer implements Serializable {
         if (o != null) {
             if (o instanceof Float) {
                 return (Float) o;
+            } else if (o instanceof BigDecimal) {
+                return ((BigDecimal) o).floatValue();
             } else {
                 return new Float(o.toString());
             }
         }
         return null;
     }
+
+    public Double getDouble(int col) {
+        Object o = get(col);
+        if (o != null) {
+            if (o instanceof Double) {
+                return (Double) o;
+            } else if (o instanceof BigDecimal) {
+                return ((BigDecimal) o).doubleValue();
+            } else {
+                return new Double(o.toString());
+            }
+        }
+        return null;
+    }
+
+    //TODO Unmark
+//    public BigDecimal getBigDecimal(int col) {
+//        Object o = get(col);
+//        if (o != null) {
+//            if (o instanceof BigDecimal) {
+//                return ((BigDecimal)o);
+//            }else if (o instanceof Double) {
+//                return BigDecimal.valueOf((Double)o);
+//            }else if (o instanceof Float) {
+//                return BigDecimal.valueOf((Float)o);
+//            }else{
+//                return BigDecimal.valueOf(getDouble(col));
+//            }
+//        }
+//        return null;
+//    }
 
     public String getString(int col) {
         Object o = get(col);

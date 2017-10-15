@@ -15,6 +15,42 @@ public class StockRegulate {
 
     }
 
+    public static String regulateStockCode(String code) {
+        if (!isStockCode(code)) return null;
+
+        if (code.length() == 6) {
+            if (code.startsWith("60") || code.startsWith("1A")) {
+                return "SH" + code;
+            } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399")) {
+                return "SZ" + code;
+            } else {
+                return null;
+            }
+        } else if (code.length() == 8) {
+            return code;
+        }
+        return null;
+    }
+
+    public static String stockMarket(String code) {
+        if (code.startsWith("60") || code.startsWith("1A") || code.startsWith("2040")) {
+            return "SH";
+        } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399") || code.startsWith("1318")) {
+            return "SZ";
+        }
+        return "";
+    }
+
+    public static boolean isStockCode(String code) {
+        if (code.length() == 6) {
+            return !"".equals(stockMarket(code));
+        } else if (code.length() == 8) {
+            if (code.toUpperCase().startsWith("SH") || code.toUpperCase().startsWith("ZH")) {
+                return isStockCode(code.substring(2));
+            }
+        }
+        return false;
+    }
 
     public static String regulatePinYinCode(String code) {
         String c = code.replace("Ｂ", "B");
@@ -85,7 +121,7 @@ public class StockRegulate {
         if (code.startsWith("7")) return "QQ";    // 期权；
         if (code.startsWith("8")) return "PGQZ";    // 配股权证；
         if (code.startsWith("9")) return "XGPS";    // 新股配售
-//        BrokerApp.logit("Alarm stockCode " + stockCode + " Not belong to any cat ");
+//        StockApp.logit("Alarm stockCode " + stockCode + " Not belong to any cat ");
         return "";
     }
 
@@ -133,16 +169,16 @@ public class StockRegulate {
         if (code.startsWith("735")) return "XJSG";    // ×××新基金申购；
         if (code.startsWith("900")) return "SHB";    // ×××B股；
         if (code.startsWith("737")) return "XGPS";    // 新股配售；
-//        BrokerApp.logit("Alarm stockCode " + stockCode + " Not belong to any cat ");
+//        StockApp.logit("Alarm stockCode " + stockCode + " Not belong to any cat ");
         return "";
     }
 
-    public static boolean isStock(String cat) {
+    public static boolean isStockCat(String cat) {
         return (cat.equals("SZA") || cat.equals("SZB") || cat.equals("SHA") || cat.equals("SHB") || cat.equals("SZC"));
     }
 
 
-    public static boolean isIndex(String cat) {
+    public static boolean isIndexCat(String cat) {
         return (cat.equals("IND")) || (cat.equals("BAND"));
     }
 }

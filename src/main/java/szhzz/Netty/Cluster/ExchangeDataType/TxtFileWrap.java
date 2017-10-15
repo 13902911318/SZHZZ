@@ -131,7 +131,7 @@ public class TxtFileWrap {
 
         if (path != null) {
             File file = new File(getFileName());
-            fileName = path + file.getName();
+            fileName = path + "\\" + file.getName();
         } else {
             fileName = getFileName();
         }

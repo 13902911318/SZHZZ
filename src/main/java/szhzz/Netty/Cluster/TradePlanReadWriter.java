@@ -2,8 +2,7 @@ package szhzz.Netty.Cluster;
 
 import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
-import szhzz.Config.CfgProvider;
-import szhzz.Netty.Cluster.ExchangeDataType.CfgFileWrap;
+import szhzz.Config.SharedCfgProvider;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.TradePlanWrap;
 import szhzz.Netty.Cluster.ExchangeDataType.TxtFileWrap;
@@ -16,31 +15,20 @@ import java.util.HashSet;
  * Created by HuangFang on 2015/4/5.
  * 12:43
  */
-public class TradePlanReadWriter extends CfgProvider {
+public class TradePlanReadWriter extends SharedCfgProvider {
     private static AppManager App = AppManager.getApp();
     private static TradePlanReadWriter onlyOne = null;
     private HashSet<NettyExchangeData> files = new HashSet<>();
     private HashSet<NettyExchangeData> amAuctionFiles = new HashSet<>();
-    private String folder = null;
 
-    private TradePlanReadWriter() {
-    }
-
-    public static CfgProvider getInstance(String groupName) {
-        return getInstance();
-    }
 
     public static TradePlanReadWriter getInstance() {
         if (onlyOne == null) {
             onlyOne = new TradePlanReadWriter();
+            onlyOne.groupName = "\\TradePlan";
         }
         return onlyOne;
     }
-
-    public void reloadCfgs() {
-        laodCfgs(null);
-    }
-
 
     public synchronized void addData(NettyExchangeData data) {
         if (App.isOnTrade() || App.isDebug()) return;
@@ -49,9 +37,7 @@ public class TradePlanReadWriter extends CfgProvider {
         delayTimer.setCircleTime(10 * 1000);
     }
 
-
-
-    void deleteFiles() {
+    private void deleteFiles() {
         File dir = new File(getSavePath());
         App.logEvent("delete files in " + dir);
 
@@ -76,25 +62,17 @@ public class TradePlanReadWriter extends CfgProvider {
 
     }
 
-    public String getDir() {
-        return getSavePath();
-    }
 
     public String getSavePath() {
-        if (folder == null) {
-            folder = App.getCfg().getProperty("TradePlanFolder",
-                    AppManager.getCurrentDisk() + "\\JNIProject\\JavaProj\\configs\\TradePlan\\");
-        }
-        return folder;
+        return getDir();
     }
 
     public String getBackupPath() {
-        String backupPath = getSavePath();
 
         MyDate dateSuffix = new MyDate(MyDate.getLastClosedDay().getDate());
         dateSuffix.futureOpenDay();
 
-        backupPath += "Plan" + dateSuffix.getDate().replace("-", "") + "\\";
+        String backupPath = getDir() + "Plan" + dateSuffix.getDate().replace("-", "") + "\\";
         new File(backupPath).mkdirs();
 
         return backupPath;

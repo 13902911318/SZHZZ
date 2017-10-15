@@ -5,9 +5,12 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Days;
 import szhzz.App.AppManager;
+import szhzz.App.ClareBuffer;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
+import szhzz.sql.database.DBException;
 import szhzz.sql.database.Database;
+import szhzz.sql.jdbcpool.DbStack;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -71,6 +74,7 @@ public class MyDate implements Serializable {
     public static final int closeTimeAM = 11 * 60 + 30;
     public static final int openTimePM = 13 * 60;
     public static final int closeTimePM = 15 * 60;
+    public static String[] m1 = null;
     public static final String[] m5 = new String[]{"09:30:00",
             "09:35:00", "09:40:00", "09:45:00", "09:50:00", "09:55:00", "10:00:00",
             "10:05:00", "10:10:00", "10:15:00", "10:20:00", "10:25:00", "10:30:00",
@@ -97,8 +101,8 @@ public class MyDate implements Serializable {
     };
     private static final long serialVersionUID = 1L;
     private static final int millisOneDay = 24 * 60 * 60 * 1000;
+    public static final int secondsOneDay = 24 * 60 * 60;
     private static final String DELIMITER = "-";
-    private static final MyDate today = new MyDate(true);
     public static String[] m60 = new String[]{"09:30:00",
             "10:30:00",
             "11:30:00",
@@ -113,12 +117,21 @@ public class MyDate implements Serializable {
     private static String closeTime2 = "15:00:00";
     private static MyDate lastOpenDay = null;
     private static String lastTradeDay = null;
-    private static String minTradeDay = "1954-07-02";
+    private static String minTradeDay = null;
+    private static MyDate today = null;
     private static HashSet<String> stockCalendar = null;
+    private static MyDate lastCloseDay = null;
     //    Calendar c = GregorianCalendar.getInstance(); // current date
     DateTime in = new DateTime();
     private boolean readOnly = false;
 
+    private static ClareBuffer clareBuffer = new ClareBuffer() {
+        @Override
+        public void clare() {
+            logIt(MyDate.class);
+            calendarChanged();
+        }
+    };
 
     private MyDate(boolean readOnly) {
         this.readOnly = readOnly;
@@ -130,10 +143,16 @@ public class MyDate implements Serializable {
     }
 
     public MyDate(String input) {
-        String dt[] = input.split(" ");
-        setDate(dt[0]);
-        if (dt.length > 1)
-            setTime(dt[1]);
+        if (input != null) {
+            try {
+                String dt[] = input.split(" ");
+                setDate(dt[0]);
+                if (dt.length > 1)
+                    setTime(dt[1]);
+            } catch (Exception e) {
+                logger.error(e);
+            }
+        }
     }
 
     public MyDate() {
@@ -144,7 +163,9 @@ public class MyDate implements Serializable {
     }
 
     public static MyDate getToday() {
-        synchronized (today) {
+        if (today == null) {
+            today = new MyDate(true);
+        } else {
             today.current();
         }
         return today;
@@ -157,74 +178,100 @@ public class MyDate implements Serializable {
 
     public static MyDate getLastOpenDay() {
         initCalendar();
-        if (lastOpenDay == null) {
-            lastOpenDay = new MyDate(false);
-        } else {
-            lastOpenDay.readOnly = false;
-            lastOpenDay.current();
-        }
 
-        if (lastOpenDay.beforOpenTime()) {
-            lastOpenDay.nextNday(-1);
-        }
+        MyDate lastOpenDay = new MyDate(false);
+        try {
+            if (lastOpenDay.beforOpenTime()) {
+                lastOpenDay.nextNday(-1);
+            }
 
-        while (!lastOpenDay.isOpenDay()) {
-            lastOpenDay.nextNday(-1);
-        }
-        lastOpenDay.readOnly = true;
+            while (!lastOpenDay.isOpenDay()) {
+                lastOpenDay.nextNday(-1);
+            }
+        } finally {
 
+        }
         return lastOpenDay;
     }
 
-    /**
-     * TODO marked from Stock
-     */
-    private static void initCalendar() {
+    private static synchronized void initCalendar() {
         if (stockCalendar == null) {
             ResultSet rs = null;
+            lastCloseDay = null;
             stockCalendar = new HashSet<String>();
-            String sql = "select  CalendarDate from stockCalendar  " +
-//                    " where CalendarDate  <= '" + getToday().getDate() + "'" +
-                    " order by 1 ";
-            Database db = AppManager.getApp().getDatabase(MyDate.class);
-            AppManager.getApp().tryOpendb(db);
-
+            String sql = "select  CalendarDate, closed from stockCalendar  " +
+                    //" where CalendarDate " +  // <= '" + getToday().getDate() + "'" +
+                    " order by 1 desc ";
+            Database db = DbStack.getDb(MyDate.class);
             try {
                 rs = db.dynamicSQL(sql);
                 while (rs.next()) {
                     lastTradeDay = rs.getObject(1).toString();
-                    if (minTradeDay == null) {
-                        minTradeDay = lastTradeDay;
-                    }
+                    boolean closed = rs.getBoolean(2);
+//                    if (minTradeDay == null) {
+//                        minTradeDay = lastTradeDay;
+//                    }
                     stockCalendar.add(lastTradeDay);
+                    if (lastCloseDay == null && closed) {
+                        lastCloseDay = new MyDate(lastTradeDay);
+                    }
                 }
+                minTradeDay = lastTradeDay;
             } catch (Exception e) {
                 logger.error(e);
             } finally {
                 Database.closeResultSet(rs);
-                db.close();
+                DbStack.closeDB(db);
             }
         }
     }
 
     public static MyDate getLastClosedDay() {
         initCalendar();
-
-        MyDate lastCloseDay = new MyDate();
-
-        if (!lastCloseDay.afterClosedTime()) {
-            lastCloseDay.nextNday(-1);
-        }
-
-        while (!lastCloseDay.isOpenDay()) {
-            lastCloseDay.nextNday(-1);
-        }
         return lastCloseDay;
+    }
+
+    public static void setLastClosedDay(String date) {
+        String update = "update stockCalendar set closed = 1 where calendarDate <= '" + date + "'";
+        Database db = DbStack.getDb(MyDate.class);
+        try {
+            db.executeUpdate(update);
+            lastCloseDay.setDate(date);
+        } catch (DBException e) {
+            logger.error(e);
+        } finally {
+            DbStack.closeDB(db);
+        }
+    }
+
+    private static String[] getM1Section() {
+        if (m1 != null) return m1;
+        m1 = new String[242];
+        m1[0] = "09:15:00";
+
+//        LinkedList<String> section = new LinkedList<>();
+        MyDate t = new MyDate();
+        t.setTime("09:30:00");
+        int i = 1;
+        while (t.isBeforeTime("11:31:00")) {
+            m1[i++] = t.getTime();
+//            System.out.println(m1[i-1]);
+            t.addTimeInMinuts(1);
+        }
+        t.setTime("13:01:00");
+        while (t.isBeforeTime("15:01:00")) {
+            m1[i++] = t.getTime();
+//            System.out.println(m1[i-1]);
+            t.addTimeInMinuts(1);
+        }
+        return m1;
     }
 
     public static String[] getTimeSection(int period) {
         String[] times = null;
         switch (period) {
+            case 1:
+                return getM1Section();
             case 5:
                 times = m5;
                 break;
@@ -278,6 +325,27 @@ public class MyDate implements Serializable {
             }
         }
         return B - b;
+    }
+
+    ///////////////////////////////////////
+    public static boolean IS_BEFORE_TIME(String time) {
+        today.now();
+        return today.isBeforeTime(time);
+    }
+
+    public static boolean IS_BEFORE_TIME(int hour, int minute, int second) {
+        today.now();
+        return today.isBeforeTime(hour, minute, second);
+    }
+
+    public static boolean IS_AFTER_TIME(int hour, int minute, int second) {
+        today.now();
+        return today.isAfterTime(hour, minute, second);
+    }
+
+    public static boolean IS_AFTER_TIME(String time) {
+        today.now();
+        return today.isAfterTime(time);
     }
 
     public static String getOpenTime1() {
@@ -350,59 +418,94 @@ public class MyDate implements Serializable {
         return null;
     }
 
+    public static void main(String[] args) throws Exception {
+        MyDate test1 = new MyDate("2007-11-18");
+        test1.print();
+        MyDate test2 = new MyDate("2008-3-30");
+        test2.print();
+        System.out.println(test1.compareDays(test2));
+    }
+
+
     public static void calendarChanged() {
         stockCalendar = null;
-    }
-
-    //////////////////////////////////////////////////////////////////
-    public static boolean IS_BEFORE_TIME(String time) {
-        today.now();
-        return today.isBeforeTime(time);
-    }
-
-    public static boolean IS_BEFORE_TIME(int hour, int minute, int second) {
-        today.now();
-        return today.isBeforeTime(hour, minute, second);
-    }
-
-    public static boolean IS_AFTER_TIME(int hour, int minute, int second) {
-        today.now();
-        return today.isAfterTime(hour, minute, second);
-    }
-
-    public static boolean IS_AFTER_TIME(String time) {
-        today.now();
-        return today.isAfterTime(time);
-    }
-
-    public static void main(String[] args) throws Exception {
-        MyDate test1 = new MyDate("2007-11-18 12:23:02.098");
-        test1.now();
-        System.out.println(test1.getTime2());
-        System.out.println(test1.getTime());
-        System.out.println(test1.getDate());
-        System.out.println(test1.getDateTime());
-        System.out.println(test1.getTimeInMillis());
-
-//        MyDate test2 = new MyDate("2008-3-30");
-//        test2.print();
-//        System.out.println(test1.compareDays(test2));
     }
 
     private void current() {
         in = new DateTime();
     }
 
-    public void now() {
+    public MyDate now() {
         in = new DateTime();
+        return this;
+    }
+
+
+    public void futureOpenDay() {
+        do {
+            this.advance_day();
+        } while (!this.isOpenDay());
+    }
+
+    public synchronized void setToFutureOpenDay() {
+        Database db = DbStack.getDb(MyDate.class);
+        try {
+            setToFutureOpenDay(db);
+        } finally {
+            DbStack.closeDB(db);
+        }
+    }
+
+    public synchronized void setToFutureOpenDay(Database db) {
+        String sql = "select  CalendarDate from stockCalendar  " +
+                " where CalendarDate  > '" + getDate() + "'" +
+                " order by CalendarDate " +
+                " limit 1 ";
+
+
+        ResultSet rs = null;
+
+
+        try {
+            rs = db.dynamicSQL(sql);
+            if (rs.next()) {
+                String nextTradeDay = rs.getObject(1).toString();
+                this.setDate(nextTradeDay);
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            Database.closeResultSet(rs);
+        }
+    }
+
+    public boolean setTime(long input) {
+        String times = String.valueOf(input);
+        int hour = 0;
+        int min = 0;
+        int sec = 0;
+        int mms = 0;
+
+        try {
+            while (times.length() < 9) {
+                times = "0" + times;
+            }
+            hour = NU.parseInt(times.substring(0, 2), 0);
+            min = NU.parseInt(times.substring(2, 4), 0);
+            sec = NU.parseInt(times.substring(4, 6), 0);
+            if (times.length() > 6) {
+                mms = NU.parseInt(times.substring(6), 0);
+            }
+            in = in.withTime(hour, min, sec, mms);
+            return true;
+        } catch (Exception e) {
+
+        }
+        return false;
     }
 
     public long getTimeInMillis() {
         return in.getMillis();
-    }
-
-    public void addTimeInMillis(int mms) {
-        in = in.plusMillis(mms);
     }
 
     public void addTimeInSecond(int ms) {
@@ -410,7 +513,7 @@ public class MyDate implements Serializable {
 
     }
 
-    public void plusMillis(int mms) {
+    public void addTimeInMillis(int mms) {
         in = in.plusMillis(mms);
     }
 
@@ -457,16 +560,12 @@ public class MyDate implements Serializable {
         return true;
     }
 
-    public boolean setDate(MyDate input) {
-        return setDate(input.getDate());
-    }
-
     public boolean setDate(String input) {
         int year;
         int month;
         int day;
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.out.println("READONLY TODAY CAN NOT BE CHANGED!");
             System.exit(1);
             return false;
@@ -491,13 +590,14 @@ public class MyDate implements Serializable {
         return true;
     }
 
+
     public boolean setDateTime(String input) {
         int year;
         int month;
         int day;
         String dtDele = "- :.";
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return false;
         }
@@ -524,7 +624,7 @@ public class MyDate implements Serializable {
         int month;
         int day;
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return false;
         }
@@ -586,31 +686,6 @@ public class MyDate implements Serializable {
             e.printStackTrace();
         }
         return true;
-    }
-
-    public boolean setTime(long input) {
-        String times = String.valueOf(input);
-        int hour = 0;
-        int min = 0;
-        int sec = 0;
-        int mms = 0;
-
-        try {
-            while (times.length() < 9) {
-                times = "0" + times;
-            }
-            hour = NU.parseInt(times.substring(0, 2), 0);
-            min = NU.parseInt(times.substring(2, 4), 0);
-            sec = NU.parseInt(times.substring(4, 6), 0);
-            if (times.length() > 6) {
-                mms = NU.parseInt(times.substring(6), 0);
-            }
-            in = in.withTime(hour, min, sec, mms);
-            return true;
-        } catch (Exception e) {
-
-        }
-        return false;
     }
 
     public boolean setTime(String input) {
@@ -680,7 +755,7 @@ public class MyDate implements Serializable {
 
     public void advance_day() {
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return;
         }
@@ -689,20 +764,16 @@ public class MyDate implements Serializable {
 
     public void nextMonth() {
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return;
         }
         in = in.plusMonths(1);
     }
 
-//    public String getTimeMms() {
-//        return in.toString();
-//    }
-
     public int NextWeekNo(int amount) {
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
         }
 
@@ -711,7 +782,7 @@ public class MyDate implements Serializable {
 
     public void nextWeek(int n) {
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
         }
         in = in.plusWeeks(n);
@@ -719,7 +790,7 @@ public class MyDate implements Serializable {
 
     public void nextMonth(int n) {
         if (readOnly) {
-            logger.error("READ ONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return;
         }
@@ -728,7 +799,7 @@ public class MyDate implements Serializable {
 
     public void nextNday(int n) {
         if (readOnly) {
-            logger.error("READ ONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
             return;
         }
@@ -738,57 +809,15 @@ public class MyDate implements Serializable {
 
     public void nextOpenDay() {
         do {
-            if (this.isToday()) break;
+//            if (this.isToday()) break;
             this.advance_day();
         } while (!this.isOpenDay());
     }
 
-    public void futureOpenDay() {
-        do {
-            this.advance_day();
-        } while (!this.isOpenDay());
-    }
 
-    /**
-     * TODO marked from Stock
-     */
-    public synchronized void setToFutureOpenDay() {
-//        Database db = DbStack.getDb(MyDate.class);
-//        try {
-//            setToFutureOpenDay(db);
-//        }finally {
-//            DbStack.closeDB(db);
-//        }
-    }
-
-    /**
-     * TODO marked from Stock
-     */
-//    public synchronized void setToFutureOpenDay(Database db) {
-//        String szhzz.sql = "select  CalendarDate from stockCalendar  " +
-//                " where CalendarDate  > '" + getDate() + "'" +
-//                " order by CalendarDate " +
-//                " limit 1 ";
-//
-//
-//        ResultSet rs = null;
-//
-//
-//        try {
-//            rs = db.dynamicSQL(szhzz.sql);
-//            if (rs.next()) {
-//                String nextTradeDay = rs.getObject(1).toString();
-//                this.setDate(nextTradeDay);
-//            }
-//        } catch (Exception e) {
-//            logger.error(e);
-//        } finally {
-//            Database.closeResultSet(rs);
-//        }
-//    }
     public void addTimeInMinuts(int minuts) {
         if (readOnly) {
-            logger.error("READONLY TODAY CAN NOT BE CHANGED!");
+            logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
             System.exit(1);
         }
         in = in.plusMinutes(minuts);
@@ -870,7 +899,19 @@ public class MyDate implements Serializable {
     }
 
     public String getTime2() {
+        return in.toString("HH:mm:ss.SS");
+    }
+
+    public String getTime3() {
         return in.toString("HH:mm:ss.SSS");
+    }
+
+    public String getTimeMms() {
+        return in.toString();
+    }
+
+    public long getMillisOfDay() {
+        return in.getMillisOfDay();
     }
 
     /**
@@ -910,6 +951,10 @@ public class MyDate implements Serializable {
         return in.getSecondOfMinute();
     }
 
+    public int getMillisOfSecond() {
+        return in.getMillisOfSecond();
+    }
+
     public void setSecond(int ss) {
         if (ss > 59) ss = 59;
         in = in.withSecondOfMinute(ss);
@@ -920,21 +965,18 @@ public class MyDate implements Serializable {
         in = in.withMillisOfSecond(ms);
     }
 
-    public long getMillisOfDay() {
-        return in.getMillisOfDay();
-    }
-
-    public int getMillisOfSecond() {
-        return in.getMillisOfSecond();
-    }
-
-    public int getSecondOfDay() {
-        return in.getSecondOfDay();
-    }
-
     public boolean isOpenDay() {
         initCalendar();
         if (this.compareDays(minTradeDay) < 0) return true;
+//        if (this.compareDays(getToday()) > 0) return false;
+        return (stockCalendar.contains(this.getDate()));
+    }
+
+    public boolean willBeOpenDay() {
+        initCalendar();
+        if (this.compareDays(minTradeDay) < 0) return true;
+        if (this.compareDays(getToday()) <= 0) return false;
+        boolean debug = stockCalendar.contains(this.getDate());
         return (stockCalendar.contains(this.getDate()));
     }
 
@@ -977,8 +1019,6 @@ public class MyDate implements Serializable {
 
     public int compareDays(MyDate d) {
         DateTimeComparator comp = DateTimeComparator.getDateOnlyInstance();
-//        int a = comp.compare(in, d.in);
-//        long b = getDaysDiff(d);
         return comp.compare(in, d.in);
     }
 
@@ -1039,14 +1079,14 @@ public class MyDate implements Serializable {
         return (in.getMillis() - d.in.getMillis()) / 1000;
     }
 
-    public long compareMmSecondsDiff(MyDate d) {
+    public long compareMmSeconds(MyDate d) {
         return (in.getMillis() - d.in.getMillis());
     }
 
-    public long compareMmSecondsDiff(String time) {
+    public long compareMmSeconds(String time) {
         MyDate d = new MyDate();
         d.setTime(time);
-        return compareMmSecondsDiff(d);
+        return compareMmSeconds(d);
     }
 
     public boolean isLastWorkingDayOfSeazen() {
@@ -1066,31 +1106,56 @@ public class MyDate implements Serializable {
         return false;
     }
 
-    /**
-     * TODO marked from Stock
-     */
-    public void getFutureOpenDay() {
-//        String szhzz.sql = "select  CalendarDate from stockCalendar  " +
-//                " where CalendarDate  > '" + getToday().getDate() + "'" +
-//                " order by CalendarDate " +
-//                " limit 1 ";
-//
-//        Database db = AppManager.getApp().getDatabase(MyDate.class);
-//        AppManager.getApp().tryOpendb(db);
-//        ResultSet rs = null;
-//
-//        try {
-//            rs = db.dynamicSQL(szhzz.sql);
-//            while (rs.next()) {
-//                String nextTradeDay = rs.getObject(1).toString();
-//                this.setDate(nextTradeDay);
-//            }
-//        } catch (Exception e) {
-//            logger.error(e);
-//        } finally {
-//            Database.closeResultSet(rs);
-//            db.close();
-//        }
+    public boolean afterClosedTime() {
+        return afterClosedTime(0);
+    }
+
+    public boolean afterClosedTime(int afteMinuts) {
+        if (beforToday()) return true;
+        if (isWeekEnd()) return true;
+
+        if (isToday()) {
+            int h = getHour();
+            int m = getMinute();
+            if (getHour() > 15) return true;
+            if (getHour() == 15 && getMinute() > afteMinuts) return true;
+        }
+        return false;
+    }
+
+    public boolean isBeforeTime(int hour, int minute, int second) {
+        long secondsOfDay = hour * 3600 + minute * 60 + second;
+        return this.getSecondOfDay() < secondsOfDay;
+    }
+
+    public boolean isBeforeTime(String time) {
+        try {
+            String[] hms = time.split(":");
+            return isBeforeTime(Integer.parseInt(hms[0]), Integer.parseInt(hms[1]), Integer.parseInt(hms[2]));
+        } catch (Exception e) {
+
+        }
+        return false;
+    }
+
+    public boolean isAfterTime(int hour, int minute, int second) {
+        long secondsOfDay = hour * 3600 + minute * 60 + second;
+        return this.getSecondOfDay() >= secondsOfDay;
+    }
+
+    public boolean isAfterTime(String time) {
+        try {
+            String[] hms = time.split(":");
+            return isAfterTime(Integer.parseInt(hms[0]), Integer.parseInt(hms[1]), Integer.parseInt(hms[2]));
+        } catch (Exception e) {
+
+        }
+        return false;
+    }
+
+    ///////////////////////////////////////
+    public int getSecondOfDay() {
+        return in.getSecondOfDay();
     }
 
     /**
@@ -1169,6 +1234,132 @@ public class MyDate implements Serializable {
         return false;
     }
 
+    /**
+     * |<--
+     *
+     * @param deviation
+     * @return
+     */
+    public boolean beforeAmAuctionOpenTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 9) {
+            if (getMinute() == 14) {
+                return getSecond() <= (59 - deviation);
+            } else {
+                return getMinute() < 14;
+            }
+        } else {
+            return getHour() < 9;
+        }
+    }
+
+    public boolean beforeAmAuctionOpenTime() {
+        return beforeAmAuctionOpenTime(0);
+    }
+
+    public boolean afterAmAuctionCloseTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 9) {
+            if (getMinute() == 25) {
+                return getSecond() >= (deviation);
+            } else {
+                return getMinute() > 25;
+            }
+        } else {
+            return getHour() > 9;
+        }
+    }
+
+    public boolean afterAmAuctionCloseTime() {
+        return afterAmAuctionCloseTime(0);
+    }
+
+    public boolean beforeAmOpenTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 9) {
+            if (getMinute() == 29) {
+                return getSecond() <= (59 - deviation);
+            } else {
+                return getMinute() < 29;
+            }
+        } else {
+            return getHour() < 9;
+        }
+    }
+
+    public boolean beforeAmOpenTime() {
+        return beforeAmOpenTime(0);
+    }
+
+    public boolean afterAmCloseTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 11) {
+            if (getMinute() == 30) {
+                return getSecond() >= deviation;
+            } else {
+                return getMinute() > 30;
+            }
+        } else {
+            return getHour() > 11;
+        }
+    }
+
+    public boolean afterAmCloseTime() {
+        return afterAmCloseTime(0);
+    }
+
+    public boolean beforePmOpenTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 12) {
+            if (getMinute() == 59) {
+                return getSecond() <= (59 - deviation);
+            } else {
+                return getMinute() < 59;
+            }
+        } else {
+            return getHour() < 12;
+        }
+    }
+
+    public boolean beforePmOpenTime() {
+        return beforePmOpenTime(0);
+    }
+
+    public boolean afterPmCloseTime() {
+        return afterPmCloseTime(0);
+    }
+
+    public boolean afterPmCloseTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 15) {
+            if (getMinute() < 1) {
+                int s = getSecond();
+                return getSecond() >= deviation;
+            } else {
+                return true;
+            }
+        } else {
+            return getHour() > 15;
+        }
+    }
+
+    public boolean beforePmActionStartTime() {
+        return beforePmActionStartTime(0);
+    }
+
+    public boolean beforePmActionStartTime(int deviation) {
+        if (deviation < 0 || deviation > 59) deviation = 0;
+        if (getHour() == 14) {
+            if (getMinute() == 56) {
+                return getSecond() < (59 - deviation);
+            } else {
+                return getMinute() < 56;
+            }
+        } else {
+            return getHour() < 15;
+        }
+    }
+
     public boolean isAmActionTime() {
         return !beforeAmAuctionOpenTime() && !afterAmAuctionCloseTime();
     }
@@ -1177,124 +1368,93 @@ public class MyDate implements Serializable {
         return !afterPmCloseTime() && !beforePmActionStartTime();
     }
 
-    public boolean isBeforeTime(int hour, int minute, int second) {
-        long secondsOfDay = hour * 3600 + minute * 60 + second;
-        return this.getSecondOfDay() < secondsOfDay;
-    }
+    public void getFutureOpenDay() {
+        String sql = "select  CalendarDate from stockCalendar  " +
+                " where CalendarDate  > '" + getToday().getDate() + "'" +
+                " order by CalendarDate " +
+                " limit 1 ";
 
-    public boolean isBeforeTime(String time) {
+        Database db = AppManager.getApp().getDatabase(MyDate.class);
+        AppManager.getApp().tryOpendb(db);
+        ResultSet rs = null;
+
         try {
-            String[] hms = time.split(":");
-            return isBeforeTime(Integer.parseInt(hms[0]), Integer.parseInt(hms[1]), Integer.parseInt(hms[2]));
+            rs = db.dynamicSQL(sql);
+            while (rs.next()) {
+                String nextTradeDay = rs.getObject(1).toString();
+                this.setDate(nextTradeDay);
+            }
         } catch (Exception e) {
-
+            logger.error(e);
+        } finally {
+            Database.closeResultSet(rs);
+            db.close();
         }
-        return false;
     }
 
-    /**
-     * |<--
-     * 早于早盘集合竞价时间
-     *
-     * @param beforeSecond
-     * @return
-     */
-    public boolean beforeAmAuctionOpenTime(int beforeSecond) {
-        return isBeforeTime(9, 15, -1 * beforeSecond);
-    }
-
-    /**
-     * 早于下午开盘时间
-     *
-     * @param beforeSecond
-     * @return
-     */
-    public boolean beforeAmOpenTime(int beforeSecond) {
-        return isBeforeTime(9, 30, -1 * beforeSecond);
-    }
-
-    /**
-     * 早于下午收盘时间
-     *
-     * @param beforeSecond
-     * @return
-     */
-    public boolean beforePmOpenTime(int beforeSecond) {
-        return isBeforeTime(13, 0, -1 * beforeSecond);
-    }
-
-    /**
-     * 早于下午收盘集合竞价时间
-     *
-     * @param beforeSecond
-     * @return
-     */
-    public boolean beforePmActionStartTime(int beforeSecond) {
-        return isBeforeTime(14, 56, -1 * beforeSecond);
-    }
-
-    public boolean beforeAmAuctionOpenTime() {
-        return beforeAmAuctionOpenTime(0);
-    }
-
-    public boolean beforeAmOpenTime() {
-        return beforeAmOpenTime(0);
-    }
-
-    public boolean beforePmOpenTime() {
-        return beforePmOpenTime(0);
-    }
-
-    public boolean beforePmActionStartTime() {
-        return beforePmActionStartTime(0);
-    }
-
-    ////////////////////////////////////////////////////
-    public boolean isAfterTime(int hour, int minute, int second) {
-        long secondsOfDay = hour * 3600 + minute * 60 + second;
-        return this.getSecondOfDay() >= secondsOfDay;
-    }
-
-    public boolean isAfterTime(String time) {
-        try {
-            String[] hms = time.split(":");
-            return isAfterTime(Integer.parseInt(hms[0]), Integer.parseInt(hms[1]), Integer.parseInt(hms[2]));
-        } catch (Exception e) {
-
-        }
-        return false;
-    }
-
-    public boolean afterClosedTime(int afterSecond) {
-        return isAfterTime(15, 0, afterSecond);
-    }
-
-    public boolean afterAmAuctionCloseTime(int afterSecond) {
-        return isAfterTime(9, 25, afterSecond);
-    }
-
-    public boolean afterAmCloseTime(int afterSecond) {
-        return isAfterTime(11, 30, afterSecond);
-    }
-
-    public boolean afterPmCloseTime(int afterSecond) {
-        return isAfterTime(15, 0, afterSecond);
-    }
-
-    public boolean afterClosedTime() {
-        return afterClosedTime(0);
-    }
-
-    public boolean afterAmAuctionCloseTime() {
-        return afterAmAuctionCloseTime(0);
-    }
-
-    public boolean afterAmCloseTime() {
-        return afterAmCloseTime(0);
-    }
-
-    public boolean afterPmCloseTime() {
-        return afterPmCloseTime(0);
-    }
+    //    ///////////////////////////////////////////////////////////
+//    public static boolean NowIsBeforeAmAuctionCloseTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 25;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//    public static boolean NowIsBeforeAmAuctionOpenTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 15;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//    public static boolean NowIsBeforeAmOpenTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 30;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//
+//    public static boolean NowIsBeforeAmCloseTime() {
+//        today = getToday();
+//        if (today.getHour() == 11) {
+//            return today.getMinute() < 30;
+//        } else {
+//            return today.getHour() < 11;
+//        }
+//    }
+//
+//    public static boolean NowIsInOpenTime() {
+//        return (NowIsBeforeAmCloseTime() && !NowIsBeforeAmAuctionOpenTime()) ||
+//                (NowIsBeforePmCloseTime() && !NowIsBeforePmOpenTime());
+//    }
+//
+//    public static boolean NowIsBeforePmOpenTime() {
+//        return getToday().getHour() < 13;
+//    }
+//
+//    public static boolean NowIsBeforePmCloseTime() {
+//        return getToday().getHour() < 15;
+//    }
+//
+//    public static boolean NowIsAfterPmActionStartTime() {
+//        return getToday().getHour() > 14 &&
+//                getToday().getHour() < 15 &&
+//                getToday().getMinute() > 56;
+//    }
+//
+//    public boolean NowIsAmActionTime(){
+//        return !NowIsBeforeAmAuctionOpenTime() && NowIsBeforeAmAuctionCloseTime();
+//    }
+//
+//    public boolean NowIsPmActionTime(){
+//        return !NowIsBeforePmCloseTime() && NowIsAfterPmActionStartTime();
+//    }
 }
 

@@ -7,6 +7,7 @@ import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import szhzz.Calendar.MyDate;
+import szhzz.Config.CfgEditor;
 import szhzz.Timer.AlarmClock;
 import szhzz.Timer.TimerEvent;
 import szhzz.sql.database.DBException;
@@ -85,10 +86,10 @@ public class AppManager implements DataConsumer {
     private String HD_ID = null;
     private String localIP = null;
     private String appName = null;  //出版名称
-    private DBProperties targetDbProp = null;
     private String icoUrl = null;
     private static ObjBufferedIO logBuffer = null;
     private static EventLoger eventLoger;
+    private static Vector<ClareBuffer> beClareBuffers = new Vector<ClareBuffer>();
 
     //    private static Shutdown dialog = null;
     private boolean debug = false;
@@ -100,6 +101,9 @@ public class AppManager implements DataConsumer {
     private static long systemTimeDiff = 0L;
     private static String currentDisk = null;
     private static Class appClass = null;
+    private static Boolean autoShutdown = false;
+
+    protected DBProperties targetDbProp = null;
 
     protected AppManager() {
         eventLoger = new EventLoger();
@@ -149,6 +153,16 @@ public class AppManager implements DataConsumer {
 
     public static String getCurrentFolder() {
         return System.getProperty("user.dir");
+    }
+
+    public static void registerClareBuffer(ClareBuffer bg) {
+        beClareBuffers.add(bg);
+    }
+
+    public static void clareDirtyData() {
+        for (ClareBuffer bg : beClareBuffers) {
+            bg.clare();
+        }
     }
 
     public static void reshape(JXBusyLabel Busy, float height) {
@@ -344,6 +358,14 @@ public class AppManager implements DataConsumer {
         return null;
     }
 
+    public String getDbHost() {
+        return getTargetDbProp().getProperty("host");
+    }
+
+    public String getDbPort() {
+        return getTargetDbProp().getProperty("port");
+    }
+
     public static boolean canShutdown() {
         //排除编程失误,误操作等造成的关机. 下述机器不得关闭
         return !("DellE5".equalsIgnoreCase(getHostName()) ||
@@ -375,6 +397,13 @@ public class AppManager implements DataConsumer {
 //        DbStack.closeDB(db);
 //    }
 
+    public static void setAutoSutdown(final boolean d) {
+        autoShutdown = d;
+    }
+
+    public static Boolean isAutoShutdown() {
+        return autoShutdown;
+    }
 
     private DBProperties getTargetDbProp() {
         if (targetDbProp == null) {
@@ -393,7 +422,7 @@ public class AppManager implements DataConsumer {
     }
 
     public String getCurrentDBCfg() {
-        return getConfigFolder() + "/" + cfg.getProperty("DatabaseCfgFile");
+        return getConfigFolder() + "/" + cfg.getProperty("DatabaseCfgFile", "MySQL.txt");
     }
 
     public boolean tryOpendb(Database db) {
@@ -708,6 +737,15 @@ public class AppManager implements DataConsumer {
         return null;
     }
 
+    public Object addAlarmClock(int hour, int minits, Runnable requestor, boolean loop, int priorol) {
+        return addAlarmClock(hour, minits, 0, requestor, loop, priorol);
+    }
+
+
+    public void removeAllAlarms() {
+        alarmClock.removeAllAlarms();
+    }
+
     public void setFreeTimeJob(Runnable requestor) {
         if (alarmClock == null) {
             alarmClock = AlarmClock.getInstance();
@@ -755,12 +793,21 @@ public class AppManager implements DataConsumer {
     public boolean Quit() {
         quitApp = true;
         if (!isDebug()) {
-            sendMailNow("程序退出", null);
+            try {
+                sendMailNow("程序退出", null);
+            }catch (Exception e){
+
+            }
             logger.info("程序退出...");
         }
 
         try {
             Collections.sort(beQuits);
+            for (int i = 0; i < beQuits.size(); i++) {
+                BeQuit bq = beQuits.get(i);
+                logit((beQuits.size()-i) + "\t" + bq.getClass().getName());
+            }
+            logit(" End of BeQuits list //////////////////////////////////");
             for (int i = 0; i < beQuits.size(); i++) {
                 BeQuit bq = beQuits.get(i);
                 logit((beQuits.size()-i) + "\t" + bq.getClass().getName());
@@ -920,7 +967,7 @@ public class AppManager implements DataConsumer {
         }
     }
 
-    public synchronized void logEvent(String msg) {
+    public static synchronized void logEvent(String msg) {
         logger.info(msg);
         eventLoger.push(MiscDate.todaysDate() + ">   " + msg);
     }

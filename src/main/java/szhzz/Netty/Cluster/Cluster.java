@@ -25,24 +25,22 @@ import java.util.Vector;
  */
 public class Cluster {
     static DawLogger logger = DawLogger.getLogger(DataConsumer.class);
-    
+
     static Cluster onlyOne = null;
-    
+
     Vector<NettyRequystor> remoteClients = new Vector<>();
     int checkCount = 1;
     ClusterServer clusterServer = null;
     ConnectionListener connectionListener;
     ClusterStation clusterStationUI = null;
-    
+
     int definedLevel = 0;
 
-    
-    
 
     //    Config localCfg = null;
-    
+
     String initMarketDataServer = null;
-    
+
     int defaultPort = 7521;
     int group = 0;
     boolean offLine = false;
@@ -58,7 +56,7 @@ public class Cluster {
     final HashMap<String, ClusterProperty> nodes = new HashMap<>();
     boolean cgfIsDirty = false;
     AppMessage msg = new AppMessage();
-    
+
     Cluster() {
 //        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
 //        proxy = cfg.getBooleanVal("设为交易代理", false);
@@ -67,7 +65,7 @@ public class Cluster {
     String statusMessage = "正在收集信息...";
 
     public static Cluster getInstance() {
-        if(onlyOne == null){
+        if (onlyOne == null) {
             AppManager.MessageBox("Developer: Cluster 需要定义衍生类.");
         }
         return onlyOne;
@@ -158,43 +156,48 @@ public class Cluster {
     }
 
 
-    //
+    //移到ClusterExt
     public void startup(Config clusterCfg) {
-        this.clusterCfg = clusterCfg;
+        if (clusterCfg != null && clusterServer == null) {
+            this.clusterCfg = clusterCfg;
 
-        Config cfg_ = CfgProvider.getInstance("系统策略").getCfg("System");
-        autoStartTrade = cfg_.getBooleanVal("自动接管交易", autoStartTrade);
-        forceTakeover = cfg_.getBooleanVal("强制接管交易", false);
-        setOffLine(cfg_.getBooleanVal("离线", false));
-        if(clusterCfg.getChildrenNames() == null || clusterCfg.getChildrenNames().size() == 0){
-            AppManager.MessageBox("请定义 " + clusterCfg.getConfigUrl() + " 集群节点设置文件");
-        }
-        int port = clusterCfg.getIntVal("Cluster", defaultPort);
-        for (String computer : clusterCfg.getChildrenNames()) {
-            Config child = clusterCfg.getChild(computer);
-            if (computer.equalsIgnoreCase(getHostName())) {
-                localLevel = child.getIntVal("Level", 0);
-                group = child.getIntVal("Group", 0);
+            Config cfg_ = CfgProvider.getInstance("系统策略").getCfg("System");
+            //移除
+            autoStartTrade = cfg_.getBooleanVal("自动接管交易", autoStartTrade);
+            forceTakeover = cfg_.getBooleanVal("强制接管交易", false);
+            setOffLine(cfg_.getBooleanVal("离线", false));
 
-                definedLevel = localLevel;
-                if (clusterServer == null) {
-                    clusterServer = ClusterServer.getInstance();
-                    clusterServer.setServerName(computer);
-                    clusterServer.setPort(port);
-                    clusterServer.setLocalLevel(localLevel);
-                    clusterServer.startServer();
-                    setProxy(child.getProperty("Proxy", ""));
+            if (clusterCfg.getChildrenNames() == null || clusterCfg.getChildrenNames().size() == 0) {
+                AppManager.MessageBox("请定义 " + clusterCfg.getConfigUrl() + " 集群节点设置文件");
+            }
+
+            int port = clusterCfg.getIntVal("Cluster", defaultPort);
+            for (String computer : clusterCfg.getChildrenNames()) {
+                Config child = clusterCfg.getChild(computer);
+                if (computer.equalsIgnoreCase(getHostName())) {
+                    localLevel = child.getIntVal("Level", 0);
+                    group = child.getIntVal("Group", 0);
+
+                    definedLevel = localLevel;
+                    if (clusterServer == null) {
+                        clusterServer = ClusterServer.getInstance();
+                        clusterServer.setServerName(computer);
+                        clusterServer.setPort(port);
+                        clusterServer.setLocalLevel(localLevel);
+                        clusterServer.startServer();
+                        setProxy(child.getProperty("Proxy", ""));
+                    }
+                } else if (child.getIntVal("Level", 0) > 0) {
+                    ClusterClients.getInstance().registerClient(computer,
+                            child.getProperty("IP", "").split(";"), port);
+
+                    AppManager.logit("启动客户端 " + computer + " " + port);
+
+                    NettyRequystor remote = new NettyRequystor(computer);
+                    remote.setReader(BusinessRuse.getInstance(), 5);
+                    remote.setQueryData(StationPropertyWrap.getStationLevelQuery());
+                    remoteClients.add(remote);
                 }
-            } else if (child.getIntVal("Level", 0) > 0) {
-                ClusterClients.getInstance().registerClient(computer,
-                        child.getProperty("IP", "").split(";"), port);
-
-                AppManager.logit("启动客户端 " + computer + " " + port);
-
-                NettyRequystor remote = new NettyRequystor(computer);
-                remote.setReader(BusinessRuse.getInstance(), 5);
-                remote.setQueryData(StationPropertyWrap.getStationLevelQuery());
-                remoteClients.add(remote);
             }
         }
 
@@ -675,6 +678,20 @@ public class Cluster {
             cgfIsDirty = false;
         }
         reportStatus();
+    }
+
+    /**
+     * 用于StockWind
+     */
+    public void joinToTradeServer(){
+
+    }
+
+    /**
+     * 用于StockWind
+     */
+    public void leavTradeServer() {
+
     }
 }
 

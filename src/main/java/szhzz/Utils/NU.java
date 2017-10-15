@@ -5,6 +5,11 @@ package szhzz.Utils;
  */
 public class NU {
 
+    public static boolean isDouble(Object o) {
+        return (o != null && o.toString().contains("."));
+    }
+
+
     public static Double parseDouble(Object o, Double defaultValue) {
         if (o == null) return defaultValue;
         if (o instanceof Double) {
@@ -26,7 +31,7 @@ public class NU {
         return defaultValue;
     }
 
-    public static int parseInt(Object o, int defaultValue) {
+    public static int parseInt(Object o, Integer defaultValue) {
         return parseLong(o, (long) defaultValue).intValue();
     }
 
@@ -56,5 +61,14 @@ public class NU {
         return defaultValue;
     }
 
+    public static boolean isNumber(Object o) {
+        if (o == null) return false;
+        try {
+            double a = Double.parseDouble(o.toString());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
 }

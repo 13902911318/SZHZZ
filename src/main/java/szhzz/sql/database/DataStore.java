@@ -74,10 +74,7 @@ public class DataStore {
             return Double.parseDouble(o.toString());
         } catch (NumberFormatException e) {
             try {
-                String s = o.toString().replace(",", "").trim();
-                s = s.toString().replace("-", "").trim();    //Data to number
-                s = s.toString().replace(":", "").trim();    //Time to number
-                return Double.parseDouble(s);
+                return Double.parseDouble(o.toString().replace(",", "").trim());
             } catch (NumberFormatException e2) {
 
             }
@@ -131,7 +128,7 @@ public class DataStore {
     }
 
     public boolean hasColumnName(String col) {
-        return getColIndex(col) >= 0;
+        return columnIndex.containsValue(col);
     }
 
     public HashMap<String, Integer> cloneColumnMap() {
@@ -462,9 +459,9 @@ public class DataStore {
      * @param col
      * @return
      */
-    public boolean setValueAt_s(Object value, int row, int col) {
+    public boolean setValueAt_s(Object value, int row, String col) {
         Object o = null;
-        String typeName = getColTypeName(col);
+        String typeName = getColTypeName(getColIndex(col));
 
         if ("Long".equals(typeName)) {
             o = parseLong(value, null);
@@ -484,11 +481,7 @@ public class DataStore {
             o = value;
         }
 
-        return setValueAt(o, row, col);
-    }
-
-    public boolean setValueAt_s(Object value, int row, String col) {
-        return setValueAt_s(value, row, getColIndex(col));
+        return setValueAt(o, row, getColIndex(col));
     }
 
     /**
@@ -561,7 +554,9 @@ public class DataStore {
     public boolean isNewRow(int row) {
         if (row >= 0 && row < rows.size()) {
             dataRow r = rows.get(row);
-            return r.isNewRow();
+            if (r != null) {
+                return r.isNewRow();
+            }
         }
         return true;
     }
@@ -989,6 +984,9 @@ public class DataStore {
         return "";
     }
 
+    public boolean hasCol(String col) {
+        return columnNames.get(col) != null;
+    }
 
     public void setDefaltValues(String col, Object val) {
         if (hasColumnName(col)) {
@@ -1193,7 +1191,7 @@ public class DataStore {
          * getUpdateScript()
          * <p/>
          * for SQL data Only ,
-         * return szhzz.sql update, delete, insert script for this row
+         * return sql update, delete, insert script for this row
          * we use this for "Log To DB" too
          *
          * @return String
@@ -1221,7 +1219,7 @@ public class DataStore {
 
             if (("java.lang.String".equals(getColumnClass(col).getName()) ||
                     "java.util.Date".equals(getColumnClass(col).getName()) ||
-                    "java.szhzz.sql.Date".equals(getColumnClass(col).getName()))
+                    "java.sql.Date".equals(getColumnClass(col).getName()))
                     && JDBCType.isNULL != this.get(col, CURRENTVALUE))
 
                 return "\'";

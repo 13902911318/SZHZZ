@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster.Net;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
 
@@ -21,12 +22,13 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
             ctx.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
             return;
         }
-//        if (msg.startsWith("TRUCRIPT-KEY")) {
-//            if(ctx.channel().isWritable()){
-//                ctx.channel().writeAndFlush("1234567890\r\n");
-//            }
-//            return;
-//        }
+        if (msg.startsWith("TRUCRIPT-KEY")) {
+            String returnKey = BusinessRuse.getInstance().getPassword(msg);
+            if(returnKey != null && ctx.channel().isWritable()){
+                ctx.channel().writeAndFlush(returnKey + "\r\n");
+            }
+            return;
+        }
 
 //        System.out.println(msg);
 

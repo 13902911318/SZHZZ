@@ -10,7 +10,7 @@ import java.io.Serializable;
  * To change this template use File | Settings | File Templates.
  */
 public class SMA implements Serializable {
-    float oldVal = 0f;
+    double oldVal = 0f;
     int length = 0;
 
     /**
@@ -19,7 +19,7 @@ public class SMA implements Serializable {
      * 其中Y'表示上一周期Y值，N必须大于M。
      * 例如：SMA(CLOSE,30,1)表示求30日移动平均价。
      */
-    public float Next(float X, int N, int M) {
+    public double Next(double X, int N, int M) {
         if (length == 0) {
             oldVal = X;
             length = 1;
@@ -29,7 +29,7 @@ public class SMA implements Serializable {
         return oldVal;
     }
 
-    public float Try(float X, int N, int M) {
+    public double Try(double X, int N, int M) {
         if (length == 0) {
             oldVal = X;
 //            length = 1;
@@ -37,7 +37,7 @@ public class SMA implements Serializable {
         return (M * X + (N - M) * oldVal) / N;
     }
 
-    public float Next(float X, float oldX, int N, int M) {
+    public double Next(double X, double oldX, int N, int M) {
         if (oldX == 0) {
             oldX = X;
         }

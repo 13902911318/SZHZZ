@@ -19,16 +19,17 @@ import java.util.LinkedList;
  * To change this template use File | Settings | File Templates.
  */
 public class CfgProvider {
-    private static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
-    private static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
-    private Config cfg = null;
-    private Hashtable<Object, Config> allCfgs;
-    private LinkedList<String> cfgNames = new LinkedList<String>();
+    static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
+    protected static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
+    protected Config cfg = null;
+    protected Hashtable<Object, Config> allCfgs;
+    protected LinkedList<String> cfgNames = new LinkedList<String>();
 
-    private String cfgFolder = null;
-    private String groupName = null;
-    private static String configFolder = null;
-    private static String appClass = "";
+    protected String cfgFolder = null;
+    protected String groupName = null;
+    protected static String configFolder = null;
+    protected static String appClass = "";
+    private static CfgEditor cfgEditor = null;
 
     public static CfgProvider getInstance(String groupName) {
         CfgProvider onlyOne = provider.get(groupName);
@@ -42,15 +43,21 @@ public class CfgProvider {
 
     public static String getRootFolder() {
         if (configFolder == null) {
-            configFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
+//            configFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
+            configFolder = getShareFolder() + "\\" + CfgProvider.appClass;
+            new File(configFolder).mkdirs();
         }
         return configFolder;
+    }
+
+    public static String getShareFolder() {
+        return System.getProperty("user.home") + "\\configs";
     }
 
     public static void setAppClass(Class appClass) {
         CfgProvider.appClass = appClass.getSimpleName();
         configFolder = null;
-        getRootFolder() ;
+        getRootFolder();
     }
 
     public Config getNewCfg(String asName) {
@@ -71,7 +78,7 @@ public class CfgProvider {
     }
 
     public void addCfg(Config c) {
-        String fileName = cfgFolder + c.getConfigID() + ".ini";
+        String fileName = cfgFolder + "\\" + c.getConfigID() + ".ini";
         cfgNames.add(c.getConfigID());
         allCfgs.put(c.getConfigID(), c);  //.toLowerCase()
     }
@@ -89,11 +96,13 @@ public class CfgProvider {
         cfg.clear();
     }
 
-    public void loadCfg(String configID, boolean savePrev) {
-        if (savePrev) {
-            save();
+
+    public Config loadCfg(String configID, boolean savePrev) {
+        if (savePrev && cfg != null) {
+            cfg.save();
         }
         cfg = getCfg(configID);
+        return cfg;
     }
 
     public LinkedList<String> getCfgIDs() {
@@ -106,9 +115,18 @@ public class CfgProvider {
         }
     }
 
+    /**
+     * 重读当前节点的 cfg
+     */
+    public void reLoadCurrentCfg() {
+        if (cfg == null) {
+            return;
+        }
+        cfg.reLoad();
+    }
 
     public String getDir() {
-        return getRootFolder() + "/" + groupName + "/";
+        return getRootFolder() + "/" + groupName;
     }
 
     protected void laodCfgs(String name) {
@@ -196,7 +214,7 @@ public class CfgProvider {
 
         Config cfg = allCfgs.get(cfgID);
         if (cfg == null) {
-            String fileName = cfgFolder + cfgID + ".ini";
+            String fileName = cfgFolder + "\\" + cfgID + ".ini";
             if (!new File(fileName).exists() && createNew) {
                 try {
                     Utilities.String2File("// Create " + MyDate.getToday().getDateTime(), fileName, false);
@@ -226,5 +244,30 @@ public class CfgProvider {
             cfgID = cfgID.replace(".ini", "");
         }
         return allCfgs.get(cfgID) != null;
+    }
+
+
+    public static CfgEditor getCfgEditor() {
+        if (cfgEditor == null) {
+            cfgEditor = new CfgEditor(AppManager.getApp().getMainFram());
+            cfgEditor.pack();
+        }
+        cfgEditor.setVisible(true);
+        return cfgEditor;
+    }
+
+    public static void editCfg(String groupName, String cfgID) {
+        Config cfg = CfgProvider.getInstance(groupName).getCfg(cfgID);
+        if (cfg != null) {
+            getCfgEditor();
+            cfgEditor.setCfg(cfg);
+        }
+    }
+
+    public static void editCfg(Config cfg) {
+        if (cfg != null) {
+            getCfgEditor();
+            cfgEditor.setCfg(cfg);
+        }
     }
 }
