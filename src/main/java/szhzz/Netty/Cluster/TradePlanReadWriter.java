@@ -25,7 +25,7 @@ public class TradePlanReadWriter extends SharedCfgProvider {
     public static TradePlanReadWriter getInstance() {
         if (onlyOne == null) {
             onlyOne = new TradePlanReadWriter();
-            onlyOne.groupName = "\\TradePlan";
+            onlyOne.groupName = "TradePlan";
         }
         return onlyOne;
     }
@@ -68,16 +68,17 @@ public class TradePlanReadWriter extends SharedCfgProvider {
     }
 
     public String getBackupPath() {
-
         MyDate dateSuffix = new MyDate(MyDate.getLastClosedDay().getDate());
         dateSuffix.futureOpenDay();
-
-        String backupPath = getDir() + "Plan" + dateSuffix.getDate().replace("-", "") + "\\";
-        new File(backupPath).mkdirs();
-
-        return backupPath;
+        return getBackupPath(dateSuffix.getDate());
     }
 
+    public String getBackupPath(String date) {
+        MyDate dateSuffix = new MyDate(date);
+        String backupPath = getDir() + "\\Plan" + dateSuffix.getDate().replace("-", "") ;
+        new File(backupPath).mkdirs();
+        return backupPath;
+    }
 
     public HashSet<NettyExchangeData> getUpdateFiles() {
         HashSet<NettyExchangeData> updateFiles = new HashSet<>();

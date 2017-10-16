@@ -2,6 +2,7 @@ package szhzz.sql.database;
 
 
 import szhzz.Config.CfgProvider;
+import szhzz.Config.SharedCfgProvider;
 
 import java.io.*;
 import java.util.Properties;
@@ -23,7 +24,7 @@ public class DBProperties {
      * Plattform independent line break.
      */
     public static String lineSep = System.getProperty("line.separator");
-    String fileName = CfgProvider.getRootFolder() + "/MySQL.txt";
+    String fileName = SharedCfgProvider.getInstance("MySql").getDir() + "\\MySQL.ini";
     private Properties props;
 
     public DBProperties() throws DBException {

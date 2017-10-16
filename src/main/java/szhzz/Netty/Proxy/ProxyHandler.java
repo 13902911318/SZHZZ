@@ -99,7 +99,9 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
 
     public static void sayBye() {
         for (Channel channel : channels) {
-            channel.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
+            if(channel.isWritable()){
+                channel.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
+            }
         }
     }
 

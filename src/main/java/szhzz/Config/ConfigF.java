@@ -1,5 +1,7 @@
 package szhzz.Config;
 
+import szhzz.App.MessageAbstract;
+import szhzz.Utils.DawLogger;
 import szhzz.Utils.Utilities;
 
 import java.io.*;
@@ -14,6 +16,7 @@ import java.util.LinkedList;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigF extends Config {
+    private static DawLogger logger = DawLogger.getLogger(ConfigF.class);
     private String configFileName = null;
 
     @Override
@@ -26,6 +29,11 @@ public class ConfigF extends Config {
 
     @Override
     public void load(String file) {
+        if(file.contains("\\\\")){
+            logger.error(new Exception("Error path format :" + file));
+            file = file.replace("\\\\", "\\");
+        }
+
         configFileName = file;
         try {
             configID = new File(file).getName();

@@ -5,7 +5,11 @@ import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
+import szhzz.Netty.Cluster.ExchangeDataType.SqlUpdateWrap;
 import szhzz.Utils.DawLogger;
+import szhzz.sql.database.DBException;
+import szhzz.sql.database.Database;
+import szhzz.sql.jdbcpool.DbStack;
 
 /**
  * Created by Administrator on 2016/5/2.
@@ -67,33 +71,33 @@ public class BufferedSqlUpdater implements DataConsumer {
             return;
         }
 
-//        Database db = DbStack.getDb(this.getClass());
-//        try {
-//            SqlUpdateWrap sqlWrap = new SqlUpdateWrap(eData);
-//            while (sqlWrap.next()) {
-//                String update = sqlWrap.getScript();
-//                try {
-//                    szhzz.App.logit(update, false);
-//                    db.executeUpdate(update);
-//                } catch (DBException e) {
-//                    logger.error(update);
-//                }
-//            }
-//        } finally {
-//            DbStack.closeDB(db);
-//        }
+        Database db = DbStack.getDb(this.getClass());
+        try {
+            SqlUpdateWrap sqlWrap = new SqlUpdateWrap(eData);
+            while (sqlWrap.next()) {
+                String update = sqlWrap.getScript();
+                try {
+                    AppManager.logit(update, false);
+                    db.executeUpdate(update);
+                } catch (DBException e) {
+                    logger.error(update);
+                }
+            }
+        } finally {
+            DbStack.closeDB(db);
+        }
     }
 
     private void sqlUpdate(String update) {
-//        Database db = DbStack.getDb(this.getClass());
-//        try {
-//            szhzz.App.logit(update);
-//            db.executeUpdate(update);
-//        } catch (DBException e) {
-//            logger.error(update);
-//        } finally {
-//            DbStack.closeDB(db);
-//        }
+        Database db = DbStack.getDb(this.getClass());
+        try {
+            AppManager.logit(update);
+            db.executeUpdate(update);
+        } catch (DBException e) {
+            logger.error(update);
+        } finally {
+            DbStack.closeDB(db);
+        }
     }
 
     @Override

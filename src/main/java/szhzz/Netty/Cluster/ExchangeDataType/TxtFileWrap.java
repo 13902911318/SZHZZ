@@ -52,6 +52,7 @@ public class TxtFileWrap {
         eData.setNettyType(ClusterProtocal.FUNCTION.TextFile); //ClusterProtocal.FUNCTION.UserData.ordinal()
         eData.setMessage(encode);
         eData.setExtData("write", 1);
+        eData.setExtData("true", 2); //createDir
 
         eData.appendRow();
         eData.appendRow();
@@ -124,6 +125,10 @@ public class TxtFileWrap {
         return (String) data.getDataValue(row, 0, "");
     }
 
+    public boolean makeDirs(){
+        return "true".equalsIgnoreCase(data.getExtData(2)); //createDir
+    }
+
 
     public void writeToTextFile(String path) {
         String fileName = null;
@@ -146,10 +151,22 @@ public class TxtFileWrap {
         }
         logger.info(fileName + " saved Timelaps=" + data.getTimeLap());
 
+        if(makeDirs()){
+            try {
+                new File(fileName).getParentFile().mkdirs();
+            }catch (Exception e){
+
+            }
+        }
 
         String encode = getEncode();
         if (encode == null) {
-            encode = System.getProperty("file.encoding");
+            try {
+                encode = System.getProperty("file.encoding");
+            }catch (Exception e){}
+        }
+        if (encode == null) {
+            encode = "UTF-8";
         }
 
         try {

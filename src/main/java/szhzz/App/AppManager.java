@@ -7,16 +7,13 @@ import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import szhzz.Calendar.MyDate;
-import szhzz.Config.CfgEditor;
+import szhzz.Config.*;
 import szhzz.Timer.AlarmClock;
 import szhzz.Timer.TimerEvent;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DBProperties;
 import szhzz.sql.database.Database;
 import szhzz.Calendar.MiscDate;
-import szhzz.Config.CfgProvider;
-import szhzz.Config.Config;
-import szhzz.Config.ConfigF;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Mail.MailMsg;
@@ -190,8 +187,8 @@ public class AppManager implements DataConsumer {
         return configFolder;
     }
 
-//    public void setConfigFolder(String configFolder) {
-//        AppManager.configFolder = configFolder;
+//    public void setConfigFolder(String appConfigFolder) {
+//        AppManager.appConfigFolder = appConfigFolder;
 //        loadConfig();
 //    }
 
@@ -377,6 +374,12 @@ public class AppManager implements DataConsumer {
         return cfg.getBooleanVal("RemoteShutdown", false);
     }
 
+    public void setRemoteShutdown(boolean b) {
+        if (cfg == null) return;
+        cfg.setProperty("RemoteShutdown", b ? "true" : "false");
+        cfg.save();
+    }
+
     /**
      * 仅适用于大量同步频繁短暂的数据库操作
      * <p>
@@ -422,7 +425,7 @@ public class AppManager implements DataConsumer {
     }
 
     public String getCurrentDBCfg() {
-        return getConfigFolder() + "/" + cfg.getProperty("DatabaseCfgFile", "MySQL.txt");
+        return SharedCfgProvider.getInstance("MySql").getDir() + "\\MySQL.ini";
     }
 
     public boolean tryOpendb(Database db) {

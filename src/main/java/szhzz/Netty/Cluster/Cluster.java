@@ -5,6 +5,7 @@ import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
+import szhzz.Config.SharedCfgProvider;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
@@ -152,7 +153,7 @@ public class Cluster {
     }
 
     public static Config getConfig() {
-        return CfgProvider.getInstance("net").getCfg("Group");
+        return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
 

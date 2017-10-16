@@ -14,6 +14,7 @@ import szhzz.App.BeQuit;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.Net.ClientInitializer;
+import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
@@ -101,7 +102,7 @@ public class NettyClient {
     }
 
     protected void connect() {
-        Config systemCfg = App.getCfg();
+        Config systemCfg = App.getCfg();//Change to CfgProvider
         if (systemCfg != null && systemCfg.propertyEquals("ProxyType", "Oio")) {
             isNio = false;
         } else {
@@ -196,21 +197,24 @@ public class NettyClient {
     }
 
     /**
-     * @param obj
+     * @param msg
      * @return requID 回执号!
      */
-    public long send(NettyExchangeData obj) {
-        if (!isConnected()) {
+    public long send(NettyExchangeData msg) {
+        if (!connected) {
+            //尝试经由服务器端发送
+//            msg.setByPass();
+//            return ServerHandler.bypassSendTo(msg, host);
             return -1;
         }
         if (!channel.isWritable()) {
-            logger.error(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + obj.toString()));
+            logger.error(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
             return -1;
         }
-        NettyExchangeData d = ((NettyExchangeData) obj);
+//        NettyExchangeData d = ((NettyExchangeData) msg);
         synchronized (locker) {
 //            d.setRequestID(++requID);
-            channel.writeAndFlush(d.encode());
+            channel.writeAndFlush(msg.encode());
 //            return requID;
             return 1;
         }

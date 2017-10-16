@@ -27,9 +27,10 @@ public class CfgProvider {
 
     protected String cfgFolder = null;
     protected String groupName = null;
-    protected static String configFolder = null;
+    protected static String appConfigFolder = null;
     protected static String appClass = "";
     private static CfgEditor cfgEditor = null;
+    private static String configRoot = "Quant";
 
     public static CfgProvider getInstance(String groupName) {
         CfgProvider onlyOne = provider.get(groupName);
@@ -42,22 +43,26 @@ public class CfgProvider {
     }
 
     public static String getRootFolder() {
-        if (configFolder == null) {
-//            configFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
-            configFolder = getShareFolder() + "\\" + CfgProvider.appClass;
-            new File(configFolder).mkdirs();
+        if (appConfigFolder == null) {
+//            appConfigFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
+            appConfigFolder = System.getProperty("user.home") + "\\" + configRoot + "\\" + CfgProvider.appClass;
+            new File(appConfigFolder).mkdirs();
         }
-        return configFolder;
+        return appConfigFolder;
     }
 
     public static String getShareFolder() {
-        return System.getProperty("user.home") + "\\configs";
+        return System.getProperty("user.home") + "\\" + configRoot + "\\Share";
     }
 
     public static void setAppClass(Class appClass) {
         CfgProvider.appClass = appClass.getSimpleName();
-        configFolder = null;
+        appConfigFolder = null;
         getRootFolder();
+    }
+
+    public static void setConfigRoot(String configRoot) {
+        CfgProvider.configRoot = configRoot;
     }
 
     public Config getNewCfg(String asName) {
@@ -93,6 +98,11 @@ public class CfgProvider {
 
     public void deleteCfg(Config cfg) {
         allCfgs.remove(cfg);
+        try {
+            new File(cfg.getConfigUrl()).delete();
+        } catch (Exception e) {
+
+        }
         cfg.clear();
     }
 

@@ -2,6 +2,7 @@ package szhzz.Mail;
 
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
+import szhzz.Config.SharedCfgProvider;
 
 import java.util.LinkedList;
 
@@ -24,9 +25,9 @@ public class MailMsg {
 
 
     private static void loadMailBox() {
-        LinkedList<String> ids = CfgProvider.getInstance("MailBox").getCfgIDs();
+        LinkedList<String> ids = SharedCfgProvider.getInstance("MailBox").getCfgIDs();
         for (String id : ids) {
-            Config cfg = CfgProvider.getInstance("MailBox").getCfg(id);
+            Config cfg = SharedCfgProvider.getInstance("MailBox").getCfg(id);
             MailMsg mm = new MailMsg();
             mm.smtp = cfg.getProperty("smtp", mm.smtp);
             mm.mailTo = cfg.getProperty("mailTo", mm.mailTo);

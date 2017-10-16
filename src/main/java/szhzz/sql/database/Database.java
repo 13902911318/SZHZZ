@@ -68,7 +68,7 @@ public class Database {
     public final static String DBURL = "dbURL";
     public final static String USER = "user";
     public final static String PASSWORD = "password";
-    public final static String PORT = "tcpPort";
+    public final static String PORT = "port";
     //    protected static Timer timer = null;  // shared by all pool
     public final static String QUERY = "dbquery";
     public final static String PARAMETERS = "parameters";
@@ -722,7 +722,7 @@ public class Database {
             resultSet = dbMeta.getColumns(null, null, tableName, null);
             while (resultSet.next()) {
                 String type = resultSet.getString("TYPE_NAME");
-                types.add(type);
+                types.add(type.toLowerCase());
             }
         } finally {
             Database.closeResultSet(resultSet);

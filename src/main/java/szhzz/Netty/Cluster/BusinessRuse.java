@@ -6,6 +6,7 @@ import szhzz.App.MessageCode;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.ExchangeDataType.*;
+import szhzz.StatusInspect.StatusInspector;
 import szhzz.Utils.DawLogger;
 
 import java.net.SocketAddress;
@@ -35,6 +36,9 @@ public class BusinessRuse implements DataConsumer {
     }
 
     public static BusinessRuse getInstance() {
+        if(onlyOne == null){
+            AppManager.MessageBox("未定义 BusinessRuse setInstance()");
+        }
         return onlyOne;
     }
 
@@ -54,6 +58,13 @@ public class BusinessRuse implements DataConsumer {
         }
     }
 
+    public  int getErrorCode(){
+//        int e = NU.parseInt(AppEventExchange.getInstance().getEvent("持仓修正"),0);
+        return StatusInspector.getInstance().getErrorCount();
+    }
+    public String getCloseDate(){
+        return "";
+    }
     public void push(Object obj) {
         try {
             if (Cluster.getInstance().isOffLine()) return;
@@ -65,6 +76,28 @@ public class BusinessRuse implements DataConsumer {
 
         } finally {
         }
+    }
+
+    /**
+     * 直接回答客户端的请求
+     * 用于覆盖
+     * @param data
+     * @return
+     */
+    public ArrayList<NettyExchangeData> answer(NettyExchangeData data){
+        ArrayList<NettyExchangeData> eDatas = null;
+        switch (data.getNettyType()) {
+            case QueryServerLevel:
+                NettyExchangeData exDate = StationPropertyWrap.getStationProperty(data);
+                if(exDate!= null){
+                    eDatas = new ArrayList<>();
+                    eDatas.add(exDate);
+                }
+                break;
+            default:
+                push(data);
+        }
+        return eDatas;
     }
 
     public void broadcast(NettyExchangeData data) {

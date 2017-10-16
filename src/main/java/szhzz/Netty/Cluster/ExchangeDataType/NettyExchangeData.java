@@ -41,7 +41,7 @@ public class NettyExchangeData extends ExchangeData {
     public static final int colCpuID = 13;  //
     public static final int colAppClass = 14;  //
     public static final int colMac = 15;  //
-
+    public static final int byPassSignal = 16;  //
     public static final int colExt = 20;  //
 
     private String language = "语言认证";  //防止通讯后出现乱码
@@ -208,12 +208,20 @@ public class NettyExchangeData extends ExchangeData {
         return (String) getValue(0, colAppClass);
     }
 
-    private void setAppClassName(String cpuID) {
-        setTitleCol(cpuID, colCpuID);
+    private void setAppClassName(String appClass) {
+        setTitleCol(appClass, colAppClass);
     }
 
     private void setMac(String cpuID) {
         setTitleCol(cpuID, colMac);
+    }
+
+    public void setByPass() {
+        setTitleCol(1, byPassSignal);
+    }
+
+    public boolean isByPass() {
+        return NU.parseInt(getValue(0, byPassSignal), 0) == 1;
     }
 
     public ClusterProtocal.FUNCTION getNettyType() {

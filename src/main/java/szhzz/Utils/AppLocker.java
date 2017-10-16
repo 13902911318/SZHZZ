@@ -20,8 +20,8 @@ public class AppLocker {
     public static boolean lock() {
         boolean locked = false;
 
-//        String configFolder = CfgProvider.getRootFolder() + "\\loker\\";
-//        new File(configFolder).mkdirs();
+//        String appConfigFolder = CfgProvider.getRootFolder() + "\\loker\\";
+//        new File(appConfigFolder).mkdirs();
 
         File configFolder = TempDirectory.location();
 

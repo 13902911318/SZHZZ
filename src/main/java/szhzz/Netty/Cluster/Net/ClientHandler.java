@@ -5,9 +5,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
+import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.ClusterClients;
+import szhzz.Netty.Cluster.ClusterServer;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
+
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2015/2/15.
@@ -48,6 +52,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         // NettyExchangeData  msg
+        if(msg.isByPass()){// 这些信息本来就应该有服务器处理
+            logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
+            ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
+            if(exDates!=null && exDates.size() > 0) {
+                for(NettyExchangeData exDate : exDates) {
+                    if (exDate != null) {
+                        logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
+                        ctx.writeAndFlush(exDate.encode());
+                    }
+                }
+            }
+            return ;
+        }
+
         if (dataBuffer != null) {
             dataBuffer.push(msg);
         } else {

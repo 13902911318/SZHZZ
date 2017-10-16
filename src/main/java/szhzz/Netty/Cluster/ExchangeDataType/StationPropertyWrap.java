@@ -2,6 +2,7 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 
 
 import szhzz.App.AppManager;
+import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.StatusInspect.StatusInspector;
 import szhzz.Utils.HardwareIDs;
@@ -74,15 +75,9 @@ public class StationPropertyWrap {
         eData.appendRow();
         eData.addData(Cluster.getInstance().getLocalLevel());
 
-        String closeDate = "";
-//        String closeDate = AppEventExchange.getInstance().getEvent("DayClose");
-//        if(closeDate == null) closeDate = "";
-
-        eData.addData(closeDate);  // Col = 1
-//        int e = NU.parseInt(AppEventExchange.getInstance().getEvent("持仓修正"),0);
-        eData.addData(StatusInspector.getInstance().getErrorCount());       // Col = 2
-//        eData.addData(AppManager.getApp().canRemoteShutdown() ? "true" : "false");  // Col = 3
-        eData.addData("false");  // Col = 3
+        eData.addData(BusinessRuse.getInstance().getCloseDate());  // Col = 1
+        eData.addData(BusinessRuse.getInstance().getErrorCode());       // Col = 2
+        eData.addData(AppManager.getApp().canRemoteShutdown());      // Col = 3
         eData.addData((Cluster.getInstance().isOnTrade() ? 1 : 0));    // Col = 4
         eData.addData((AppManager.getApp().isDebug() ? 1 : 0));         // Col = 5
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6

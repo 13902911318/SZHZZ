@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 
 /**
@@ -89,17 +90,18 @@ public class ClusterServer {
      * @param data
      * @return 恢复远程的查询信息
      */
-    public NettyExchangeData answer(NettyExchangeData data) {
+    public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
         if (Cluster.getInstance().isOffLine()) return null;
-        NettyExchangeData exDate = null;
-        switch (data.getNettyType()) {
-            case QueryServerLevel:
-                exDate = StationPropertyWrap.getStationProperty(data);
-                break;
-            default:
-                BusinessRuse.getInstance().push(data);
-        }
-        return exDate;
+//        NettyExchangeData exDate = null;
+//        switch (data.getNettyType()) {
+//            case QueryServerLevel:
+//                exDate = StationPropertyWrap.getStationProperty(data);
+//                break;
+//            default:
+//
+//        }
+//        return exDate;
+        return BusinessRuse.getInstance().answer(data);
     }
 
     public void closeOtheNodes() {

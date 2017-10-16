@@ -1,5 +1,6 @@
 package szhzz.Netty.Cluster;
 
+
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DataStore;
 import szhzz.sql.gui.DataWindow;
@@ -32,6 +33,7 @@ public class ClusterStation extends JDialog {
     private JCheckBox offLineButtom;
     private JComboBox comboBoxGroup;
     private JCheckBox proxyCheckBox;
+    private JLabel text1;
     private DataWindow dw;
     private DataStore ds;
 //    private JButton broadcast;
@@ -169,6 +171,14 @@ public class ClusterStation extends JDialog {
         System.exit(0);
     }
 
+    public void set7522Model(){
+        startAllCheckBox.setVisible(false);
+        forceTakeover.setVisible(false);
+        offLineButtom.setVisible(false);
+        comboBoxGroup.setVisible(false);
+        proxyCheckBox.setVisible(false);
+        text1.setVisible(false);
+    }
     void initDw() {
         dw = stationViewPanel.getDataWindow();
         ds = new DataStore();
@@ -206,6 +216,12 @@ public class ClusterStation extends JDialog {
         ds.setColTypeName("Boolean", col);
         ds.setColLength(col, 10);
         ds.setDefaltValues(col, false);
+
+        col++;
+        ds.setColName("收盘日期", col);
+        ds.setColTypeName("String", col);
+        ds.setColLength(col, 10);
+        ds.setDefaltValues(col, "");
 
         col++;
         ds.setColName("离线", col);
@@ -268,11 +284,12 @@ public class ClusterStation extends JDialog {
         ds.setValueAt("本地", row, "类型");
         ds.setValueAt(Cluster.getInstance().getLocalLevel(), row, "级别");
         ds.setValueAt(true, row, "已连接");
+        ds.setValueAt(BusinessRuse.getInstance().getCloseDate(), row, "收盘日期");
         ds.setValueAt(Cluster.getInstance().getGroup(), row, "分组");
         ds.setValueAt(Cluster.getInstance().isOnTrade(), row, "交易中");
         ds.setValueAt(Cluster.getTradeProxyHost(), row, "代理");
         ds.setValueAt(Cluster.getInstance().isOffLine(), row, "离线");
-        ds.setValueAt(StatusInspector.getInstance().getErrorCount(), row, "错误");
+        ds.setValueAt(BusinessRuse.getInstance().getErrorCode(), row, "错误");
 
         ds.setValueAt(MyDate.getToday().getDateTime(), row, "最近更新");
 
@@ -288,6 +305,7 @@ public class ClusterStation extends JDialog {
         }
         ds.setValueAt(ss.type + " " + ss.ipAddress, row, "类型");
         ds.setValueAt(ss.connected, row, "已连接");
+        ds.setValueAt(ss.closeDate, row, "收盘日期");
         ds.setValueAt(ss.level, row, "级别");
         ds.setValueAt(ss.onTrade, row, "交易中");
         ds.setValueAt(ss.tradeProxy, row, "代理");
@@ -347,6 +365,10 @@ public class ClusterStation extends JDialog {
         appCfg.save();
     }
 
+    public DwPanel getStationViewPanel() {
+        return stationViewPanel;
+    }
+
 //    public static boolean isIndependent() {
 //        return independent;
 //    }
@@ -361,15 +383,23 @@ public class ClusterStation extends JDialog {
             Component c = super.getTableCellRendererComponent(jTable, value, isSelected, hasFocus, row, column);
             if (c instanceof JLabel) {
                 JLabel label = (JLabel) c;
+                boolean marketCloseError = false;
 
-                if ((Integer) dw.getValueAt(row, "错误", 0) > 0) {
+                if (MyDate.getToday().isOpenDay() &&
+                        (MyDate.IS_AFTER_TIME(15, 0, 0) || MyDate.IS_BEFORE_TIME(9, 15, 0))) {
+                    String s = dw.getValueAt(row, "收盘日期").toString();
+                    if (!s.equals("") && MyDate.getLastOpenDay().compareDays(s) != 0) {
+                        marketCloseError = true;
+                    }
+                }
+                if (!(boolean) dw.getValueAt(row, "已连接", false)) {
+                    label.setForeground(Color.GRAY);
+                } else if (marketCloseError || (Integer) dw.getValueAt(row, "错误", 0) > 0) {
                     label.setForeground(Color.RED);
                 } else if ((boolean) dw.getValueAt(row, "交易中", false)) {
                     label.setForeground(Color.BLUE);
                 } else if ((Integer) dw.getValueAt(row, "级别", -1) < 0) {
                     label.setForeground(Color.RED);
-                } else if (!(boolean) dw.getValueAt(row, "已连接", false)) {
-                    label.setForeground(Color.GRAY);
                 } else {
                     label.setForeground(Color.BLACK);
                 }
