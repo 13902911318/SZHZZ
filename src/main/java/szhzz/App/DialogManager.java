@@ -8,6 +8,7 @@ import szhzz.sql.database.DbConnectionsView;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 2017/10/6.
@@ -72,10 +73,11 @@ public class DialogManager {
     public void openStatuesView() {
         if (statusView == null) {
             statusView = new StatusView();
-            statusView.pack();
-            statusView.loadPref();
-            statusView.setTitle(frame.getTitle());
             dialogs.add(statusView);
+
+            statusView.pack();
+            statusView.setTitle(frame.getTitle());
+            statusView.loadPref();
         }
         statusView.setVisible(true);
     }

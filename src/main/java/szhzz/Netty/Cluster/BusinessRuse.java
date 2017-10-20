@@ -1,5 +1,6 @@
 package szhzz.Netty.Cluster;
 
+import com.sun.istack.internal.NotNull;
 import szhzz.App.AppManager;
 import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
@@ -177,6 +178,8 @@ public class BusinessRuse implements DataConsumer {
     public String getPassword(String key ){
         return "";
     }
+
+    @NotNull
     int acceptCluster(NettyExchangeData eData) {
         switch (eData.getNettyType()) {
             case AnswerServerLevel:
@@ -186,18 +189,27 @@ public class BusinessRuse implements DataConsumer {
         return 0;
     }
 
+    @NotNull
     int acceptBroadcast(NettyExchangeData eData) {
+        if( eData.isForward()){
+            eData.setForward(false);
+            broadcast(eData);
+            return 0;
+        }
         return -1;
     }
 
+    @NotNull
     public boolean isSameCpuID(NettyExchangeData eData) {
-        return eData != null && Cluster.getCpuID().equals(eData.getCpuID());
+        return Cluster.getCpuID().equals(eData.getCpuID());
     }
 
+    @NotNull
     public boolean isSameAppClass(NettyExchangeData eData) {
-        return eData != null && Cluster.getAppClassName().equals(eData.getAppClassName());
+        return Cluster.getAppClassName().equals(eData.getAppClassName());
     }
 
+    @NotNull
     void acceptMessage(NettyExchangeData eData) {
         MessageWrap messageWrap = new MessageWrap(eData);
         if (!isSameCpuID(eData) || !isSameAppClass(eData)) {
@@ -206,6 +218,7 @@ public class BusinessRuse implements DataConsumer {
     }
 
     @Override
+    @NotNull
     public long in(long dataID, Object obj) {
         return 0;
     }

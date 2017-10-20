@@ -104,9 +104,10 @@ public class ClusterClients {
     public long tell(String stationName, NettyExchangeData msg) {
         NettyClient client = clients.get(stationName);
         if (client == null) {
+            logger.debug("Client " + stationName + " not create error!");
             return -1;
         }
-        System.out.println("tell " + stationName);
+        logger.debug("tell " + stationName);
         return client.send(msg);
     }
 
@@ -181,11 +182,11 @@ public class ClusterClients {
                 client = new NettyClient(address, port);
                 clients.put(computerName, client);
                 App.logit(computerName + " " + client.getHost() + " to be connect");
-                client.start();
             } catch (Exception e) {
                 logger.error(e);
             }
         }
+        client.start();
         return client;
     }
 

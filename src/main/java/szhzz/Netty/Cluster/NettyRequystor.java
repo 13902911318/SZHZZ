@@ -62,9 +62,9 @@ public class NettyRequystor {
                 }
             }
         }
-//        if (isConnected()) {
+        if (isConnected()) {
             return ClusterClients.getInstance().query(this);
-//        }
+        }
         return false;
     }
 

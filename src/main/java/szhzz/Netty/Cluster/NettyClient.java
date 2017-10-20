@@ -205,6 +205,7 @@ public class NettyClient {
             //尝试经由服务器端发送
 //            msg.setByPass();
 //            return ServerHandler.bypassSendTo(msg, host);
+            logger.debug("连接已断开");
             return -1;
         }
         if (!channel.isWritable()) {

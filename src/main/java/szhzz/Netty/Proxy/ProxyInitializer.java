@@ -38,6 +38,6 @@ public class ProxyInitializer extends ChannelInitializer<SocketChannel> {
 
 
         pipeline.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));
-        pipeline.addLast("handler", new ProxyHandler());
+        pipeline.addLast("handler", ProxyHandler.getInstance());
     }
 }

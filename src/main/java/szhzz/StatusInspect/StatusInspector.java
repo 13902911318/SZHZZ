@@ -122,7 +122,7 @@ public class StatusInspector {
             dw.setSortingStatus(1, -1);
             dw.setSortingStatus(2, 1);
 
-            dw.repaint(100);
+            dw.repaint();
         } catch (DBException e) {
             logger.error(e);
         }

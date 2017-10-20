@@ -15,6 +15,7 @@ import szhzz.Utils.DawLogger;
 import szhzz.Utils.HardwareIDs;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Vector;
 
 
@@ -57,6 +58,7 @@ public class Cluster {
     final HashMap<String, ClusterProperty> nodes = new HashMap<>();
     boolean cgfIsDirty = false;
     AppMessage msg = new AppMessage();
+    Hashtable<String,String> ipToName= new Hashtable<>();
 
     Cluster() {
 //        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
@@ -156,6 +158,16 @@ public class Cluster {
         return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
+    private void addIpToName(String computer, Config cfg){
+        String[] ips = cfg.getProperty("IP", "").split(";");
+        for(String ip : ips){
+            ipToName.put(ip, computer);
+        }
+    }
+
+    public String getNameByIP(String ip){
+        return ipToName.get(ip);
+    }
 
     //移到ClusterExt
     public void startup(Config clusterCfg) {
@@ -171,10 +183,12 @@ public class Cluster {
             if (clusterCfg.getChildrenNames() == null || clusterCfg.getChildrenNames().size() == 0) {
                 AppManager.MessageBox("请定义 " + clusterCfg.getConfigUrl() + " 集群节点设置文件");
             }
-
             int port = clusterCfg.getIntVal("Cluster", defaultPort);
+
             for (String computer : clusterCfg.getChildrenNames()) {
                 Config child = clusterCfg.getChild(computer);
+                addIpToName(computer, child);
+
                 if (computer.equalsIgnoreCase(getHostName())) {
                     localLevel = child.getIntVal("Level", 0);
                     group = child.getIntVal("Group", 0);

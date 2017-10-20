@@ -1,5 +1,6 @@
 package szhzz.Netty.Proxy;
 
+import com.sun.istack.internal.NotNull;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -11,8 +12,11 @@ import io.netty.channel.socket.oio.OioServerSocketChannel;
 import szhzz.App.AppManager;
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
+import szhzz.Config.SharedCfgProvider;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
+
+import java.util.Hashtable;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -30,6 +34,8 @@ public class ProxyServer {
     private boolean isNio = true;
     private Channel serverChannel = null;
     private boolean serverClosed = false;
+    private static Hashtable<String,String> ipToName= new Hashtable<>();
+
 
     public ProxyServer(int port) {
         this.port = port;
@@ -40,10 +46,41 @@ public class ProxyServer {
         new ProxyServer(7521).startServer();
     }
 
+    private static void addIpToName(){
+        try {
+            Config cfg = SharedCfgProvider.getInstance("net").getCfg("Group");
+            for (String computer : cfg.getChildrenNames()) {
+                Config child = cfg.getChild(computer);
+                String[] ips = child.getProperty("IP", "").split(";");
+                for (String ip : ips) {
+                    ipToName.put(ip, computer);
+                }
+            }
+        }catch (Exception e){}
+    }
+
+    @NotNull
+    public static String getNameClint(Channel channel) {
+        String name = null;
+
+        String netAdd = channel.remoteAddress().toString();
+        String[] add = netAdd.split(":");
+        String ip = add[0].replace("/", "");
+        if (add.length > 0) {
+            name = ipToName.get(ip);;
+        }
+        if (name == null) {
+            name = netAdd;
+        }
+        return name;
+    }
+
     public void startServer() throws InterruptedException {
         serverClosed = false;
 
         Config systemCfg = CfgProvider.getInstance("系统策略").getCfg("System");
+        addIpToName();
+
         isNio = !(systemCfg != null && systemCfg.propertyEquals("ProxyType", "Oio"));
 
         if (isNio) {

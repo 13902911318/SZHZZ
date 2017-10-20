@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 public class StatusView extends JDialog {
     private static DawLogger logger = DawLogger.getLogger(StatusView.class);
@@ -92,8 +93,17 @@ public class StatusView extends JDialog {
         );
 
         String[] colWidth = appCfg.getProperty("StatusViewColWidth", "").split("\t");
-        for (int c = 0; c < colWidth.length; c++) {
-            dw.setColumnWidth(c, NU.parseLong(colWidth[c], (long) dw.getColumnWidth(c)).intValue());
+        if(dw.getColumnCount() ==0){
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+
+            }
+        }
+        if(dw.getColumnCount() > 0) {
+            for (int c = 0; c < colWidth.length; c++) {
+                dw.setColumnWidth(c, NU.parseLong(colWidth[c], (long) dw.getColumnWidth(c)).intValue());
+            }
         }
     }
 

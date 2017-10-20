@@ -2,6 +2,7 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 
 
 import JNI.ExchangeData;
+import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.Utils.DawLogger;
@@ -42,6 +43,7 @@ public class NettyExchangeData extends ExchangeData {
     public static final int colAppClass = 14;  //
     public static final int colMac = 15;  //
     public static final int byPassSignal = 16;  //
+    public static final int colForwad = 17;  //
     public static final int colExt = 20;  //
 
     private String language = "语言认证";  //防止通讯后出现乱码
@@ -71,6 +73,7 @@ public class NettyExchangeData extends ExchangeData {
     public void setEvenType(Object coed) {
         setTitleCol(coed, colEventType);
     }
+
 
     public boolean isSameCharset() {
         String l = getValue(0, colLanguage).toString();
@@ -132,6 +135,13 @@ public class NettyExchangeData extends ExchangeData {
         return NU.parseLong(getValue(0, colLogonID), 0L);
     }
 
+    public void setForward(boolean isForward) {
+        setTitleCol(isForward, colForwad);
+    }
+
+    public boolean isForward() {
+        return "true".equals(getValue(0, colForwad, "false")) ;
+    }
 
     public Long getRequestID() {
         return NU.parseLong(getValue(0, colRequestID), 0L);
@@ -197,7 +207,7 @@ public class NettyExchangeData extends ExchangeData {
     }
 
     public String getCpuID() {
-        return (String) getValue(0, colCpuID);
+        return (String) getValue(0, colCpuID, "");
     }
 
     private void setCpuID(String cpuID) {
@@ -280,6 +290,9 @@ public class NettyExchangeData extends ExchangeData {
         }
     }
 
+    public boolean isSameCpuID(){
+        return getCpuID().equals(AppManager.getCpuID());
+    }
     public void decode(String data) {
         if (getTable() == null) {
             table = new Vector<Vector>();

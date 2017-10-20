@@ -29,13 +29,29 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
     //ChannelInboundMessageHandlerAdapter
     //SimpleChannelInboundHandler
     private static DawLogger logger = DawLogger.getLogger(ProxyHandler.class);
-    private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private static final Hashtable<Channel, BufferedOutChanel> channelBuffer = new Hashtable<>();
-    private static HashSet<String> feededList = new HashSet<String>();
+    static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    static final Hashtable<Channel, BufferedOutChanel> channelBuffer = new Hashtable<>();
+    static HashSet<String> feededList = new HashSet<String>();
     //    private static UdpClient_Netty udpClient = null;
-    private static boolean useUdp = false;
-//    private boolean isNio = false;
+    static boolean useUdp = false;
+    //    private boolean isNio = false;
 //    private static MarketProxy nodeStation = null;
+    private static ProxyHandler onlyOne = null;
+
+    public static ProxyHandler getInstance() {
+        if (onlyOne == null) {
+            return new ProxyHandler();
+        } else {
+            return onlyOne.createNew();
+        }
+    }
+
+    public ProxyHandler createNew(){return null;}
+
+    public static void setInstance(ProxyHandler onlyOne) {
+        ProxyHandler.onlyOne = onlyOne;
+    }
+
 
     public static void setUdp(boolean useUdp) {
         UdpClient_Abstract.setInstance("UdpClient"); //UdpClient_Netty
@@ -99,7 +115,7 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
 
     public static void sayBye() {
         for (Channel channel : channels) {
-            if(channel.isWritable()){
+            if (channel.isWritable()) {
                 channel.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
             }
         }
@@ -111,13 +127,11 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-
         Channel incoming = ctx.channel();
+        AppManager.getApp().logEvent("Proxy 客户端 " + ProxyServer.getNameClint(ctx.channel()) + " " + " 已经连接!");
 
-        AppManager.getApp().logEvent("[Proxy]" + incoming.remoteAddress() + " 已经连接!");
-
-//        channels.add(incoming);
-//        channelBuffer.put(incoming, new BufferedOutChanel(incoming));
+        channels.add(incoming);
+        channelBuffer.put(incoming, new BufferedOutChanel(incoming));
         try {
             feedData(incoming);
         } catch (Exception e) {
@@ -148,7 +162,7 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
                 out.stop();
             }
         }
-        AppManager.getApp().logEvent("已经离开 [Proxy]" + incoming.remoteAddress());
+        AppManager.getApp().logEvent("已经离开 Proxy 客户端 " + ProxyServer.getNameClint(incoming) + " " + incoming.remoteAddress());
     }
 
     @Override
@@ -185,10 +199,10 @@ public class ProxyHandler extends SimpleChannelInboundHandler<NettyExchangeData>
     }
 
 
-    private void feedData(Channel incoming) throws InterruptedException {
+    void feedData(Channel incoming) throws InterruptedException {
     }
 
-    private class BufferedOutChanel implements DataConsumer {
+    class BufferedOutChanel implements DataConsumer {
         ObjBufferedIO pushBuffer = null;
         long in = 0;
         long out = 0;
