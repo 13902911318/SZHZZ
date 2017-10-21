@@ -225,13 +225,18 @@ public class CfgProvider {
         Config cfg = allCfgs.get(cfgID);
         if (cfg == null) {
             String fileName = cfgFolder + "\\" + cfgID + ".ini";
-            if (!new File(fileName).exists() && createNew) {
-                try {
-                    Utilities.String2File("// Create " + MyDate.getToday().getDateTime(), fileName, false);
-                } catch (IOException e) {
-                    logger.error(e);
+            if (!new File(fileName).exists()) {
+                if (createNew) {
+                    try {
+                        Utilities.String2File("// Create " + MyDate.getToday().getDateTime(), fileName, false);
+                    } catch (IOException e) {
+
+                    }
+                } else {
+                    return null;
                 }
             }
+
             ConfigF cfgF = new ConfigF();
             cfgF.setConfigFileName(fileName);
             addCfg(cfgF);

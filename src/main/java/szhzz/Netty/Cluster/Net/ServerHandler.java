@@ -34,6 +34,11 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         clusterServer = ClusterServer.getInstance();
     }
 
+    public static boolean hasConnection(){
+        if (Cluster.getInstance().isOffLine()) return false;
+        return channels.size() > 0;
+    }
+
     /**
      * 广播的方式,避免遗漏
      *

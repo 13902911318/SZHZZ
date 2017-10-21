@@ -87,6 +87,10 @@ public class Cluster {
         Cluster.proxy = proxy;
     }
 
+    public void broadcast(NettyExchangeData msg) {
+
+    }
+
     public NettyRequystor getNextNode() {
         String nodeName = null;
         int levelIndex = -1;

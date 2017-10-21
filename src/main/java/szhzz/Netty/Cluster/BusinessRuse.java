@@ -7,6 +7,7 @@ import szhzz.App.MessageCode;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.ExchangeDataType.*;
+import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.StatusInspect.StatusInspector;
 import szhzz.Utils.DawLogger;
 
@@ -37,7 +38,7 @@ public class BusinessRuse implements DataConsumer {
     }
 
     public static BusinessRuse getInstance() {
-        if(onlyOne == null){
+        if (onlyOne == null) {
             AppManager.MessageBox("未定义 BusinessRuse setInstance()");
         }
         return onlyOne;
@@ -59,13 +60,15 @@ public class BusinessRuse implements DataConsumer {
         }
     }
 
-    public  int getErrorCode(){
+    public int getErrorCode() {
 //        int e = NU.parseInt(AppEventExchange.getInstance().getEvent("持仓修正"),0);
         return StatusInspector.getInstance().getErrorCount();
     }
-    public String getCloseDate(){
+
+    public String getCloseDate() {
         return "";
     }
+
     public void push(Object obj) {
         try {
             if (Cluster.getInstance().isOffLine()) return;
@@ -82,15 +85,16 @@ public class BusinessRuse implements DataConsumer {
     /**
      * 直接回答客户端的请求
      * 用于覆盖
+     *
      * @param data
      * @return
      */
-    public ArrayList<NettyExchangeData> answer(NettyExchangeData data){
+    public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
         ArrayList<NettyExchangeData> eDatas = null;
         switch (data.getNettyType()) {
             case QueryServerLevel:
                 NettyExchangeData exDate = StationPropertyWrap.getStationProperty(data);
-                if(exDate!= null){
+                if (exDate != null) {
                     eDatas = new ArrayList<>();
                     eDatas.add(exDate);
                 }
@@ -102,8 +106,13 @@ public class BusinessRuse implements DataConsumer {
     }
 
     public void broadcast(NettyExchangeData data) {
-        if (!Cluster.getInstance().isOffLine()) {
-            ClusterServer.getInstance().broadcast(data);
+//        if (!Cluster.getInstance().isOffLine()) {
+//            ClusterServer.getInstance().broadcast(data);
+//        }
+        if (ServerHandler.hasConnection()) {
+            ServerHandler.broadcast(data);
+        } else {
+            Cluster.getInstance().broadcast(data); //经由客户端委托服务器发布广播
         }
     }
 
@@ -175,12 +184,13 @@ public class BusinessRuse implements DataConsumer {
 
     }
 
-    public String getPassword(String key ){
+    public String getPassword(String key) {
         return "";
     }
 
-    @NotNull
+
     int acceptCluster(NettyExchangeData eData) {
+        if(eData == null) return -1;
         switch (eData.getNettyType()) {
             case AnswerServerLevel:
                 Cluster.getInstance().dataChanged(eData);
@@ -189,9 +199,9 @@ public class BusinessRuse implements DataConsumer {
         return 0;
     }
 
-    @NotNull
+
     int acceptBroadcast(NettyExchangeData eData) {
-        if( eData.isForward()){
+        if (eData != null && eData.isForward()) {
             eData.setForward(false);
             broadcast(eData);
             return 0;
@@ -199,26 +209,28 @@ public class BusinessRuse implements DataConsumer {
         return -1;
     }
 
-    @NotNull
     public boolean isSameCpuID(NettyExchangeData eData) {
+        if(eData == null) return false;
         return Cluster.getCpuID().equals(eData.getCpuID());
     }
 
-    @NotNull
+
     public boolean isSameAppClass(NettyExchangeData eData) {
+        if(eData == null) return false;
         return Cluster.getAppClassName().equals(eData.getAppClassName());
     }
 
-    @NotNull
+
     void acceptMessage(NettyExchangeData eData) {
-        MessageWrap messageWrap = new MessageWrap(eData);
+        if(eData == null) return ;
+
         if (!isSameCpuID(eData) || !isSameAppClass(eData)) {
+            MessageWrap messageWrap = new MessageWrap(eData);
             message.sendMessage(messageWrap.getMessageCode(), messageWrap.getMessageData());
         }
     }
 
     @Override
-    @NotNull
     public long in(long dataID, Object obj) {
         return 0;
     }

@@ -59,9 +59,9 @@ public class ProxyServer {
         }catch (Exception e){}
     }
 
-    @NotNull
     public static String getNameClint(Channel channel) {
         String name = null;
+        if(channel == null) return name;
 
         String netAdd = channel.remoteAddress().toString();
         String[] add = netAdd.split(":");

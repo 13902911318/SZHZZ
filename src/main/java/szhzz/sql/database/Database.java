@@ -812,6 +812,21 @@ public class Database {
         QueryInback.executeInback(lisener);
     }
 
+    public boolean executeScriptFile(String file) throws DBException {
+        boolean success = false;
+
+        String sqls = Utilities.File2String(file);
+            StringTokenizer tok = new StringTokenizer(sqls, ";");
+            while (tok.hasMoreTokens()) {
+                String sql = tok.nextToken();
+                if (sql.trim().length() > 5) {
+                    executeUpdate(sql);
+                }
+            }
+            success = true;
+        return success;
+    }
+
     /**
      * incase any unexpect error stoped the program,
      * Automaticlly force close the connection

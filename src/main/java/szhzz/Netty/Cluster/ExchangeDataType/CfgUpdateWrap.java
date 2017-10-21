@@ -64,12 +64,10 @@ public class CfgUpdateWrap {
 
         for (int i = 0; i < data.getDataRowCount(); i++) {
             cols.add(data.getDataValue(i, 0, "").toString());
-            vals.add(data.getDataValue(i, 0, "").toString());
-            comments.add(data.getDataValue(i, 0, "").toString());
+            vals.add(data.getDataValue(i, 1, "").toString());
+            comments.add(data.getDataValue(i, 2, "").toString());
         }
-        AppEventExchange.getInstance().setEvent((String[]) cols.toArray(),
-                (String[]) vals.toArray(),
-                (String[]) comments.toArray(), false);
+        AppEventExchange.getInstance().setEvent(cols, vals, comments, false);
     }
 
     public void updateCfg() {
@@ -80,7 +78,7 @@ public class CfgUpdateWrap {
 
         Object fileName = data.getExtData(1);
         if ("".equals(fileName)) return;
-        //兼容老程序 TBD
+        //兼容老程序 TBD, 文件路径不同
         if("event.ini".equalsIgnoreCase(new File(fileName.toString()).getName())){
             updateAppEventCfg();
             return ;

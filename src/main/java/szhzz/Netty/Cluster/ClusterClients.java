@@ -111,6 +111,19 @@ public class ClusterClients {
         return client.send(msg);
     }
 
+    public void broadcast(NettyExchangeData msg) {
+        if (clients.isEmpty()) return;
+        for (NettyClient client : clients.values()) {
+            if (client.isConnected()) {
+                msg.setForward(true);
+                if (client.send(msg) > 0) {
+                    break;
+                }
+            }
+        }
+    }
+
+
     public boolean isConnect(String address) {
         NettyClient client = clients.get(address);
         return client != null && client.isConnected();

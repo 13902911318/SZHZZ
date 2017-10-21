@@ -23,6 +23,7 @@ public class HardwareIDs {
         System.out.println("CPU ID=" + getCPUSerial());
         System.out.println("Mac ID=" + getMACAddress("Endpoint VPN Client"));
 
+        getJvmProperties();
     }
 
     public static String getIP() {
@@ -237,6 +238,10 @@ public class HardwareIDs {
         return hostName;
     }
 
+    public static int getJreBitVersion(){
+        if(HardwareIDs.getJvmName().contains("64-Bit")) return 64;
+        return 32;
+    }
     public static String getCPUSerial() {
         String result = "";
         try {
