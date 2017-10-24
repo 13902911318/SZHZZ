@@ -2,6 +2,7 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 
 
 import JNI.ExchangeData;
+import io.netty.util.internal.StringUtil;
 import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Netty.Cluster.Cluster;
@@ -140,7 +141,7 @@ public class NettyExchangeData extends ExchangeData {
     }
 
     public boolean isForward() {
-        return "true".equals(getValue(0, colForwad, "false")) ;
+        return "true".equals(getValue(0, colForwad, "false"));
     }
 
     public Long getRequestID() {
@@ -263,13 +264,16 @@ public class NettyExchangeData extends ExchangeData {
         if (getTable() == null) {
             table = new Vector<Vector>();
         }
-        setLanguage();
-        setCpuID(Cluster.getInstance().getCpuID());
-        setAppClassName(Cluster.getInstance().getAppClassName());
-        setGroup(Cluster.getInstance().getGroup());
-        setTimeStamp();
-        setHostName(Cluster.getHostName());
-        setMac(Cluster.getMac());
+        //Forward 的数据不要改变数据源的信息
+        if(StringUtil.isNullOrEmpty(getCpuID())) {
+            setLanguage();
+            setCpuID(Cluster.getCpuID());
+            setAppClassName(Cluster.getAppClassName());
+            setGroup(Cluster.getInstance().getGroup());
+            setTimeStamp();
+            setHostName(Cluster.getHostName());
+            setMac(Cluster.getMac());
+        }
 
         StringBuilder sb = new StringBuilder(BoD).append(nl);
         for (Vector row : getTable()) {
@@ -290,9 +294,10 @@ public class NettyExchangeData extends ExchangeData {
         }
     }
 
-    public boolean isSameCpuID(){
+    public boolean isSameCpuID() {
         return getCpuID().equals(AppManager.getCpuID());
     }
+
     public void decode(String data) {
         if (getTable() == null) {
             table = new Vector<Vector>();

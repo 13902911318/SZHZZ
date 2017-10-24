@@ -14,13 +14,13 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator on 2017/10/6.
  */
 public class DialogManager {
-    private static DialogManager onlyOne = null;
-    private ClusterStation clusterStation = null;
-    private StatusView statusView = null;
-    private JFrame frame;
-    private DbConnectionsView dbView = null;
-    private ArrayList<JDialog> dialogs = new ArrayList<>();
-    private TaskView taskView = null;
+    protected static DialogManager onlyOne = null;
+    protected ClusterStation clusterStation = null;
+    protected StatusView statusView = null;
+    protected JFrame frame;
+    protected DbConnectionsView dbView = null;
+    protected ArrayList<JDialog> dialogs = new ArrayList<>();
+    protected TaskView taskView = null;
 
     private BeQuit autoQuit = new BeQuit() {
 
@@ -33,7 +33,7 @@ public class DialogManager {
         }
     };
 
-    private DialogManager() {
+    protected DialogManager() {
         frame = AppManager.getApp().getMainFram();
     }
 

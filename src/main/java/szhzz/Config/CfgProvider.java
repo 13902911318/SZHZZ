@@ -138,6 +138,9 @@ public class CfgProvider {
     public String getDir() {
         return getRootFolder() + "/" + groupName;
     }
+    public String toString(){
+        return getRootFolder() + "/" + groupName;
+    }
 
     protected void laodCfgs(String name) {
         this.groupName = name;
