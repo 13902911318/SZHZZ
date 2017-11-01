@@ -4,6 +4,7 @@ package szhzz.Config;
 import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.HardwareIDs;
 import szhzz.Utils.Utilities;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class CfgProvider {
     protected String cfgFolder = null;
     protected String groupName = null;
     protected static String appConfigFolder = null;
-    protected static String appClass = "";
+    protected static String appClass = "default";
     private static CfgEditor cfgEditor = null;
     private static String configRoot = "Quant";
 
@@ -45,14 +46,14 @@ public class CfgProvider {
     public static String getRootFolder() {
         if (appConfigFolder == null) {
 //            appConfigFolder = System.getProperty("user.dir") + "\\configs\\" + CfgProvider.appClass;
-            appConfigFolder = System.getProperty("user.home") + "\\" + configRoot + "\\" + CfgProvider.appClass;
+            appConfigFolder = HardwareIDs.getEnv("QuantHome") + "\\" + configRoot + "\\" + CfgProvider.appClass;
             new File(appConfigFolder).mkdirs();
         }
         return appConfigFolder;
     }
 
     public static String getShareFolder() {
-        return System.getProperty("user.home") + "\\" + configRoot + "\\Share";
+        return HardwareIDs.getEnv("QuantHome") + "\\" + configRoot + "\\Share";
     }
 
     public static void setAppClass(Class appClass) {
@@ -245,7 +246,6 @@ public class CfgProvider {
             addCfg(cfgF);
             cfg = cfgF;
         }
-
 //        if (cfg == null) {
 //            cfg = new ConfigF();
 //        }

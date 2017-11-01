@@ -814,6 +814,20 @@ public class MyDate implements Serializable {
         } while (!this.isOpenDay());
     }
 
+    public void nextTradeTime(int period) {
+        String[] times = getTimeSection(period);
+        if (getTime().equals(times[times.length - 1])) {
+            this.nextOpenDay();
+            this.setTime(times[1]);
+        } else {
+            for (int i = 0; i < (times.length - 1); i++) {
+                if (getTime().equals(times[i])) {
+                    this.setTime(times[i + 1]);
+                    break;
+                }
+            }
+        }
+    }
 
     public void addTimeInMinuts(int minuts) {
         if (readOnly) {

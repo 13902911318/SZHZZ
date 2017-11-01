@@ -10,20 +10,25 @@ package szhzz.Utils;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 
 public class HardwareIDs {
+    static Map<String, String> map = System.getenv();
     public static void main(String[] args) {
 
         //****************获取硬盘ID*****************//
-        System.out.println("硬盘编号=" + getSerialNumber("C"));
-        System.out.println("Realtek PCIe GBE Family Controller IP=" + getIP("Realtek PCIe GBE Family Controller"));
-        System.out.println("Endpoint VPN Client IP=" + getIP("Endpoint VPN Client"));
-        System.out.println("CPU ID=" + getCPUSerial());
-        System.out.println("Mac ID=" + getMACAddress("Endpoint VPN Client"));
-
-        getJvmProperties();
+//        System.out.println("硬盘编号=" + getSerialNumber("C"));
+//        System.out.println("Realtek PCIe GBE Family Controller IP=" + getIP("Realtek PCIe GBE Family Controller"));
+//        System.out.println("Endpoint VPN Client IP=" + getIP("Endpoint VPN Client"));
+//        System.out.println("CPU ID=" + getCPUSerial());
+//        System.out.println("Mac ID=" + getMACAddress("Endpoint VPN Client"));
+//
+//        getJvmProperties();
+//        rvnTest();
+        System.out.println(getEnv("QuantHome"));
     }
 
     public static String getIP() {
@@ -238,10 +243,11 @@ public class HardwareIDs {
         return hostName;
     }
 
-    public static int getJreBitVersion(){
-        if(HardwareIDs.getJvmName().contains("64-Bit")) return 64;
+    public static int getJreBitVersion() {
+        if (HardwareIDs.getJvmName().contains("64-Bit")) return 64;
         return 32;
     }
+
     public static String getCPUSerial() {
         String result = "";
         try {
@@ -344,4 +350,20 @@ public class HardwareIDs {
         System.out.println("用户的当前工作目录：" + props.getProperty("user.dir"));
         return "";
     }
+
+    public static String getEnv(String key){
+        String evn =  map.get(key);
+        if(evn == null) {
+            evn = System.getProperty("user.home");
+        }
+        return evn;
+    }
+
+    static void rvnTest() {
+        for (Iterator<String> itr = map.keySet().iterator(); itr.hasNext(); ) {
+            String key = itr.next();
+            System.out.println(key + "=" + map.get(key));
+        }
+    }
 }
+

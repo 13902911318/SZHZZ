@@ -631,6 +631,38 @@ public class Database {
     }
 
     public boolean hasTable(String tName) {
+        String schma = null;
+        String table = tName;
+        ResultSet rs = null;
+
+        int index = tName.indexOf(".");
+        if (index > 0) {
+            schma = tName.substring(0, index);
+            table = tName.substring(index + 1);
+        }
+        String sql = "SELECT TABLE_NAME FROM information_schema.`TABLES` " +
+                " where TABLE_NAME = '" + table + "'";
+        if(schma!=null){
+            sql += " and TABLE_SCHEMA = '" + schma + "'";
+        }
+        try {
+            rs = dynamicSQL(sql);
+            if (rs.next()) {
+                String name = null;
+                name = rs.getString(1);
+                return (name.equalsIgnoreCase(table));
+            }
+        } catch (DBException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResultSet(rs);
+        }
+        return false;
+    }
+
+    public boolean hasTable_(String tName) {
         boolean retval = false;
 //        Vector queries = new Vector();
         String types[] = {"TABLE"};

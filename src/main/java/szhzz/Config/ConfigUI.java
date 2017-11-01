@@ -4,6 +4,7 @@ import szhzz.App.AppManager;
 import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
 import szhzz.Calendar.MyDate;
+import szhzz.Files.TextTransfer;
 import szhzz.Utils.Utilities;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DataStore;
@@ -38,9 +39,12 @@ public class ConfigUI {
     protected DataWindow dw = null;
     JButton buttonCfgFile;
     JButton buttonLook;
+    JButton compareClipboard;
     //    JButton compareCfg;
     ImageIcon lookIcon;
     ImageIcon unLookIcon;
+    ImageIcon compareClipboardIcon;
+    TextTransfer ClipboardReader = null;
     private boolean clearBeforeSave = false;
 
     public void setEnabledItems(Vector<String> enabledItems) {
@@ -76,9 +80,9 @@ public class ConfigUI {
     }
 
     protected void initDw() {
-        lookIcon = AppManager.createImageIcon("/resources/Lock.gif");
-        unLookIcon = AppManager.createImageIcon("/resources/key.gif");
-//        ImageIcon lookIcon = new ImageIcon(getClass().getResource("/resource/Lock.gif"));
+        lookIcon = new ImageIcon(getClass().getResource("/resources/Lock.gif"));
+        unLookIcon = new ImageIcon(getClass().getResource("/resources/key.gif"));
+        compareClipboardIcon = new ImageIcon(getClass().getResource("/resources/Clipboard Copy.gif"));
 
 
         cfgEditor.addToolbarEvent(new triggerRetrive());
@@ -91,8 +95,7 @@ public class ConfigUI {
         dw = cfgEditor.getDataWindow();
 
         buttonCfgFile = new JButton();
-
-        buttonCfgFile.setIcon(AppManager.createImageIcon("/resources/Doc-Edit.gif"));
+        buttonCfgFile.setIcon(new ImageIcon(getClass().getResource("/resources/Doc-Edit.gif")));
         buttonCfgFile.setToolTipText("打开文件");
         buttonCfgFile.setEnabled(false);
         cfgEditor.getToolBar().addSeparator();
@@ -106,8 +109,14 @@ public class ConfigUI {
         cfgEditor.getToolBar().add(buttonLook);
 
 
+        compareClipboard = new JButton();
+        compareClipboard.setIcon(compareClipboardIcon);
+        compareClipboard.setToolTipText("与剪贴板比较");
+        compareClipboard.setEnabled(true);
+        cfgEditor.getToolBar().add(compareClipboard);
+
 //        compareCfg = new JButton();
-//        compareCfg.setIcon(new ImageIcon(getClass().ResourceManager("/GUIS/resource/and.gif")));
+//        compareCfg.setIcon(new ImageIcon(getClass().ResourceManager("/GUIS/resources/and.gif")));
 //        compareCfg.setToolTipText("对照剪贴板数据");
 //        compareCfg.setEnabled(true);
 //        cfgEditor.getToolBar().addSeparator();
@@ -119,6 +128,11 @@ public class ConfigUI {
 //            }
 //        });
 
+        compareClipboard.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                compareWithClipboard();
+            }
+        });
 
         buttonCfgFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -200,46 +214,68 @@ public class ConfigUI {
 
     }
 
+    public void compareWithClipboard() {
+        if (ClipboardReader == null) {
+            ClipboardReader = new TextTransfer();
+        }
+        String text = ClipboardReader.getClipboardContents();
+        ConfigF cfg2 = new ConfigF();
+        cfg2.loadDataVal(text);
+        compare(cfg2);
+    }
 
     public void compare(Config otherCfg) {
 //        dw.removeEditor();
-        onRetrieve();
-        dw.resetVisibleCols(new int[]{0, 1, 2, 3});
-        Vector<String> checkedKey = new Vector<String>();
-        for (int row = 0; row < dw.getRowCount(); row++) {
-            Object key = dw.getValueAt(row, "项目");
-            if (key != null) {
-                checkedKey.add(key.toString());
-                Object o = dw.getValueAt(row, "数值");
-                if (o == null) o = "NULL";
+        boolean isReadOnly = false;
+        try {
 
-                String v = otherCfg.getProperty(key.toString());
-                if (v == null) {
-                    int r = dw.appendRow();
-                    dw.setValueAt("- " + key, r, "对比");
-                } else if (!v.equals(o.toString())) {
-                    dw.setValueAt("!= " + v, row, "对比");
-                } else {
-                    dw.setValueAt("==", row, "对比");
+
+            onRetrieve();
+            dw.resetVisibleCols(new int[]{0, 1, 2, 3});
+
+            isReadOnly = dw.isDataWindowReadOnly();
+            if (isReadOnly) {
+                dw.setDataWindowReadOnly(false);
+            }
+            Vector<String> checkedKey = new Vector<String>();
+            for (int row = 0; row < dw.getRowCount(); row++) {
+                Object key = dw.getValueAt(row, "项目");
+                if (key != null) {
+                    checkedKey.add(key.toString());
+                    Object o = dw.getValueAt(row, "数值");
+                    if (o == null) o = "NULL";
+
+                    String v = otherCfg.getProperty(key.toString());
+                    if (v == null) {
+                        dw.setValueAt(" X ", row, "对比");
+                    } else if (o.equals(v)) {
+                        dw.setValueAt("==", row, "对比");
+                    } else {
+                        dw.setValueAt("!= " + v, row, "对比");
+                    }
                 }
             }
-        }
 
 
-        for (Enumeration e = otherCfg.getEnumeration(); e.hasMoreElements(); ) {
-            Object key = e.nextElement();
-            if (checkedKey.contains(key.toString())) continue;
+            for (Enumeration e = otherCfg.getEnumeration(); e.hasMoreElements(); ) {
+                Object key = e.nextElement();
+                if (checkedKey.contains(key.toString())) continue;
 
-            String v = otherCfg.getProperty(key.toString(), "");
-            int row = dw.find("项目", key);
-            if (row < 0) {
-                row = dw.appendRow();
-                dw.setValueAt("+ " + key + " = " + v, row, "对比");
-            } else {
-                Object o = dw.getValueAt(row, "数值");
-                if (o == null || !v.equals(o.toString())) {
-                    dw.setValueAt("!= " + v, row, "对比");
+                String v = otherCfg.getProperty(key.toString(), "");
+                int row = dw.find("项目", key);
+                if (row < 0) {
+                    row = dw.appendRow();
+                    dw.setValueAt("+ " + key + " = " + v, row, "对比");
+                } else {
+                    Object o = dw.getValueAt(row, "数值");
+                    if (o == null || !v.equals(o.toString())) {
+                        dw.setValueAt("!= " + v, row, "对比");
+                    }
                 }
+            }
+        } finally {
+            if (isReadOnly) {
+                dw.setDataWindowReadOnly(isReadOnly);
             }
         }
     }
@@ -249,7 +285,6 @@ public class ConfigUI {
         boolean looked = false;
         if (cfg != null) {//&& dm != null
             cfg.reLoad();
-
             ds.clear();
 
             int r;
@@ -257,11 +292,13 @@ public class ConfigUI {
             LinkedList<Config.item> list = cfg.getIndex();
 
             for (Config.item i : list) {
+                if ("Protect".equals(i.getComment())) continue;
+
                 r = ds.appendRow();
 
                 ds.setValueAt(i.name, r, "项目");
-                ds.setValueAt(i.value, r, "数值");
-                ds.setValueAt(i.comment, r, "备注");
+                ds.setValueAt(i.getValue(), r, "数值");
+                ds.setValueAt(i.getComment(), r, "备注");
             }
             cfgEditor.getDataWindow().repaintDataWindow();
             buttonCfgFile.setEnabled(true);
@@ -298,6 +335,8 @@ public class ConfigUI {
     }
 
     public void onWrite() {
+        if (cfgEditor.getDataWindow().getRowCount() == 0) return;
+
         cfgEditor.getDataWindow().removeEditor();
         if (cfg != null) {
             if (clearBeforeSave) {
@@ -325,7 +364,7 @@ public class ConfigUI {
                 }
             }
             cfg.save();
-            MessageAbstract.getInstance().sendMessage(MessageCode.ConfigChanged, cfg);
+            MessageAbstract.getInstance().sendMessage(MessageCode.ConfigFileChanged, cfg);
         }
     }
 
@@ -455,5 +494,4 @@ public class ConfigUI {
             return c;
         }
     }
-
 }

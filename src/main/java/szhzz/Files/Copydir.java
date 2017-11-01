@@ -15,7 +15,7 @@ import java.util.Vector;
 public class Copydir {
     public static final int NEW_ONLY = 1;
     public static final int ADD_ONLY = 2;
-//    public static final int OVEWRITE = 4;
+    public static final int OVEWRITE = 4;
 
     Vector<String> finishedDir = new Vector<String>();
     String logFile = "./copydir.log";
@@ -76,7 +76,7 @@ public class Copydir {
 //        return (writeModle & OVEWRITE) == OVEWRITE;
 //    }
 
-    void copy(String file1, String file2, int writeModle) throws IOException {
+    public void copy(String file1, String file2, int writeModle) throws IOException {
         String2File("no", "Shutdown.txt", false);
         this.writeModle = writeModle;
         File log = new File(logFile);
