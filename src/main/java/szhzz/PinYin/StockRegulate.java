@@ -33,7 +33,7 @@ public class StockRegulate {
     }
 
     public static String stockMarket(String code) {
-        if (code.startsWith("60") || code.startsWith("1A") || code.startsWith("2040")) {
+        if (code.startsWith("60") || code.startsWith("1A") || code.startsWith("2040")|| code.startsWith("510")) {
             return "SH";
         } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399") || code.startsWith("1318")) {
             return "SZ";

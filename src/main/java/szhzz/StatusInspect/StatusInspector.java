@@ -310,7 +310,7 @@ public class StatusInspector {
                 if (MyDate.getToday().isOpenTime(300)) {
                     if ("集群节点".equals(report.relate)) {
                         sendMail = true;
-                        Utilities.playSound(".\\AlertSound\\alert.wav");
+                        Utilities.playSound("\\resources\\AlertSound\\alert.wav");
                     }
                 }
             } catch (Exception e) {

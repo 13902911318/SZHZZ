@@ -512,7 +512,7 @@ public class Utilities {
 
     public static void main(String[] args) {
         try {
-            playSound("D:\\JNIProject\\JavaProj\\AlertSound\\alert.wav");
+            playSound("\\resources\\AlertSound\\alert.wav");
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

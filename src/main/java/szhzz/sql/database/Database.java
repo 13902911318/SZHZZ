@@ -582,7 +582,7 @@ public class Database {
             return rows;
         } catch (SQLException ex) {
             //lastError = ex;
-            Utilities.playSound("/resources/alert.wav");
+            Utilities.playSound("\\resources\\AlertSound\\alert.wav");
             throw new DBException(ex);
 //            throw new DBException("The query: " + szhzz.sql + "\n"
 //                    + "could not be executed! Probably "
