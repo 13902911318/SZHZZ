@@ -32,7 +32,7 @@ public class ClusterStation extends JDialog {
     private DwPanel stationViewPanel;
     private JCheckBox offLineButtom;
     private JComboBox comboBoxGroup;
-    private JCheckBox proxyCheckBox;
+
     private JLabel text1;
     private DataWindow dw;
     private DataStore ds;
@@ -148,12 +148,12 @@ public class ClusterStation extends JDialog {
             }
         });
 
-        if (Cluster.connectToProxy()) {
-            proxyCheckBox.setEnabled(false);
-            proxyCheckBox.setSelected(false);
-        } else {
-            proxyCheckBox.setSelected(Cluster.connectToProxy());
-        }
+//        if (Cluster.connectToProxy()) {
+//            proxyCheckBox.setEnabled(false);
+//            proxyCheckBox.setSelected(false);
+//        } else {
+//            proxyCheckBox.setSelected(Cluster.connectToProxy());
+//        }
 //        proxyCheckBox.addActionListener(new ActionListener() {
 //            @Override
 ////            public void actionPerformed(ActionEvent e) {
@@ -176,7 +176,7 @@ public class ClusterStation extends JDialog {
         forceTakeover.setVisible(false);
         offLineButtom.setVisible(false);
         comboBoxGroup.setVisible(false);
-        proxyCheckBox.setVisible(false);
+//        proxyCheckBox.setVisible(false);
         text1.setVisible(false);
     }
     void initDw() {
@@ -236,11 +236,17 @@ public class ClusterStation extends JDialog {
         ds.setDefaltValues(col, false);
 //        dw.addCellRenderer(col, numberRenderer);
 
+//        col++;
+//        ds.setColName("代理", col);
+//        ds.setColTypeName("String", col);
+//        ds.setColLength(col, 10);
+//        ds.setDefaltValues(col, "");
+
         col++;
-        ds.setColName("代理", col);
-        ds.setColTypeName("String", col);
-        ds.setColLength(col, 10);
-        ds.setDefaltValues(col, "");
+        ds.setColName("远程关机", col);
+        ds.setColTypeName("Boolean", col);
+        ds.setColLength(col, 5);
+        ds.setDefaltValues(col, false);
 
         col++;
         ds.setColName("错误", col);
@@ -259,6 +265,7 @@ public class ClusterStation extends JDialog {
         } catch (DBException e) {
             logger.error(e);
         }
+        dw.setSortingStatus(3, 1);
         dw.setSortingStatus(2, -1);
 
         loadPref();
@@ -287,8 +294,9 @@ public class ClusterStation extends JDialog {
         ds.setValueAt(BusinessRuse.getInstance().getCloseDate(), row, "收盘日期");
         ds.setValueAt(Cluster.getInstance().getGroup(), row, "分组");
         ds.setValueAt(Cluster.getInstance().isOnTrade(), row, "交易中");
-        ds.setValueAt(Cluster.getTradeProxyHost(), row, "代理");
+//        ds.setValueAt(Cluster.getTradeProxyHost(), row, "代理");
         ds.setValueAt(Cluster.getInstance().isOffLine(), row, "离线");
+        ds.setValueAt(AppManager.getApp().canRemoteShutdown(), row, "远程关机");
         ds.setValueAt(BusinessRuse.getInstance().getErrorCode(), row, "错误");
 
         ds.setValueAt(MyDate.getToday().getDateTime(), row, "最近更新");
@@ -308,9 +316,10 @@ public class ClusterStation extends JDialog {
         ds.setValueAt(ss.closeDate, row, "收盘日期");
         ds.setValueAt(ss.level, row, "级别");
         ds.setValueAt(ss.onTrade, row, "交易中");
-        ds.setValueAt(ss.tradeProxy, row, "代理");
+//        ds.setValueAt(ss.tradeProxy, row, "代理");
         ds.setValueAt(ss.group, row, "分组");
         ds.setValueAt(ss.offline, row, "离线");
+        ds.setValueAt(ss.canShutdown, row, "远程关机");
         ds.setValueAt(ss.errorCode, row, "错误");
         //dumDate.setDateTime(ss.lastUpdate);
 
@@ -337,7 +346,8 @@ public class ClusterStation extends JDialog {
         );
 
         String[] colWidth = appCfg.getProperty("ColWidths", "").split("\t");
-        for (int c = 0; c < colWidth.length; c++) {
+        int cols = Math.min(dw.getColumnCount(),colWidth.length);
+        for (int c = 0; c < cols; c++) {
             dw.setColumnWidth(c, NU.parseLong(colWidth[c], (long) dw.getColumnWidth(c)).intValue());
         }
     }

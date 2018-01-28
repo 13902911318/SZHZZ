@@ -49,7 +49,7 @@ public class Cluster {
     Config clusterCfg = null;
     static String macID = null;
     boolean definedGate = false;
-    static String proxy = "";
+//    static String proxy = "";
 
     static AppManager App = AppManager.getApp();
     boolean forceTakeover = false;
@@ -78,14 +78,14 @@ public class Cluster {
         Cluster.onlyOne = onlyOne;
     }
 
-    public static String getProxy() {
-        return proxy;
-    }
+//    public static String getProxy() {
+//        return proxy;
+//    }
 
-    public static void setProxy(String proxy) {
-        if (proxy == null) proxy = "";
-        Cluster.proxy = proxy;
-    }
+//    public static void setProxy(String proxy) {
+//        if (proxy == null) proxy = "";
+//        Cluster.proxy = proxy;
+//    }
 
     public void broadcast(NettyExchangeData msg) {
 
@@ -153,10 +153,10 @@ public class Cluster {
         return ClusterClients.getInstance().isConnect(hostName);
     }
 
-    public boolean isConnectProxy() {
-        if ("".equals(getTradeProxyHost())) return false;
-        return ClusterClients.getInstance().isConnect(getTradeProxyHost());
-    }
+//    public boolean isConnectProxy() {
+//        if ("".equals(getTradeProxyHost())) return false;
+//        return ClusterClients.getInstance().isConnect(getTradeProxyHost());
+//    }
 
     public static Config getConfig() {
         return SharedCfgProvider.getInstance("net").getCfg("Group");
@@ -204,7 +204,7 @@ public class Cluster {
                         clusterServer.setPort(port);
                         clusterServer.setLocalLevel(localLevel);
                         clusterServer.startServer();
-                        setProxy(child.getProperty("Proxy", ""));
+//                        setProxy(child.getProperty("Proxy", ""));
                     }
                 } else if (child.getIntVal("Level", 0) > 0) {
                     ClusterClients.getInstance().registerClient(computer,
@@ -350,15 +350,15 @@ public class Cluster {
     }
 
 
-    public static String getTradeProxyHost() {
-        return getProxy();
-    }
+//    public static String getTradeProxyHost() {
+//        return getProxy();
+//    }
 
-    public static boolean connectToProxy() {
+//    public static boolean connectToProxy() {
 //        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
 //        return !isProxy() && cfg.getBooleanVal("使用交易代理", false);
-        return getProxy().length() > 0;
-    }
+//        return getProxy().length() > 0;
+//    }
 
 
     class ConnectionListener extends CircleTimer {

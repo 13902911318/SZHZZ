@@ -5,6 +5,8 @@ package szhzz.Utils;
  */
 public class NU {
 
+
+
     public static boolean isDouble(Object o) {
         return (o != null && o.toString().contains("."));
     }

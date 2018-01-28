@@ -227,8 +227,17 @@ public abstract class Config {
     }
 
     public void clear() {
-        datas.clear();
-        index.clear();
+        if(hideProtect){
+            Vector<String> ks = getKeys();
+            for(String k : ks){
+                if(!isProtected(k)){
+                    removeProperty(k);
+                }
+            }
+        }else{
+            datas.clear();
+            index.clear();
+        }
     }
 
     private String encodeLine(String lines) {
@@ -397,11 +406,11 @@ public abstract class Config {
 
     public Vector<String> getKeys() {
         Vector<String> e = new Vector();
-        for (String k : datas.keySet()) {
+        for (int i = 0; i < index.size(); i++){
+            String k = index.get(i).name;
             if (hideProtect && isProtected(k)) {
                 continue;
             }
-
             if (getProperty(k, null) != null) {
                 e.add(k);
             }
@@ -495,8 +504,18 @@ public abstract class Config {
         sb.append("//# LastUpdate ").append(MiscDate.now()).append("\n");
         for (item e : index) {
             if (!e.toString().startsWith("//# LastUpdate")) {
-                sb.append(e.toString());
-                sb.append("\n");
+                if(!e.isProtected()) {
+                    sb.append(e.toString());
+                    sb.append("\n");
+                }
+            }
+        }
+        for (item e : index) {
+            if (!e.toString().startsWith("//# LastUpdate")) {
+                if(e.isProtected()) {
+                    sb.append(e.toString());
+                    sb.append("\n");
+                }
             }
         }
         if (this.getBooleanVal("锁定", false)) {

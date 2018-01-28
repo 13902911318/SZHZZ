@@ -9,6 +9,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
@@ -327,12 +328,16 @@ public class Utilities {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    Clip clip = AudioSystem.getClip();
-                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File(url));   //Trade.class.getResourceAsStream("/path/to/sounds/" + url)
-                    clip.open(inputStream);
-                    clip.start();
+                    File f = new File(url);
+                    if(f.exists()) {
+                        Clip clip = AudioSystem.getClip();
+                        AudioInputStream inputStream = AudioSystem.getAudioInputStream(f);   //Trade.class.getResourceAsStream("/path/to/sounds/" + url)
+                        clip.open(inputStream);
+                        clip.start();
+                    }
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                    Toolkit.getDefaultToolkit().beep();
                 }
             }
         }).start();

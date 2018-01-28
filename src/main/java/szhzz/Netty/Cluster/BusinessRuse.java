@@ -169,10 +169,10 @@ public class BusinessRuse implements DataConsumer {
 //        broadcast(ShutdownWrap.getShutdownWrap(statu));
 //    }
 
-    public void broadcastAccountQuery(NettyExchangeData data) {
-        if (Cluster.connectToProxy()) return;
-        broadcast(data);
-    }
+//    public void broadcastAccountQuery(NettyExchangeData data) {
+//        if (Cluster.connectToProxy()) return;
+//        broadcast(data);
+//    }
 
     @Override
     public long in(Object obj) {

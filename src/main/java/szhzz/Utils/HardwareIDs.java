@@ -8,6 +8,8 @@ package szhzz.Utils;
  * To change this template use File | Settings | File Templates.
  */
 
+import szhzz.App.AppManager;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.util.Iterator;
@@ -27,8 +29,8 @@ public class HardwareIDs {
 //        System.out.println("Mac ID=" + getMACAddress("Endpoint VPN Client"));
 //
 //        getJvmProperties();
-//        rvnTest();
-        System.out.println(getEnv("QuantHome"));
+        rvnTest();
+        AppManager.debugLogit(System.getProperty("user.home"));
     }
 
     public static String getIP() {

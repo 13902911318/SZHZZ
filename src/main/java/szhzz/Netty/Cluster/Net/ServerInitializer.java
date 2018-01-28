@@ -5,6 +5,9 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
@@ -31,6 +34,10 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
         pipeline.addLast("decoder", new StringDecoder(Charset.forName("UTF-8")));
         pipeline.addLast("decoder2", new ExchangeDataDecoder());
+
+//        pipeline.addLast("encode", new ObjectEncoder());
+//        pipeline.addLast("decode", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+//        pipeline.addLast("handler", new ClientHandler());
 
         pipeline.addLast("encoder", new StringEncoder(Charset.forName("UTF-8")));
         pipeline.addLast("handler", new ServerHandler());

@@ -3,6 +3,8 @@ package szhzz.Config;
 
 import szhzz.Utils.NU;
 
+import java.math.BigDecimal;
+
 /**
  * Created by Administrator on 2015/5/21.
  */
@@ -11,6 +13,8 @@ public class LoopFunctionExp {
     String[] args = null;
     private String express = "";
     ArgumentLoop argumentLoop = null;
+    private Double relay = null;
+    private int presize = 6;
 
     public LoopFunctionExp(String exp) {
         if (exp != null) {
@@ -77,6 +81,15 @@ public class LoopFunctionExp {
         }
     }
 
+    public void setRelay(Double relay) {
+        this.relay = presized(relay);
+    }
+
+    public void setPresize(int presize) {
+        this.presize = presize;
+    }
+
+
     class ArgumentLoop {
         ArgumentLoop child = null;
 
@@ -108,9 +121,9 @@ public class LoopFunctionExp {
 
 
             if (!isConstant() && !isArray) {
-                firstP = NU.parseDouble(params[0], null);
-                lastP = NU.parseDouble(params[1], null);
-                step = NU.parseDouble(params[2], null);
+                firstP = presized(NU.parseDouble(params[0], null));
+                lastP = presized(NU.parseDouble(params[1], null));
+                step = presized(NU.parseDouble(params[2], null));
                 if (isNumberRanger()) {
 //                        currentNumber = firstP;
 //                        if (level == 0) {
@@ -144,10 +157,20 @@ public class LoopFunctionExp {
             if (isNumberRanger()) {
                 if (currentNumber == null) {
                     currentNumber = firstP;
+                    if (relay != null) {//可中继
+                        if (currentNumber <= relay) {
+                            currentNumber = presized(relay + step);
+
+                        }
+                    }
                 } else {
-                    currentNumber += step;
+                    if(currentNumber >= lastP){
+                        currentNumber += 2*step;
+                    }else{
+                        currentNumber = presized(currentNumber + step);
+                    }
                 }
-                if (currentNumber > lastP) {
+                if ((currentNumber - lastP) >= step) {//double比较的精度的原因
                     if (!hasChild()) return false;
 
                     if (child.nextLoop()) {
@@ -201,7 +224,7 @@ public class LoopFunctionExp {
 
         private void setCurrentParam_(String arg) {
             if (isNumberRanger()) {
-                currentNumber = NU.parseDouble(arg, currentNumber);
+                currentNumber = presized(NU.parseDouble(arg, currentNumber));
             } else if (isArray) {
                 for (int i = 0; i < params.length; i++) {
                     if (arg.equals(params[i])) {
@@ -220,6 +243,9 @@ public class LoopFunctionExp {
         }
     }
 
+    private double presized(double val){
+        return BigDecimal.valueOf(val).setScale(presize, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
 
     public static void main(String[] args) {
         LoopFunctionExp f = new LoopFunctionExp("AMTUN(1:20:1 , -9:9:1 , A;B;C , avg;opt)");

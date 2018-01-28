@@ -89,7 +89,7 @@ public class AppManager implements DataConsumer {
     private static Vector<ClareBuffer> beClareBuffers = new Vector<ClareBuffer>();
 
     //    private static Shutdown dialog = null;
-    private boolean debug = false;
+    private static boolean debug = false;
 
     private static Mailer mailer = null;
     private MailMsg mailMsg = null;
@@ -99,7 +99,7 @@ public class AppManager implements DataConsumer {
     private static String currentDisk = null;
     private static Class appClass = null;
     private static Boolean autoShutdown = false;
-
+    private static String debugFile = null;
     protected DBProperties targetDbProp = null;
 
     protected AppManager() {
@@ -318,21 +318,24 @@ public class AppManager implements DataConsumer {
 
 
     public static void debugLogit(String msg) {
+        if(!debug) return;
+        if(debugFile == null){
+            String debugDir = getCurrentFolder() + "\\debug" ;
+            new File(debugDir).mkdirs();
+            debugFile = debugDir + "\\Debug_"+ MyDate.getToday().getDate() + ".txt";
+        }
         try {
-            Utilities.String2File(msg, "g:/debug.txt", true);
+            Utilities.String2File(msg + "\r\n", debugFile, true );
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error(e);
         }
     }
 
     public static void debugLogit(Exception er) {
-        try {
-            StackTraceElement[] msgs = er.getStackTrace();
-            for (StackTraceElement st : msgs) {
-                Utilities.String2File(st.toString(), "g:/debug.txt", true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        if(!debug) return;
+        StackTraceElement[] msgs = er.getStackTrace();
+        for (StackTraceElement st : msgs) {
+            debugLogit(st.toString());
         }
     }
 

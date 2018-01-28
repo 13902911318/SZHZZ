@@ -82,7 +82,7 @@ public class StationPropertyWrap {
         eData.addData((AppManager.getApp().isDebug() ? 1 : 0));         // Col = 5
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
-        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
+//        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
 
         return eData;
