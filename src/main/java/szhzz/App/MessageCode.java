@@ -43,8 +43,8 @@ public enum MessageCode {
     OpenStockTradeEventView,
     Net_QueryOrderStatus,
     OnTradeStatusChanged,
-    TDF_MayDisconnected,
-    TDF_Disconnected,
+    MarketDataEvent,
+    TDF_Disconnected,  //depreciate
     TradeProxyConnect,
     ////////////////////// for Quantitative Analyses ////////////////////////////////////
     AutoTradeEvent,
@@ -89,5 +89,4 @@ public enum MessageCode {
     CloseOperation,
     PublicEvent;
     ;
-
 }

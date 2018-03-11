@@ -1235,8 +1235,13 @@ public class DataStore {
             names.append("( ");
             vals.append(" VALUES ( ");
             int count = 0;
+            boolean updateColDefined = updateCols.size() > 0;
             for (int i = 0; i < getColumnCount(); i++) {
-                if (getObject(i) != null && updateCols.contains(i)) {
+                if(updateColDefined && !updateCols.contains(i)){
+                    continue;
+                }
+
+                if (getObject(i) != null) {
                     if (count > 0) {
                         vals.append(", ");
                         names.append(", ");

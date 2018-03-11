@@ -209,6 +209,15 @@ class dateValidater extends DataValidater {
                 return false;
             }
             return true;
+        }else if (value instanceof String) {
+            String[] element = value.toString().split("-|/");
+            if(element.length <3) return false;
+            try {
+                Date t = new Date(Integer.parseInt(element[0]),Integer.parseInt(element[1]),Integer.parseInt(element[2]));
+                return true;
+            }catch (Exception e){
+
+            }
         }
         return false;
     }

@@ -36,12 +36,13 @@ public class NettyClient {
     private int hostIndex = 0;
     protected int port;
     private Channel channel = null;
-    //    private EventLoopGroup group = null;
+    private EventLoopGroup group = null;
     private ClientInitializer clientInitializer = null;
     private boolean connected = false;
     private boolean autoReconnect = false;
     protected boolean isNio = true;
     private int retry = 0;
+    private int connectionTimeout = 10;
 
     public static void main(String[] args) {
         App.setLog4J();
@@ -119,7 +120,7 @@ public class NettyClient {
         if (clientInitializer == null) {
             clientInitializer = new ClientInitializer();
         }
-        EventLoopGroup group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup();
         try {
 
             Bootstrap bootstrap = new Bootstrap();
@@ -127,6 +128,7 @@ public class NettyClient {
             bootstrap.channel(NioSocketChannel.class);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, true); // (4)
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
+            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout);
             bootstrap.handler(clientInitializer);
 
 
@@ -143,6 +145,7 @@ public class NettyClient {
             logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
         } finally {
             group.shutdownGracefully();
+            group = null;
             disConnected();
         }
     }
@@ -151,7 +154,7 @@ public class NettyClient {
         if (clientInitializer == null) {
             clientInitializer = new ClientInitializer();
         }
-        EventLoopGroup group = new OioEventLoopGroup();
+        group = new OioEventLoopGroup();
         try {
 
             Bootstrap bootstrap = new Bootstrap();
@@ -159,6 +162,7 @@ public class NettyClient {
             bootstrap.channel(OioSocketChannel.class);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, true); // (4)
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
+            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout);
             bootstrap.handler(clientInitializer);
 
 
@@ -174,6 +178,7 @@ public class NettyClient {
             logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
         } finally {
             group.shutdownGracefully();
+            group = null;
             disConnected();
         }
     }
@@ -193,6 +198,12 @@ public class NettyClient {
     public void sayBye() {
         if (channel != null && channel.isActive()) {
             channel.writeAndFlush("bye\r\n");
+        }
+    }
+
+    public void flagSignal(String semaphore) {
+        if (channel != null && channel.isActive()) {
+            channel.writeAndFlush(semaphore);
         }
     }
 
@@ -223,7 +234,7 @@ public class NettyClient {
 
     public void start() {
         autoReconnect = true;
-        ConnectionListener.setCircleTime(10 * 1000);
+        ConnectionListener.setCircleTime(100);
     }
 
     CircleTimer ConnectionListener = new CircleTimer() {
@@ -245,10 +256,10 @@ public class NettyClient {
         autoReconnect = false;
         ConnectionListener.stopTimer();
 
-        sayBye();
-        connected = false;
-//        if (group != null) group.shutdownGracefully();
+        sayBye(); //不能保证远端服务器会自动断开
+        if (group != null) group.shutdownGracefully();
         channel = null;
+        connected = false;
     }
 
     BeQuit quit = new BeQuit() {
@@ -258,4 +269,8 @@ public class NettyClient {
             return false;
         }
     };
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
 }

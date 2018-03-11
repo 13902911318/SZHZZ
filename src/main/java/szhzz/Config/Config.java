@@ -618,8 +618,10 @@ public abstract class Config {
                 if (trim.length() == 0) continue;
                 item e = new item(tk);
                 if (e.name != null && !"".equals(e.name)) {
+                    if(!datas.containsKey(e.name)){//避免重复Key值
+                        index.add(e);
+                    }
                     datas.put(e.name, e);
-                    index.add(e);
                 }
             }
         } catch (IOException e) {

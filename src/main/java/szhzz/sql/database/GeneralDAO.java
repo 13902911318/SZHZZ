@@ -1,6 +1,9 @@
 package szhzz.sql.database;
 
 
+import com.sun.glass.ui.Clipboard;
+import com.sun.glass.ui.ClipboardAssistance;
+import szhzz.Files.TextTransfer;
 import szhzz.Utils.Utilities;
 
 import java.sql.*;
@@ -71,7 +74,8 @@ public class GeneralDAO implements DaoInterface {
     private boolean updateUseScript = true;
     private int updateRows = 0;
     private DataBuffer dataBuffer;
-
+    private boolean copyScriptToClipbaod = true;
+    StringBuffer sqlString = null;
     GeneralDAO() {
     }
 
@@ -551,6 +555,7 @@ public class GeneralDAO implements DaoInterface {
         if (readOnly) return 0;
         if (null == updateDs) return 0;
         int uprow = 0;
+        sqlString = new StringBuffer();
 
         // flash all any posibel unsaved dblog
         // addFrom10JQKA a new log section
@@ -600,8 +605,21 @@ public class GeneralDAO implements DaoInterface {
 //                    }
                 }
                 uprow += db.executeUpdate(updateSQL);
+                if(copyScriptToClipbaod){
+                    sqlString.append(updateSQL).append(";").append("\n");
+                }
                 triggerUpdateListeners(updateDs, row, true);
             }
+        }
+        if(sqlString.length() > 0){
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    new TextTransfer().setClipboardContents(sqlString.toString());
+//                }
+//            }).start();
+            new TextTransfer().setClipboardContents(sqlString.toString());
+            sqlString = null;
         }
         return uprow;
     }
@@ -637,5 +655,9 @@ public class GeneralDAO implements DaoInterface {
 
     public void setLog2DB(boolean log2DB) {
         this.logDBQuery = log2DB;
+    }
+
+    public void setCopyScriptToClipbaod(boolean copyScriptToClipbaod) {
+        this.copyScriptToClipbaod = copyScriptToClipbaod;
     }
 }

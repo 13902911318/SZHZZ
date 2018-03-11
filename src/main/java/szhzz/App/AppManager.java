@@ -231,6 +231,7 @@ public class AppManager implements DataConsumer {
         });
     }
 
+
     private static void setIndeterminate(boolean b) {
         if (Busy == null) return;
         Busy.setVisible(b);
@@ -1320,4 +1321,50 @@ public class AppManager implements DataConsumer {
             }
         }
     }
+
+    public static boolean taskkill(String processName, String title) {
+        BufferedReader bufferedReader = null;
+        Process proc = null;
+
+        try {
+            if (processName != null) {
+                proc = Runtime.getRuntime().exec("tasklist /FI \"IMAGENAME eq " + processName + "\"");
+            } else if (title != null) {
+                title = title.replace("*", "");
+                proc = Runtime.getRuntime().exec("tasklist /FI \"WINDOWTITLE eq " + title + "*\"");
+            } else {
+                return false;
+            }
+
+            bufferedReader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = null;
+            int listCount = 0;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (processName != null && line.contains(processName)) //判断是否存在
+                {
+                    Runtime.getRuntime().exec( "Taskkill /IM "+processName);//关闭的是对应程序的线程。
+                    return true;
+                } else if (title != null && line.contains("=====")) //判断是否存在
+                {
+                    listCount = 1;
+                    return true;
+                } else if (line.contains("没有运行的任务匹配指定标准")) {
+                    return false;
+                }
+            }
+            return false;
+        } catch (Exception ex) {
+            logger.equals(ex);
+            return false;
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (Exception ex) {
+                }
+            }
+        }
+    }
+
+
 }

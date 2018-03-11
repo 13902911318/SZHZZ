@@ -34,7 +34,7 @@ public class NettyExchangeData extends ExchangeData {
     public static final int colTimeStamp = 6;  //
     public static final int colHostName = 7;  //
     public static final int colNettyType = 8;  //
-
+    public static final int colSubType = 9;  //
     public static final int colLanguage = 10;  //
     public static final int colSerialNo = 11;  //
 //    private static final int colExt = 11;  //
@@ -102,6 +102,10 @@ public class NettyExchangeData extends ExchangeData {
 
     public String getIpAddress() {
         return (String) getValue(0, colIpAddress);
+    }
+
+    public String getSubType(){
+        return (String) getValue(0, colSubType);
     }
 
     public void setIpAddress(String address) {
@@ -185,7 +189,7 @@ public class NettyExchangeData extends ExchangeData {
     }
 
     public long getSerialNo() {
-        return NU.parseLong(getValue(0, colSerialNo), 0L);
+        return NU.parseLong(getValue(0, colSerialNo), -1L);
     }
 
 

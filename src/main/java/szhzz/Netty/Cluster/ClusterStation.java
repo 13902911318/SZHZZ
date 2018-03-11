@@ -398,7 +398,7 @@ public class ClusterStation extends JDialog {
                 if (MyDate.getToday().isOpenDay() &&
                         (MyDate.IS_AFTER_TIME(15, 0, 0) || MyDate.IS_BEFORE_TIME(9, 15, 0))) {
                     String s = dw.getValueAt(row, "收盘日期").toString();
-                    if (!s.equals("") && MyDate.getLastOpenDay().compareDays(s) != 0) {
+                    if (s != null && !s.isEmpty() && MyDate.getLastOpenDay().compareDays(s) != 0) {
                         marketCloseError = true;
                     }
                 }

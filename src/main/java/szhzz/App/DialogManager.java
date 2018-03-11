@@ -77,9 +77,15 @@ public class DialogManager {
 
             statusView.pack();
             statusView.setTitle(frame.getTitle());
-            statusView.loadPref();
+
         }
         statusView.setVisible(true);
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+
+        }
+        statusView.loadPref();
     }
 
     public StatusView getStatuesView() {

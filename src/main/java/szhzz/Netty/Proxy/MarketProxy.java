@@ -19,7 +19,7 @@ import java.util.HashMap;
  * 和数个 client
  */
 public class MarketProxy implements DataConsumer {
-    public static final int tcpPort = 7523;
+    public int tcpPort = 7523;
 
     private final static HashMap<Long, NettyRequystor> requests = new HashMap<>();
     private static DawLogger logger = DawLogger.getLogger(MarketProxy.class);
@@ -109,8 +109,8 @@ public class MarketProxy implements DataConsumer {
 //        ProxyTcpClient newClient = new ProxyTcpClient("localhost", tcpPort);
 //        newClient.start(this);
 //    }
-
-    public void connectToServer(String host) {
+    public void connectToServer(String host, int port, int connectionTimeout) {
+        tcpPort = port;
         if (isServerStarted()) {
             App.logEvent("Local Proxy Server started, can not connect to other Proxy server");
             return;
@@ -122,8 +122,17 @@ public class MarketProxy implements DataConsumer {
         } else {
             proxyClient = new ProxyTcpClient(host.split(";"), tcpPort);
         }
-
+        proxyClient.setConnectionTimeout(connectionTimeout);
         proxyClient.start(this);
+    }
+
+    public void connectToServer(String host, int port) {
+        connectToServer(host, port, 10);
+    }
+
+
+    public void connectToServer(String host) {
+        connectToServer(host, tcpPort) ;
     }
 
 //    public void clientConnect(ProxyTcpClient client) {
@@ -132,6 +141,12 @@ public class MarketProxy implements DataConsumer {
 //        }
 //        proxyClient = client;
 //    }
+
+    public void flagSignal(String semaphore){
+        if(proxyClient != null){
+            proxyClient.flagSignal(semaphore);
+        }
+    }
 
     public String getClientHost() {
         if (proxyClient != null) {

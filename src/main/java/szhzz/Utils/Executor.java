@@ -96,6 +96,21 @@ public class Executor {
         }
     }
 
+    public boolean taskkill(String taskName){
+        boolean isRunning = isRunning(taskName, null);
+        boolean isKilled = !isRunning;
+        if (isRunning) {
+            String[] p = new String[]{"Taskkill /IM " + taskName};
+            try {
+                execute(p, taskName); //, null,
+                isKilled = true;
+            } catch (Exception e1) {
+                logger.error(e1);
+            }
+        }
+        return isKilled;
+    }
+
     public void execute(String[] commands) throws IOException, InterruptedException {
         execute(commands, true, false, null, false);
     }
@@ -261,14 +276,14 @@ public class Executor {
                 }
 
 
-                if (firstLine.toLowerCase().contains(".exe") || firstLine.toLowerCase().contains(".com")) {
+                if(firstLine.toLowerCase().endsWith(".lnk") || firstLine.endsWith("快捷方式")){
+                    //"cmd /c start \"\" \"D:/JNIProject/VC2010/MarketAp/Debug/MarketAp.exe - 快捷方式\"";
+                    proc = Runtime.getRuntime().exec("cmd /c start \"\" \"" + firstLine + "\"");//避开win10的权限限制
+                }else if (!firstLine.toLowerCase().startsWith("task") && firstLine.toLowerCase().contains(".exe") || firstLine.toLowerCase().contains(".com")) {
 //                    if(privileges){
 //                    proc = Runtime.getRuntime().exec("runas /profile /user:Administrator "+command, null, workFolder);
 
                     proc = Runtime.getRuntime().exec(command, null, workFolder);
-                } else if(firstLine.toLowerCase().endsWith(".lnk") || firstLine.endsWith("快捷方式")){
-                    //"cmd /c start \"\" \"D:/JNIProject/VC2010/MarketAp/Debug/MarketAp.exe - 快捷方式\"";
-                    proc = Runtime.getRuntime().exec("cmd /c start \"\" \"" + firstLine + "\"");//避开win10的权限限制
                 } else {
                     proc = Runtime.getRuntime().exec("cmd /c " + firstLine, null, workFolder);
                 }

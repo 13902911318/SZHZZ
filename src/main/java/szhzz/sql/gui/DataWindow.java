@@ -102,6 +102,7 @@ public class DataWindow extends JTable {
     private ArrayList<ActionListener> userMenuItem = new ArrayList<ActionListener>();
     private ArrayList<String> userMenuTitle = new ArrayList<String>();
     private IdleTimer idleTimer = null;
+    private boolean copyScriptToClipbaod = false;
 
     public DataWindow() {
         super();
@@ -467,8 +468,8 @@ public class DataWindow extends JTable {
     }
 
     public void setUpdateKey(String col) {
-        UpdateKeys.add(col);
-        if (null != ds) ds.setUpdateKey(col);
+        UpdateKeys.add(col.toUpperCase());
+        if (null != ds) ds.setUpdateKey(col.toUpperCase());
     }
 
     private void setUpdateKey() {
@@ -611,6 +612,7 @@ public class DataWindow extends JTable {
         int updateRows;
         //if (isDataWindowReadOnly()) return 0;
 
+        dao.setCopyScriptToClipbaod(copyScriptToClipbaod);
         updateRows = dao.applyUpdates();
         if (updateRows > 0) {
             //loger.getLoger().messgeBox("Update Success!", "Update " + updateRows + " rows.");
@@ -1155,6 +1157,10 @@ public class DataWindow extends JTable {
     public void addUdfMenu(String title, ActionListener act) {
         userMenuTitle.add(title);
         userMenuItem.add(act);
+    }
+
+    public void setCopyScriptToClipbaod(boolean copyScriptToClipbaod) {
+        this.copyScriptToClipbaod = copyScriptToClipbaod;
     }
 
     private class rowsDebug extends DWRowChanged {

@@ -81,7 +81,7 @@
             <artifactId>javax-swingx</artifactId>
             <version>1.6.0</version>
             <scope>system</scope>
-            <systemPath>D:/Inis/LibExt/SwingX/swingx-1.6.1.jar</systemPath>
+            <systemPath>D:/.m2/repository/SwingX/swingx-1.6.1.jar</systemPath>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->

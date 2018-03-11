@@ -90,6 +90,16 @@ public class StatusInspector {
         return true;
     }
 
+    public boolean checkState(String itemName) {
+        boolean status = false;
+        int row = ds.find("名称", itemName);
+        if(row >= 0){
+            Object o = ds.getValueAt(row, "status", "true");
+            status = Boolean.valueOf(o.toString());
+        }
+        return status;
+    }
+
     private void loadDefault() {
         Vector<String> keys = cfg.getKeys();
         for (String key : keys) {
@@ -251,13 +261,16 @@ public class StatusInspector {
 //        String name = vals[0];
         Object startTime = null;
         Object endTime = null;
-
+        String comment = "";
         int row = ds.find("名称", report.name);
+//        if("招商证券.慧网宁灼1号".equals(report.name)){
+//            int a = 0;
+//        }
         if (row < 0) {
             row = ds.appendRow();
             ds.setValueAt_s(report.name, row, "名称");
 
-            String comment = cfg.getComment(report.name);
+            comment = cfg.getComment(report.name);
             needed = ("必须".equals(comment));
 
             String[] times = cfg.getProperty(report.name, "").split("-");
@@ -283,7 +296,7 @@ public class StatusInspector {
 
         boolean ok = true;
 
-        if (report.status && report.forceAlarm) {
+        if (!report.status && report.forceAlarm) {
             needed = true;
             ok = false;
         } else {
@@ -443,5 +456,6 @@ public class StatusInspector {
             onRetrieve();
         }
     }
+
 
 }

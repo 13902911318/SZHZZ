@@ -17,6 +17,14 @@ import java.security.AccessController;
 public class AppLocker {
     private static RandomAccessFile out = null;
 
+    public static boolean lock(String title) {
+        boolean locked = !Executor.isRunning(null, title);
+        if (!locked) {
+            Shutdown();
+        }
+        return locked;
+    }
+
     public static boolean lock() {
         boolean locked = false;
 

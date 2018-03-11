@@ -193,9 +193,12 @@ public class AppEventExchange {
     }
 
     public String getEvent(String name) {
-        return cfg.getProperty(name);
+        return cfg.getProperty(name, "");
     }
 
+    public String getEvent(String name, String def) {
+        return cfg.getProperty(name, def);
+    }
 
     public Config getEventCfg() {
         cfg.reLoad();
