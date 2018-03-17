@@ -178,7 +178,7 @@ public class Cluster {
         if (clusterCfg != null && clusterServer == null) {
             this.clusterCfg = clusterCfg;
 
-            Config cfg_ = CfgProvider.getInstance("系统策略").getCfg("System");
+            Config cfg_ = CfgProvider.getInstance("Schedule").getCfg("System");
             //移除
             autoStartTrade = cfg_.getBooleanVal("自动接管交易", autoStartTrade);
             forceTakeover = cfg_.getBooleanVal("强制接管交易", false);
@@ -690,7 +690,7 @@ public class Cluster {
 
         if (cgfIsDirty) {
             App.logit("cgfIsDirty");
-            Config systemCfg = CfgProvider.getInstance("系统策略").getCfg("System");
+            Config systemCfg = CfgProvider.getInstance("Schedule").getCfg("System");
             systemCfg.setReloadProtect(false);
             systemCfg.reLoad();
             msg.sendMessage(MessageCode.ConfigChanged, systemCfg);

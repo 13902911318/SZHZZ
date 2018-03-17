@@ -62,7 +62,7 @@ public class ClusterStation extends JDialog {
 //        broadcast.setEnabled(true);
 //        stationViewPanel.getToolBar().add(broadcast);
 
-        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
+        Config cfg = CfgProvider.getInstance("Schedule").getCfg("System");
 
         comboBoxGroup.setSelectedIndex(Cluster.getInstance().getGroup());
 
@@ -88,7 +88,7 @@ public class ClusterStation extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Cluster.getInstance().setAutoStartTrade(startAllCheckBox.isSelected());
-                Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
+                Config cfg = CfgProvider.getInstance("Schedule").getCfg("System");
                 cfg.setProperty("自动接管交易", startAllCheckBox.isSelected());
             }
         });
@@ -108,7 +108,7 @@ public class ClusterStation extends JDialog {
 
         buttonSave.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
+                Config cfg = CfgProvider.getInstance("Schedule").getCfg("System");
                 cfg.setProperty("自动接管交易", startAllCheckBox.isSelected());
                 cfg.setProperty("强制接管交易", forceTakeover.isSelected());
                 cfg.setProperty("离线", Cluster.getInstance().isOffLine());

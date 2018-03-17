@@ -78,7 +78,7 @@ public class ProxyServer {
     public void startServer() throws InterruptedException {
         serverClosed = false;
 
-        Config systemCfg = CfgProvider.getInstance("系统策略").getCfg("System");
+        Config systemCfg = CfgProvider.getInstance("Schedule").getCfg("System");
         addIpToName();
 
         isNio = !(systemCfg != null && systemCfg.propertyEquals("ProxyType", "Oio"));

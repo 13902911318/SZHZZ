@@ -43,6 +43,7 @@ public class NettyClient {
     protected boolean isNio = true;
     private int retry = 0;
     private int connectionTimeout = 10;
+    private ClientInspector  inspector = null;
 
     public static void main(String[] args) {
         App.setLog4J();
@@ -85,7 +86,10 @@ public class NettyClient {
 
     public void connected() {
         connected = true;
-    }
+        if(inspector!=null){
+            inspector.connected(channel);
+        }
+   }
 
     public void disConnected() {
         if (host.size() > 1) {
@@ -97,6 +101,9 @@ public class NettyClient {
             }
         }
         connected = false;
+        if(inspector!=null){
+            inspector.disConnected();
+        }
         if (autoReconnect) {
             start();
         }
@@ -170,7 +177,6 @@ public class NettyClient {
             ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();
-
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             logger.error("Error on connect to " + host + " " + port, e);
@@ -272,5 +278,9 @@ public class NettyClient {
 
     public void setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
+    }
+
+    public void setInspector(ClientInspector inspector) {
+        this.inspector = inspector;
     }
 }

@@ -4,6 +4,7 @@ import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
+import szhzz.Netty.Cluster.ClientInspector;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.NettyRequystor;
 import szhzz.Netty.Cluster.UDP.UdpServer;
@@ -30,6 +31,7 @@ public class MarketProxy implements DataConsumer {
     private ProxyTcpClient proxyClient = null;
     private ObjBufferedIO dataBuffer = null;
     private UdpServer udpServer = null;
+    private ClientInspector clientInspector = null;
 
     private MarketProxy() {
     }
@@ -100,7 +102,7 @@ public class MarketProxy implements DataConsumer {
     }
 
 
-//    public void connectToServer() {
+    //    public void connectToServer() {
 //        if (isServerStarted()) {
 //            szhzz.App.logEvent("Local Proxy Server started, can not connect to other Proxy server");
 //            return;
@@ -122,6 +124,7 @@ public class MarketProxy implements DataConsumer {
         } else {
             proxyClient = new ProxyTcpClient(host.split(";"), tcpPort);
         }
+        proxyClient.setInspector(clientInspector);
         proxyClient.setConnectionTimeout(connectionTimeout);
         proxyClient.start(this);
     }
@@ -132,7 +135,7 @@ public class MarketProxy implements DataConsumer {
 
 
     public void connectToServer(String host) {
-        connectToServer(host, tcpPort) ;
+        connectToServer(host, tcpPort);
     }
 
 //    public void clientConnect(ProxyTcpClient client) {
@@ -142,8 +145,8 @@ public class MarketProxy implements DataConsumer {
 //        proxyClient = client;
 //    }
 
-    public void flagSignal(String semaphore){
-        if(proxyClient != null){
+    public void flagSignal(String semaphore) {
+        if (proxyClient != null) {
             proxyClient.flagSignal(semaphore);
         }
     }
@@ -236,6 +239,13 @@ public class MarketProxy implements DataConsumer {
             } catch (InterruptedException e) {
                 logger.error(e);
             }
+        }
+    }
+
+    public void setClientInspector(ClientInspector clientInspector) {
+        this.clientInspector = clientInspector;
+        if (proxyClient != null) {
+            proxyClient.setInspector(clientInspector);
         }
     }
 }
