@@ -19,6 +19,8 @@ public class WakeOnLan {
 
         String ipStr = args[0];
         String macStr = args[1];
+//        String ipStr = "192.168.0.202";
+//        String macStr = "94:C6:91:1B:F9:54";
         wakeup(ipStr, macStr);
     }
 
@@ -42,7 +44,7 @@ public class WakeOnLan {
             System.out.println("Wake-on-LAN packet sent.");
         } catch (Exception e) {
             System.out.println("Failed to send Wake-on-LAN packet: + e");
-            System.exit(1);
+            //System.exit(1);
         }
 
     }

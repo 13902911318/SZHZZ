@@ -69,7 +69,7 @@ public class StatusInspector {
     public boolean checkRelate(String relate, boolean needed) {
 
         for (int row = 0; row < ds.getRowCount(); row++) {
-            String r = (String) ds.getValueAt(row, "关联", "");
+            String r = (String) ds.getValueAt(row, "关联", "");// "集群节点"
             if (relate.matches(r)) {
                 Object o = ds.getValueAt(row, "status", "true");
                 boolean status = Boolean.valueOf(o.toString());

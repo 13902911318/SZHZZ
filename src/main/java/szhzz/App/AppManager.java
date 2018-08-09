@@ -10,6 +10,7 @@ import szhzz.Calendar.MyDate;
 import szhzz.Config.*;
 import szhzz.Timer.AlarmClock;
 import szhzz.Timer.TimerEvent;
+import szhzz.Utils.*;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DBProperties;
 import szhzz.sql.database.Database;
@@ -18,10 +19,6 @@ import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Mail.MailMsg;
 import szhzz.Mail.Mailer;
-import szhzz.Utils.DawLogger;
-import szhzz.Utils.DiskUtils;
-import szhzz.Utils.HardwareIDs;
-import szhzz.Utils.Utilities;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -231,6 +228,16 @@ public class AppManager implements DataConsumer {
         });
     }
 
+    public static void MessageBox(final String string, int seconds) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TimeOutMessageBox dialog = new TimeOutMessageBox();
+                dialog.showMessage(string, seconds);
+                dialog.pack();
+                dialog.setVisible(true);
+            }
+        });
+    }
 
     private static void setIndeterminate(boolean b) {
         if (Busy == null) return;

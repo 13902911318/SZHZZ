@@ -14,7 +14,10 @@ import java.util.concurrent.TimeUnit;
 public class OpenMySql {
     private static DawLogger logger = DawLogger.getLogger(OpenMySql.class);
 
-    public static boolean openMySql() {
+    public static boolean openMySql(){
+        return openMySql(true);
+    }
+    public static boolean openMySql(boolean echo) {
         AppManager app = AppManager.getApp();
         Database db = app.getDatabase(OpenMySql.class);
         boolean connected = false;
@@ -36,7 +39,7 @@ public class OpenMySql {
                         logger.error(e);
                     }
                 }
-                if(!connected ){
+                if(!connected && echo){
                     openCfg(null);
                     app.resetTargetDbProp();
                     db = app.getDatabase(OpenMySql.class);

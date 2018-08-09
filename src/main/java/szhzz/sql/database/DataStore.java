@@ -136,13 +136,14 @@ public class DataStore {
     }
 
     public int getColIndex(String col) {
-        if (null == columnNames.get(col.toUpperCase())) {
+        Integer obj = columnNames.get(col.toUpperCase());
+        if (obj == null) {
 //            loger.getLoger().errorOut(
 //                    new DBException("No such column " + col,
 //                            DBException.SQLEXCEPTION));
             return -1;
         }
-        return columnNames.get(col.toUpperCase());
+        return obj;
     }
 
     public void setColTypeName(String name, int pos) {
@@ -461,7 +462,8 @@ public class DataStore {
      */
     public boolean setValueAt_s(Object value, int row, String col) {
         Object o = null;
-        String typeName = getColTypeName(getColIndex(col));
+        int index = getColIndex(col);
+        String typeName = getColTypeName(index);
 
         if ("Long".equals(typeName)) {
             o = parseLong(value, null);
@@ -481,7 +483,7 @@ public class DataStore {
             o = value;
         }
 
-        return setValueAt(o, row, getColIndex(col));
+        return setValueAt(o, row, index); //getColIndex(col)
     }
 
     /**

@@ -227,14 +227,14 @@ public abstract class Config {
     }
 
     public void clear() {
-        if(hideProtect){
+        if (hideProtect) {
             Vector<String> ks = getKeys();
-            for(String k : ks){
-                if(!isProtected(k)){
+            for (String k : ks) {
+                if (!isProtected(k)) {
                     removeProperty(k);
                 }
             }
-        }else{
+        } else {
             datas.clear();
             index.clear();
         }
@@ -406,7 +406,7 @@ public abstract class Config {
 
     public Vector<String> getKeys() {
         Vector<String> e = new Vector();
-        for (int i = 0; i < index.size(); i++){
+        for (int i = 0; i < index.size(); i++) {
             String k = index.get(i).name;
             if (hideProtect && isProtected(k)) {
                 continue;
@@ -504,7 +504,7 @@ public abstract class Config {
         sb.append("//# LastUpdate ").append(MiscDate.now()).append("\n");
         for (item e : index) {
             if (!e.toString().startsWith("//# LastUpdate")) {
-                if(!e.isProtected()) {
+                if (!e.isProtected()) {
                     sb.append(e.toString());
                     sb.append("\n");
                 }
@@ -512,7 +512,7 @@ public abstract class Config {
         }
         for (item e : index) {
             if (!e.toString().startsWith("//# LastUpdate")) {
-                if(e.isProtected()) {
+                if (e.isProtected()) {
                     sb.append(e.toString());
                     sb.append("\n");
                 }
@@ -537,6 +537,19 @@ public abstract class Config {
         cfgDirty = !saved;
 
         return saved;
+    }
+
+    public Config newChild(String name) {
+        if (!children.containsKey(name)) {
+            childrenIndex.add(name);
+            children.put(name, new ConfigF());
+        }
+        return children.get(name);
+    }
+
+    public Config removeChild(String name) {
+        childrenIndex.remove(name);
+        return children.remove(name);
     }
 
     public String getTxt() {
@@ -618,7 +631,7 @@ public abstract class Config {
                 if (trim.length() == 0) continue;
                 item e = new item(tk);
                 if (e.name != null && !"".equals(e.name)) {
-                    if(!datas.containsKey(e.name)){//避免重复Key值
+                    if (!datas.containsKey(e.name)) {//避免重复Key值
                         index.add(e);
                     }
                     datas.put(e.name, e);

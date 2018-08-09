@@ -4,6 +4,7 @@ import sun.applet.AppletEvent;
 import szhzz.App.AppEventExchange;
 import szhzz.Config.Config;
 import szhzz.Config.ConfigF;
+import szhzz.Netty.Cluster.Cluster;
 import szhzz.Utils.DawLogger;
 
 import java.io.File;
@@ -71,6 +72,9 @@ public class CfgUpdateWrap {
     }
 
     public void updateCfg() {
+        if(data.getCpuID().equals(Cluster.getCpuID())){
+            return;
+        }
         if("AppEventUpdate".equals(data.getMessage())){
             updateAppEventCfg();
             return ;
@@ -96,6 +100,14 @@ public class CfgUpdateWrap {
             cfg.setProperty(col.toString(), val.toString(), comment.toString());
         }
         cfg.save();
+    }
+
+    public String getFileName(){
+        Object fileName = data.getExtData(1);
+        if(fileName!=null){
+            return fileName.toString();
+        }
+        return null;
     }
 
     public ConfigF getCfg() {

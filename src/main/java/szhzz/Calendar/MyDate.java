@@ -928,6 +928,10 @@ public class MyDate implements Serializable {
         return in.getMillisOfDay();
     }
 
+    public String format(String formatString) {
+        return in.toString(formatString);
+    }
+
     /**
      * @param format yyyy-MM-dd HH:mm:ss.SSS
      * @return

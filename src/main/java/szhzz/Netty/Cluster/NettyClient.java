@@ -86,6 +86,7 @@ public class NettyClient {
 
     public void connected() {
         connected = true;
+        retry = Math.min(this.host.size() - hostIndex, 3);
         if(inspector!=null){
             inspector.connected(channel);
         }
@@ -226,7 +227,7 @@ public class NettyClient {
             return -1;
         }
         if (!channel.isWritable()) {
-            logger.error(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
+            logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
             return -1;
         }
 //        NettyExchangeData d = ((NettyExchangeData) msg);

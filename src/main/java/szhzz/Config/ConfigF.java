@@ -18,10 +18,16 @@ import java.util.LinkedList;
 public class ConfigF extends Config {
     private static DawLogger logger = DawLogger.getLogger(ConfigF.class);
     private String configFileName = null;
+    private String cs = "UTF-8";
 
     @Override
     public boolean save() {
         if (configFileName != null) {
+            if(!cs.equals("UTF-8")){
+                logger.info(configFileName + " change encode from " + cs + " to UTF-8");
+                new File(configFileName).delete();
+                cs = "UTF-8";
+            }
             return saveAs(new File(configFileName));
         }
         return false;
@@ -49,7 +55,7 @@ public class ConfigF extends Config {
         FileInputStream in = null;
         BufferedReader buff = null;
         try {
-            String cs = Utilities.detectCharset(configFileName);
+            cs = Utilities.detectCharset(configFileName);
             if (cs == null) {
                 cs = System.getProperty("file.encoding");
             }
@@ -89,6 +95,11 @@ public class ConfigF extends Config {
         configID = configID.substring(0, configID.lastIndexOf("."));
     }
 
+    public void setConfigFile(File configFile) {
+        this.configFileName = configFile.getAbsolutePath();
+        configID = configFile.getName();
+        configID = configID.substring(0, configID.lastIndexOf("."));
+    }
     public String getConfigFolder() {
         return new File(configFileName).getParent();
     }

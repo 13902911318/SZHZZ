@@ -105,6 +105,15 @@
             <version>2.23</version>
         </dependency>
 
+        <!--
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <version>1.9.2</version>
+            <scope>compile</scope>
+        </dependency>
+    -->
+
     </dependencies>
 
     <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->

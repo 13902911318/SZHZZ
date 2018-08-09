@@ -62,6 +62,7 @@ public class AppLocker {
         Shutdown dialog = new Shutdown();
         dialog.setModal(false);
         dialog.setAlwaysOnTop(true);
+        dialog.setNotCancelable();
         dialog.startup();
 
         dialog.setQuit(5);

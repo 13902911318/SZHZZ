@@ -73,6 +73,7 @@ public class Shutdown extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 if (--step < 0) {
                     onOK();
+                    return;
                 } else {
                     TimeLeft.setText("" + step);
                     countDown.start();
@@ -138,6 +139,9 @@ public class Shutdown extends JDialog {
         this.step = step;
     }
 
+    public void setNotCancelable(){
+        buttonCancel.setEnabled(false);
+    }
     public void setLogout() {
         setCommand("-L");
     }
