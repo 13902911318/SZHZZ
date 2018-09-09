@@ -8,6 +8,7 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import szhzz.Calendar.MyDate;
 import szhzz.Config.*;
+import szhzz.StatusInspect.StatusInspector;
 import szhzz.Timer.AlarmClock;
 import szhzz.Timer.TimerEvent;
 import szhzz.Utils.*;

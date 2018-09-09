@@ -21,6 +21,8 @@ import szhzz.Utils.Utilities;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 
 /**
@@ -51,6 +53,7 @@ public class StatusInspector {
     private int sendMailCount = 0;
     private String errorMsg = null;
     private int errorCount = -1;
+    private JCheckBox silent = null;
 
     private StatusInspector() {
         App.logEvent("状态监控已经启动");
@@ -93,7 +96,7 @@ public class StatusInspector {
     public boolean checkState(String itemName) {
         boolean status = false;
         int row = ds.find("名称", itemName);
-        if(row >= 0){
+        if (row >= 0) {
             Object o = ds.getValueAt(row, "status", "true");
             status = Boolean.valueOf(o.toString());
         }
@@ -123,6 +126,18 @@ public class StatusInspector {
         StatusDw.getToolBar().setFloatable(false);
         StatusDw.setTitle(null);
 
+        silent = new JCheckBox("不再提示");
+        silent.setToolTipText("不再弹出提示窗口");
+        silent.setSelected(false);
+        StatusDw.getToolBar().add(silent);
+
+        silent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogManager.setStatusViewSilent(silent.isSelected());
+            }
+        });
+
         dw = StatusDw.getDataWindow();
         try {
             dw.addCellEditor(1, new JXTable.BooleanEditor());
@@ -136,6 +151,10 @@ public class StatusInspector {
         } catch (DBException e) {
             logger.error(e);
         }
+    }
+
+    public void setSilentCheckBoxVisible(boolean visibale) {
+        silent.setVisible(visibale);
     }
 
     private void initDw() {
@@ -367,8 +386,10 @@ public class StatusInspector {
     }
 
     private void onRetrieve() {
-        message.sendMessage(MessageCode.QueryStatus, this);
-        logErrorStatus();
+        if (! (MyDate.IS_AFTER_TIME(9, 24, 50) && MyDate.IS_BEFORE_TIME(9, 25, 0))) {
+            message.sendMessage(MessageCode.QueryStatus, this);
+            logErrorStatus();
+        }
     }
 
     void logErrorStatus() {

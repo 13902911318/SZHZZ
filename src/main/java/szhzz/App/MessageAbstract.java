@@ -46,7 +46,7 @@ public abstract class MessageAbstract implements Comparable {
             messageWatch = new WatchMessage();
             dataBuffer = new ObjBufferedIO();
             try {
-                dataBuffer.setReader(messageWatch, 10240);           //500
+                dataBuffer.setReader(messageWatch, 1240);           //500
             } catch (InterruptedException e) {
                 logger.error(e);
             }

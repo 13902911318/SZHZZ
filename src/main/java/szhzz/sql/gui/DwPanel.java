@@ -1,6 +1,7 @@
 package szhzz.sql.gui;
 
 
+import szhzz.Java_infor.Light;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.Database;
 import szhzz.sql.database.TableFormaterWriter;
@@ -38,7 +39,7 @@ public class DwPanel extends JPanel implements DwPanel_interface {
     JLabel jLabelTitle = new JLabel();
     TitledBorder titledBorder1 = new TitledBorder("");
     StringBuilder stateString = null;
-
+    Light light = null;
     private TableModel stateData = null;
 
     public DwPanel() {
@@ -92,6 +93,14 @@ public class DwPanel extends JPanel implements DwPanel_interface {
         dataWindow1.setDataWindowReadOnly(false);
         jLabelStatus.setVisible(false);
 //        dataWindow1.setStatusBar(jLabelStatus);
+
+//        light = new Light();
+//        light.setLightColor(Color.RED);
+//        light.setPreferredSize(new Dimension(20, 20));
+//        light.setMaximumSize(new Dimension(20, 20));
+//
+//        light.setLightOn(true);
+//        this.add(jLabelStatus, java.awt.BorderLayout.SOUTH);
     }
 
     /**

@@ -36,7 +36,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
             if (data != null) {
 //                System.out.println("数据序列错误");
 //                logger.info("ID=" + data.getSerialNo(), new Exception("数据序列错误!") );
-                logger.info(msg + " 数据序列错误 ID=" + data.getSerialNo() + data.encode());
+                logger.error(msg + " 数据序列错误 ID=" + data.getSerialNo() + data.encode());
             }
             data = new NettyExchangeData();
         } else if (NettyExchangeData.isEndOfDate(msg)) {
@@ -47,7 +47,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
                     logger.error(msg, new Exception("中文编码错误!"));
                 }
             } else {
-                logger.info(msg + " 数据序列错误 ID=" + data.getSerialNo());
+                logger.error(msg + " 数据序列错误 ID=" + data.getSerialNo());
             }
             data = null;
         } else {
@@ -58,7 +58,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
 
                 }
             } else {
-                logger.info(" 正文 数据序列错误 ");
+                logger.error(" 正文 数据序列错误 ");
                 logger.info("[" + msg + "]");
             }
         }

@@ -1,10 +1,7 @@
 package szhzz.Netty.Cluster;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -37,7 +34,7 @@ public class NettyClient {
     protected int port;
     private Channel channel = null;
     private EventLoopGroup group = null;
-    private ClientInitializer clientInitializer = null;
+    private ChannelInitializer clientInitializer = null;
     private boolean connected = false;
     private boolean autoReconnect = false;
     protected boolean isNio = true;
@@ -105,9 +102,9 @@ public class NettyClient {
         if(inspector!=null){
             inspector.disConnected();
         }
-        if (autoReconnect) {
-            start();
-        }
+//        if (autoReconnect) {
+//            start();
+//        }
     }
 
     protected void connect() {
@@ -283,5 +280,9 @@ public class NettyClient {
 
     public void setInspector(ClientInspector inspector) {
         this.inspector = inspector;
+    }
+
+    public void setClientInitializer(ChannelInitializer clientInitializer) {
+        this.clientInitializer = clientInitializer;
     }
 }

@@ -69,9 +69,9 @@ public class SpeedGroup {
             sum += t;
             sb.append(id + "\t" + FT.format00(t/1000000000d) + "min\t" + FT.format00(100d * t / total) + "%\n");
         }
-        sb.append("-----------------------------");
-        sb.append("TOTAL:\t" + FT.format00(sum/1000000000d) + "min\t");
-        sb.append("============================");
+        sb.append("-----------------------------\n");
+        sb.append("TOTAL:\t" + FT.format00(sum/1000000000d) + "min\n");
+        sb.append("============================\n");
         AppManager.logit("\n" + sb.toString());
 
     }

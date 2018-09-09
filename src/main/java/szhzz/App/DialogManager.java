@@ -21,6 +21,8 @@ public class DialogManager {
     protected DbConnectionsView dbView = null;
     protected ArrayList<JDialog> dialogs = new ArrayList<>();
     protected TaskView taskView = null;
+    private static boolean statusViewSilent = false;
+    private static boolean clusterStationSilent = false;
 
     private BeQuit autoQuit = new BeQuit() {
 
@@ -44,6 +46,13 @@ public class DialogManager {
         return onlyOne;
     }
 
+    public static void setStatusViewSilent(boolean statusViewSilent) {
+        DialogManager.statusViewSilent = statusViewSilent;
+    }
+
+    public static void setClusterStationSilent(boolean clusterStationSilent) {
+        DialogManager.clusterStationSilent = clusterStationSilent;
+    }
 
 
     public synchronized void openDbView() {
@@ -57,8 +66,12 @@ public class DialogManager {
         dbView.setVisible(true);
     }
 
-
     public void openClusterStation() {
+        openClusterStation(false);
+    }
+    public void openClusterStation(boolean force ) {
+        if(!force && clusterStationSilent) return;
+
         if (clusterStation == null) {
             clusterStation = new ClusterStation(frame);
             clusterStation.setModalityType(Dialog.ModalityType.MODELESS);
@@ -71,6 +84,11 @@ public class DialogManager {
 
 
     public void openStatuesView() {
+        openStatuesView(false);
+    }
+    public void openStatuesView(boolean force) {
+        if(!force && statusViewSilent) return;
+
         if (statusView == null) {
             statusView = new StatusView();
             dialogs.add(statusView);

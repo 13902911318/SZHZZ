@@ -1,6 +1,7 @@
 package szhzz.Netty.Cluster;
 
 
+import szhzz.App.DialogManager;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DataStore;
 import szhzz.sql.gui.DataWindow;
@@ -36,6 +37,8 @@ public class ClusterStation extends JDialog {
     private JLabel text1;
     private DataWindow dw;
     private DataStore ds;
+    JCheckBox silent = null;
+
 //    private JButton broadcast;
     //    private static boolean independent = false;
     StatusReportMail statusReportMail;
@@ -74,6 +77,18 @@ public class ClusterStation extends JDialog {
         forceTakeover = new JCheckBox("强制接管交易");
         forceTakeover.setSelected(Cluster.getInstance().isForceTakeover());
         stationViewPanel.getToolBar().add(forceTakeover);
+
+        silent = new JCheckBox("不再提示");
+        silent.setToolTipText("不再弹出提示窗口");
+        silent.setSelected(false);
+        stationViewPanel.getToolBar().add(silent);
+
+        silent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DialogManager.setClusterStationSilent(silent.isSelected());
+            }
+        });
 
 //        broadcast.addActionListener(new ActionListener() {
 //            @Override
@@ -179,6 +194,11 @@ public class ClusterStation extends JDialog {
 //        proxyCheckBox.setVisible(false);
         text1.setVisible(false);
     }
+
+    public void setSilentCheckBoxVisible(boolean visibale){
+        silent.setVisible(visibale);
+    }
+
     void initDw() {
         dw = stationViewPanel.getDataWindow();
         ds = new DataStore();

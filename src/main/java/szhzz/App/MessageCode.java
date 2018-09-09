@@ -87,6 +87,6 @@ public enum MessageCode {
     CreateTradeCfg,
     TDF_Downlaod,
     CloseOperation,
-    PublicEvent;
-    ;
+    PublicEvent,
+    CancelListChanged;
 }
