@@ -8,7 +8,9 @@ import szhzz.Calendar.MyDate;
 import szhzz.Netty.Cluster.Cluster;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
+import szhzz.Utils.Utilities;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
@@ -74,7 +76,9 @@ public class NettyExchangeData extends ExchangeData {
     public void setEvenType(Object coed) {
         setTitleCol(coed, colEventType);
     }
-
+    public void setSubType(Object coed) {
+        setTitleCol(coed, colSubType);
+    }
 
     public boolean isSameCharset() {
         String l = getValue(0, colLanguage).toString();
@@ -104,7 +108,7 @@ public class NettyExchangeData extends ExchangeData {
         return (String) getValue(0, colIpAddress);
     }
 
-    public String getSubType(){
+    public String getSubType() {
         return (String) getValue(0, colSubType);
     }
 
@@ -269,7 +273,7 @@ public class NettyExchangeData extends ExchangeData {
             table = new Vector<Vector>();
         }
         //Forward 的数据不要改变数据源的信息
-        if(StringUtil.isNullOrEmpty(getCpuID())) {
+        if (StringUtil.isNullOrEmpty(getCpuID())) {
             setLanguage();
             setCpuID(Cluster.getCpuID());
             setAppClassName(Cluster.getAppClassName());
@@ -281,8 +285,12 @@ public class NettyExchangeData extends ExchangeData {
 
         StringBuilder sb = new StringBuilder(BoD).append(nl);
         for (Vector row : getTable()) {
+            int count = 0;
             for (Object o : row) {
-                sb.append(o).append("\t");
+                if(count++ > 0){
+                    sb.append("\t");
+                }
+                sb.append(o);
             }
             sb.append(nl);
         }
@@ -328,5 +336,62 @@ public class NettyExchangeData extends ExchangeData {
 
     public void setASC_II() {
         this.language = "ASC_II";
+    }
+
+
+    public static NettyExchangeData readFile(File file) {
+        boolean dataBeging = false;
+        boolean dataEnd = false;
+
+        if(file == null)return null;
+        if(!file.exists())return null;
+
+        NettyExchangeData eData = new NettyExchangeData();
+
+        FileInputStream in = null;
+        String encode = fileEncode(file);//可以确保文件已经生成并关闭.
+        encode = "UTF-8";
+        String[] element = null;
+        try {
+            in = new FileInputStream(file);
+            BufferedReader buff = new BufferedReader(new InputStreamReader(in, encode));
+            String tk;
+            while ((tk = buff.readLine()) != null) {
+                dataEnd = dataEnd|| tk.equals(NettyExchangeData.EoD);
+
+                if(dataEnd) break;
+
+                if(tk.equals(NettyExchangeData.BoD)) {
+                    dataBeging = true;
+                }else if(dataBeging){
+                    element = tk.split("\t");
+                    eData.appendRow();
+                    eData.addArrayData(element);
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
+
+        if(dataEnd) return eData;
+
+        return null;
+    }
+
+    protected static String fileEncode(File fileName) {
+        String cs = null;
+        cs = Utilities.detectCharset(fileName);
+        if (cs == null) {
+            cs = System.getProperty("file.encoding");
+        }
+        return cs;
     }
 }

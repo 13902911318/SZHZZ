@@ -25,6 +25,12 @@ public class ClusterClients {
     private static Vector<Long> abandoned = new Vector<Long>();
     private Hashtable<String, NettyClient> clients = new Hashtable<String, NettyClient>();
     private int defaultPort = 7522;
+    private int circleTime = 10* 1000;
+
+    public void setTimer(int circleTime) {
+        if(circleTime <= 0) return;
+        this.circleTime = circleTime;
+    }
 
     private ClusterClients() {
 
@@ -193,6 +199,8 @@ public class ClusterClients {
         if (client == null) {
             try {
                 client = new NettyClient(address, port);
+                client.setTimer(circleTime);
+
                 clients.put(computerName, client);
                 App.logit(computerName + " " + client.getHost() + " to be connect");
             } catch (Exception e) {

@@ -65,6 +65,11 @@ public class ConfigMerged extends Config {
         return slave.getProperty(name);
     }
 
+    public String getComment(String name, String defaultValue) {
+        if (master.hasProperty(name)) return master.getComment(name, defaultValue);
+        return slave.getComment(name, defaultValue);
+    }
+
     public void insertProperty(String afterName, String name, String val) {
         if (slave.hasProperty(name)) {
             slave.insertProperty(afterName, name, val, null);

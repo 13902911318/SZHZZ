@@ -11,7 +11,6 @@ import szhzz.App.BeQuit;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.Net.ClientInitializer;
-import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
@@ -40,7 +39,8 @@ public class NettyClient {
     protected boolean isNio = true;
     private int retry = 0;
     private int connectionTimeout = 10;
-    private ClientInspector  inspector = null;
+    private ClientInspector inspector = null;
+    private int circleTime = 10* 1000;
 
     public static void main(String[] args) {
         App.setLog4J();
@@ -84,10 +84,10 @@ public class NettyClient {
     public void connected() {
         connected = true;
         retry = Math.min(this.host.size() - hostIndex, 3);
-        if(inspector!=null){
+        if (inspector != null) {
             inspector.connected(channel);
         }
-   }
+    }
 
     public void disConnected() {
         if (host.size() > 1) {
@@ -99,7 +99,7 @@ public class NettyClient {
             }
         }
         connected = false;
-        if(inspector!=null){
+        if (inspector != null) {
             inspector.disConnected();
         }
 //        if (autoReconnect) {
@@ -242,15 +242,22 @@ public class NettyClient {
     }
 
     CircleTimer ConnectionListener = new CircleTimer() {
+        boolean progressing = false;
+
         @Override
         public void execTask() {
+            if (progressing) return;
+            progressing = true;
             try {
                 if (autoReconnect && !connected) {
 //                    connected = true;
-                    connect();
+                    if(!AppManager.getApp().isSilentTime()){
+                        connect();//阻塞直到断开连接
+                    }
                 }
             } finally {
-                setCircleTime(10 * 1000);
+                setCircleTime(circleTime);
+                progressing = false;
             }
         }
     };
@@ -284,5 +291,9 @@ public class NettyClient {
 
     public void setClientInitializer(ChannelInitializer clientInitializer) {
         this.clientInitializer = clientInitializer;
+    }
+
+    public void setTimer(int circleTime) {
+        this.circleTime = circleTime;
     }
 }

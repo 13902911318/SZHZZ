@@ -139,7 +139,7 @@ public class AlarmClock implements DawCountdown {
         c++;
         ds.setColName("触发时间", c);
         ds.setColTypeName("String", c);
-        ds.setColLength(c, 20);
+        ds.setColLength(c, 25);
         ds.setReadOnlyCol(c, true);
 
         c++;
@@ -321,7 +321,7 @@ public class AlarmClock implements DawCountdown {
             runAjob(job);
         }
         for (TimerEvent job : execJobs) {
-            String msg = MiscDate.todaysDate() + ">" + job.toString();
+            String msg = MiscDate.todaysDate() + ">" + job.toString() + "\n";
             try {
                 Utilities.String2File(msg, logfile, true);
             } catch (IOException e) {
@@ -460,7 +460,7 @@ public class AlarmClock implements DawCountdown {
         }
 
         public String getDateTime() {
-            return day.getDateTime();
+            return day.getDateTimeFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
 
@@ -535,7 +535,7 @@ public class AlarmClock implements DawCountdown {
                 try {
                     AppManager.executeInBack(a.getRequestor());
 
-                    msg = MiscDate.todaysDate() + ">" + a.toString();
+                    msg = MiscDate.todaysDate() + ">" + a.toString() + "\n";
                     Utilities.String2File(msg, logfile, true);
                     App.logit(command + ">" + a.toString());
                 } catch (InterruptedException e1) {

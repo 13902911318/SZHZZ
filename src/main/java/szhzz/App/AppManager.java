@@ -117,7 +117,7 @@ public class AppManager implements DataConsumer {
     public static void setSystemTimeDiff(long systemTimeDiff) {
         AppManager.systemTimeDiff = systemTimeDiff;
     }
-
+    public boolean isSilentTime(){return false;}
 
     private void prepareIDs() {
         getIP(cfg.getProperty("VPN_Signature", null));
@@ -1374,5 +1374,12 @@ public class AppManager implements DataConsumer {
         }
     }
 
+    public static String getCompileTime(){
+        ClassLoader cl = AppManager.getApp().getClass().getClassLoader();
+        String threadContexteClass = AppManager.getApp().getClass().getName().replace('.', '/');
+        URL url = cl.getResource(threadContexteClass + ".class");
+        String path = url.getPath();
+        return new MyDate(new File(path).lastModified()).getDateTime();
+    }
 
 }

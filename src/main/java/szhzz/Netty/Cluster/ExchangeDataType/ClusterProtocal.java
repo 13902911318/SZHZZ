@@ -58,7 +58,8 @@ public class ClusterProtocal {
         Cluster,
         Broadcast,
         HandDown,
-        TradeProxy;
+        TradeProxy,
+        MarketProxy;
     }
 
     public static boolean isBroadcast(Object event) {

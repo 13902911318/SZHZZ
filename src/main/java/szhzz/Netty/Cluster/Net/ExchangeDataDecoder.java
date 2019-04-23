@@ -44,7 +44,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
                 if (data.isSameCharset()) {
                     out.add(data);
                 } else {
-                    logger.error(msg, new Exception("中文编码错误!"));
+                    logger.error(data.toString(), new Exception("中文编码错误!"));
                 }
             } else {
                 logger.error(msg + " 数据序列错误 ID=" + data.getSerialNo());

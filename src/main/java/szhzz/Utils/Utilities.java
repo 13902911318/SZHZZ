@@ -2,6 +2,7 @@ package szhzz.Utils;
 
 import org.apache.commons.io.FileUtils;
 import org.mozilla.universalchardet.UniversalDetector;
+import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Files.ExtensionFileFilter;
 
@@ -32,7 +33,7 @@ public class Utilities {
     public static String TAB = "\t";
     public static String NEW_LINE = "\n";
     private static Hashtable<String, PrintWriter> openedFiles = null;
-
+    private static AppManager App = null;
 
     public static void String2File_s(String S) {
         try {
@@ -153,14 +154,24 @@ public class Utilities {
 
         FileInputStream from = null;
         FileOutputStream to = null;
+        long fSize = 0;
+        long timer = System.currentTimeMillis();
         try {
             from = new FileInputStream(fromFile);
             to = new FileOutputStream(toFile);
             byte[] buffer = new byte[4096];
             int bytesRead;
 
-            while ((bytesRead = from.read(buffer)) != -1)
+            while ((bytesRead = from.read(buffer)) != -1){
                 to.write(buffer, 0, bytesRead); // saveAs
+                fSize += bytesRead;
+                if(App != null ){
+                     if((System.currentTimeMillis() - timer ) > 1000){
+                         timer = System.currentTimeMillis();
+                         App.setStatuText("Copy file " + FT.formatK00(fSize/(1024*1024)) + " Mb");
+                     }
+                }
+            }
         } finally {
             if (from != null)
                 try {
@@ -528,6 +539,10 @@ public class Utilities {
         y ^= (y >>> 21);
         y ^= (y << 7);
         return y;
+    }
+
+    public static void setApp(AppManager app) {
+        App = app;
     }
 }
 

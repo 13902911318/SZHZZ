@@ -6,6 +6,7 @@ package szhzz.sectionmath;
  * Date: 13-3-4
  * Time: 下午2:45
  * To change this template use File | Settings | File Templates.
+ * 钝化指标，消除毛刺
  */
 public class Switch {
     private int threshold = 0;

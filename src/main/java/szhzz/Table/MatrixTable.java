@@ -35,6 +35,7 @@ public class MatrixTable {
     private LinkedList<LinkedList<String>> table;
     private Comparator comparator = null;
     private int readLines = 0;
+    private String charsetName = null;
 
     private MatrixTableModel tableModel = null;
 
@@ -420,8 +421,13 @@ public class MatrixTable {
 
     public void read(String txt, int startLine) {
         if (txt == null) return;
-        BufferedReader buff = new BufferedReader(new InputStreamReader((new ByteArrayInputStream(txt.getBytes()))));
+        BufferedReader buff;
         try {
+            if(charsetName == null){
+                buff = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(txt.getBytes())));
+            }else{
+                buff = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(txt.getBytes()),charsetName));
+            }
             setDirty(true);
             read(buff, startLine);
         } catch (IOException e) {
@@ -443,11 +449,14 @@ public class MatrixTable {
                 continue;
             }
 
-            if (counter == 0 && this.isHasHeader()) {
-                if (!this.headerFilled()) {
-                    StringTokenizer tok = new StringTokenizer(l);
-                    while (tok.hasMoreTokens()) {
-                        this.setColumnName(tok.nextToken());
+            if (counter == 0 ) {
+                l = l.replace("\uFEFF", "");//UTF-8 with sing
+                if(this.isHasHeader()) {
+                    if (!this.headerFilled()) {
+                        StringTokenizer tok = new StringTokenizer(l, delimiter);
+                        while (tok.hasMoreTokens()) {
+                            this.setColumnName(tok.nextToken());
+                        }
                     }
                 }
             } else {
@@ -479,7 +488,11 @@ public class MatrixTable {
 
         try {
             FileInputStream fin = new FileInputStream(file);
-            in = new BufferedReader(new InputStreamReader(fin));
+            if(charsetName == null){
+                in = new BufferedReader(new InputStreamReader(fin));
+            }else{
+                in = new BufferedReader(new InputStreamReader(fin, charsetName));
+            }
             read(in, startLine);
         } catch (IOException e) {
             e.printStackTrace();
@@ -539,6 +552,10 @@ public class MatrixTable {
             tableModel = new MatrixTableModel();
         }
         return tableModel;
+    }
+
+    public void setCharsetName(String charsetName) {
+        this.charsetName = charsetName;
     }
 
     //

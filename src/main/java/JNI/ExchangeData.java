@@ -1,6 +1,5 @@
 package JNI;
 
-
 import szhzz.Utils.NU;
 
 import java.io.Serializable;
@@ -35,6 +34,7 @@ public class ExchangeData implements Serializable {
     private StringBuilder dbgMsg = null;
     private int handledCount = 0;
     public static final String nl = System.getProperty("line.separator");
+    protected boolean inited = false;
 //    public static final String nl = "\n";
 
     public void initData() {
@@ -93,6 +93,16 @@ public class ExchangeData implements Serializable {
             appendRow();
 
         currentRecord.add(o);
+    }
+
+    public void addArrayData(String[] eletemt) {
+        if (currentRecord == null) {
+            appendRow();
+        }
+        for (String o : eletemt) {
+            currentRecord.add(o);
+        }
+//        Collections.addAll(currentRecord, eletemt);
     }
 
     public void addData(int o) {
@@ -156,6 +166,25 @@ public class ExchangeData implements Serializable {
         return NU.parseLong(getValue(0, colLogonID), -1L);
     }
 
+    public void setDataValue(int row, int col, Object o) {
+        Vector row0 = null;
+        int realRow = row + 2;
+
+        while (table.size() <= realRow) {
+            row0 = new Vector();
+            table.add(row0);
+        }
+        if (row0 == null) {
+            row0 = table.get(realRow);
+        }
+
+        if (row0 != null) {
+            while (row0.size() <= col) {
+                row0.add("");
+            }
+            row0.setElementAt(o, col);
+        }
+    }
 
     public String getMessageString() {
         String msg = (String) getValue(0, colMessage);
@@ -173,21 +202,23 @@ public class ExchangeData implements Serializable {
      * @return
      */
     public long getDataRowCount() {
-        Long rowCount = null;
-        Object o = getValue(1, 0);
-        if (o instanceof Long) {
-            rowCount = (Long) o;
-        } else if (o instanceof Integer) {
-            rowCount = ((Integer) o).longValue();
-        }
-
-        if (rowCount == null) {
-            rowCount = table.size() - 2L;
-            if (rowCount < 0) rowCount = 0l;
-        } else {
-            rowCount = Math.min(rowCount, table.size() - 2L);
-        }
-        return rowCount;
+        if (table.size() < 2) return 0;
+        return table.size() - 2L;
+//        Long rowCount = null;
+//        Object o = getValue(1, 0);
+//        if (o instanceof Long) {
+//            rowCount = (Long) o;
+//        } else if (o instanceof Integer) {
+//            rowCount = ((Integer) o).longValue();
+//        }
+//
+//        if (rowCount == null) {
+//            rowCount = table.size() - 2L;
+//            if (rowCount < 0) rowCount = 0l;
+//        } else {
+//            rowCount = Math.min(rowCount, table.size() - 2L);
+//        }
+//        return rowCount;
     }
 
     public Object getDataValue(int row, int col) {
@@ -230,6 +261,11 @@ public class ExchangeData implements Serializable {
         setTitleCol(coed, colErrCode);
     }
 
+    /**
+     * TODO Cluster 發出的時候自動設定,不要手動設置
+     *
+     * @param requestID
+     */
     public void setRequestID(Object requestID) {
         setTitleCol(requestID, colRequestID);
     }
@@ -254,8 +290,12 @@ public class ExchangeData implements Serializable {
         if (table == null) return "";
         StringBuilder sb = new StringBuilder();
         for (Vector row : table) {
+            int count = 0;
             for (Object o : row) {
-                sb.append(o).append("\t");
+                if (count++ > 0) {
+                    sb.append("\t");
+                }
+                sb.append(o);
             }
             sb.append(nl);
         }
@@ -268,8 +308,12 @@ public class ExchangeData implements Serializable {
         StringBuilder sb = new StringBuilder();
         for (int i = 2; i < table.size(); i++) {
             Vector row = table.get(i);
+            int count = 0;
             for (Object o : row) {
-                sb.append(o).append(separator);
+                if (count++ > 0) {
+                    sb.append(separator);
+                }
+                sb.append(o);
             }
             sb.append(nl);
         }

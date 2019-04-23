@@ -108,8 +108,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.info("Client Error!");
         if (!(cause instanceof java.io.IOException)) {
-            logger.error(cause);
+            if(!cause.getMessage().contains("远程主机强迫关闭了一个现有的连接")){
+                logger.error(cause);
+                ctx.fireExceptionCaught(cause);
+            }
         }
-        ctx.fireExceptionCaught(cause);
     }
 }

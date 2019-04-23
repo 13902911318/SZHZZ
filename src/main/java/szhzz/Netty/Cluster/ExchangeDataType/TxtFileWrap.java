@@ -38,7 +38,10 @@ public class TxtFileWrap {
         return getTextFile(fileName, null);
     }
 
-    public static NettyExchangeData getTextFile(String fileName, String toFile) {
+    public static NettyExchangeData getTextFile(String fileName, String toFile){
+        return getTextFile(fileName, toFile, true);
+    }
+    public static NettyExchangeData getTextFile(String fileName, String toFile, boolean sameGroup) {
         String encode = fileEncode(fileName);//可以确保文件已经生成并关闭.
         encode = "UTF-8";
 
@@ -53,6 +56,8 @@ public class TxtFileWrap {
         eData.setMessage(encode);
         eData.setExtData("write", 1);
         eData.setExtData("true", 2); //createDir
+        eData.setExtData((sameGroup ? "true": "false"), 3);
+
 
         eData.appendRow();
         eData.appendRow();

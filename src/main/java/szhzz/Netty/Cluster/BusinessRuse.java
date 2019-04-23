@@ -34,6 +34,9 @@ public class BusinessRuse implements DataConsumer {
 
 
     public static void setInstance(BusinessRuse onlyOne) {
+        if(BusinessRuse.onlyOne!=null){
+            logger.error(new Exception( "重复定义 BusinessRuse"));
+        }
         BusinessRuse.onlyOne = onlyOne;
     }
 
