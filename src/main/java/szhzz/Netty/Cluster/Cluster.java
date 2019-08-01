@@ -51,7 +51,7 @@ public class Cluster {
     boolean definedGate = false;
 //    static String proxy = "";
 
-    static AppManager App = AppManager.getApp();
+    static AppManager App = AppManager.getApp(); //Error!
     boolean forceTakeover = false;
     int localLevel = 0;
     boolean autoStartTrade = true;
@@ -61,6 +61,7 @@ public class Cluster {
     Hashtable<String,String> ipToName= new Hashtable<>();
 
     Cluster() {
+        App = AppManager.getApp(); //Error!
 //        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
 //        proxy = cfg.getBooleanVal("设为交易代理", false);
     }
