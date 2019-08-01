@@ -13,7 +13,7 @@ public class LoopFunctionExp {
     String[] args = null;
     private String express = "";
     ArgumentLoop argumentLoop = null;
-    private Double relay = null;
+    private Double relay = null;  //TODO 不再需要
     private int presize = 6;
 
     public LoopFunctionExp(String exp) {
