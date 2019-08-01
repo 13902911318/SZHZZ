@@ -1,12 +1,15 @@
 package szhzz.Table;
 
 import szhzz.Calendar.MyDate;
+import szhzz.Files.FileZiper;
 import szhzz.Table.Filters.RowFilter;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.io.*;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,9 +52,11 @@ public class MatrixTable {
 
     public static void main(String args[]) throws IOException {
         MatrixTable testT = new MatrixTable();
-        testT.read(new File("G:/SinaStockData/Optimizer/CCI_OPT/buy/ccm_20080530.txt"));
+        testT.setHasHeader(true);
+        //testT.readZipFile(new File("T:\\QTS_CSV\\20190716\\SSEL2\\STOCK\\TAQ\\RealSSEL2Quote_S0101.zip"), 0, "");
+        testT.readZipFile(new File("T:\\QTS_CSV\\20190716\\SSEL2\\STOCK\\TAQ\\RealSSEL2Quote_S0101.zip"), 0, "600030.csv");
         testT.sort(0);
-        testT.save();
+//        testT.save();
     }
 
     public void reset() {
@@ -112,9 +117,22 @@ public class MatrixTable {
 //    }
 
     public int find(String col, String val) {
-        int c = getColumnNo(col);
-        for (int r = 0; r < rowCount(); r++) {
-            String v = get(r, c);
+        return find(col, val, 0);
+    }
+
+    public int find(String col, String val, int startRow) {
+        return find(getColumnNo(col), val, startRow);
+    }
+
+    public int find(int col, String val) {
+        return find(col, val, 0);
+    }
+
+    public int find(int col, String val, int startRow) {
+        if (col < 0) return -1;
+        if (startRow < 0) startRow = 0;
+        for (int r = startRow; r < rowCount(); r++) {
+            String v = get(r, col);
             if (val.equals(v)) return r;
         }
         return -1;
@@ -415,6 +433,49 @@ public class MatrixTable {
         read(file, 0);
     }
 
+    public void readZipFile(File file, int startLine) {
+        readZipFile(file, startLine, null) ;
+    }
+
+    public void readZipFile(File file, int startLine, String fName) {
+        BufferedReader in = null;
+        ZipEntry entry;
+
+        if (!file.exists()) return;
+
+        try {
+            FileZiper fileZiper = new FileZiper();
+
+            ZipInputStream zipIn = fileZiper.getZipInputStream(file);
+            while ((entry = zipIn.getNextEntry()) != null) {
+                String f = entry.getName();
+//                if(f.indexOf(".") > 0){
+//                    f = f.substring(0,f.indexOf("."));
+//                }
+                if (fName == null || f.equalsIgnoreCase(fName)){
+                    if (charsetName == null) {
+                        in = new BufferedReader(new InputStreamReader(zipIn));
+                    } else {
+                        in = new BufferedReader(new InputStreamReader(zipIn, charsetName));
+                    }
+                    read(in, startLine);
+                    setDirty(true);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            reSort();
+            setDirty(false);
+        }
+    }
+
     public void read(String txt) {
         read(txt, 0);
     }
@@ -423,10 +484,10 @@ public class MatrixTable {
         if (txt == null) return;
         BufferedReader buff;
         try {
-            if(charsetName == null){
+            if (charsetName == null) {
                 buff = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(txt.getBytes())));
-            }else{
-                buff = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(txt.getBytes()),charsetName));
+            } else {
+                buff = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(txt.getBytes()), charsetName));
             }
             setDirty(true);
             read(buff, startLine);
@@ -449,9 +510,9 @@ public class MatrixTable {
                 continue;
             }
 
-            if (counter == 0 ) {
+            if (counter == 0) {
                 l = l.replace("\uFEFF", "");//UTF-8 with sing
-                if(this.isHasHeader()) {
+                if (this.isHasHeader()) {
                     if (!this.headerFilled()) {
                         StringTokenizer tok = new StringTokenizer(l, delimiter);
                         while (tok.hasMoreTokens()) {
@@ -482,15 +543,18 @@ public class MatrixTable {
         BufferedReader in = null;
 
         if (!file.exists()) return;
+//        if (file.getName().toLowerCase().endsWith(".zip")){
+//            readZipFile(file, startLine, file.getName());
+//        }
 
         dataFileName = file.getAbsolutePath();
         setDirty(true);
 
         try {
             FileInputStream fin = new FileInputStream(file);
-            if(charsetName == null){
+            if (charsetName == null) {
                 in = new BufferedReader(new InputStreamReader(fin));
-            }else{
+            } else {
                 in = new BufferedReader(new InputStreamReader(fin, charsetName));
             }
             read(in, startLine);
