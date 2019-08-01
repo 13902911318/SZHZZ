@@ -3,11 +3,16 @@ package szhzz.Config;
 
 import org.apache.commons.io.FileUtils;
 import szhzz.Calendar.MiscDate;
-import szhzz.Utils.Chelper;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.io.BufferedReader;
@@ -15,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.security.spec.KeySpec;
 import java.util.*;
 
 import static szhzz.Utils.Utilities.String2File;
@@ -30,10 +36,6 @@ import static szhzz.Utils.Utilities.getEquation;
 public abstract class Config {
     private static DawLogger logger = DawLogger.getLogger(Config.class);
 
-    static boolean checkPassword = false;
-    private static Hashtable<String, String> keyMap = new Hashtable<>();
-
-    public static boolean allSaveModel = false;
     static int masterIndex = 0;
     Hashtable<String, item> datas;
     LinkedList<item> index;
@@ -45,23 +47,10 @@ public abstract class Config {
     private Hashtable<String, Config> children = null;
     private LinkedList<String> childrenIndex = null;
     private boolean autoSave = false; //未实现
-    private boolean isSafe = false; //
-    private static CfgChecker checker = null;
 
     public Config() {
         datas = new Hashtable<String, item>();
         index = new LinkedList<item>();
-        if (allSaveModel) isSafe = allSaveModel;
-    }
-
-    public static void setChecker(CfgChecker checker) {
-        Config.checker = checker;
-    }
-
-    public void checkCfg() {
-        if (checker != null) {
-            checker.checkCfg(this);
-        }
     }
 
     public boolean isMerged() {
@@ -133,14 +122,11 @@ public abstract class Config {
     }
 
     public String getProperty(String name) {
-        if (datas.get(name) != null) {
-            String val = decodeLine(datas.get(name).value);
-            if ("".equals(val) || "''".equals(val) || "\"\"".equals(val)) {
-                return null;
-            }
-            return val;
-        }
-        return null;
+        String ret = null;
+        if (datas.get(name) != null)
+            ret = decodeLine(datas.get(name).value);
+
+        return ret;
     }
 
     public String getLastVal(String name) {
@@ -264,14 +250,13 @@ public abstract class Config {
     }
 
     private String encodeLine(String lines) {
-        if (lines == null) return "";
         if (lines.contains("\n")) {
             lines = lines.replace("\n", "\\n");
         }
         return lines;
     }
 
-    String decodeLine(String lines) {
+    private String decodeLine(String lines) {
         if (lines.contains("\\n")) {
             lines = lines.replace("\\n", "\n");
         }
@@ -357,7 +342,7 @@ public abstract class Config {
         String val = getProperty(name);
         if (val != null)
             try {
-                return NU.parseInt(val, defalt);
+                return NU.parseLong(val, (long) defalt).intValue();
             } catch (Exception e) {
 
             }
@@ -395,15 +380,15 @@ public abstract class Config {
         return getLongVal(name, 0l);
     }
 
-    public float getFloatVal(String name, float defaults) {
+    public float getFloatVal(String name, float defalt) {
         String val = getProperty(name);
         if (val != null)
             try {
-                return NU.parseDouble(val, (double) defaults).floatValue();
+                return NU.parseDouble(val, (double) defalt).floatValue();
             } catch (Exception ignored) {
 
             }
-        return defaults;
+        return defalt;
     }
 
     public float getFloatVal(String name) {
@@ -427,21 +412,17 @@ public abstract class Config {
         return getDoubleVal(name, 0d);
     }
 
+
     public Vector<String> getKeys() {
         Vector<String> e = new Vector();
         for (int i = 0; i < index.size(); i++) {
             String k = index.get(i).name;
-            if (!(this.hideProtect && this.isProtected(k))) {
+            if (hideProtect && isProtected(k)) {
+                continue;
+            }
+            if (getProperty(k, null) != null) {
                 e.add(k);
             }
-        }
-        return e;
-    }
-
-    public Vector<String> getAllKeys() {
-        Vector<String> e = new Vector();
-        for (int i = 0; i < index.size(); i++) {
-            e.add(index.get(i).name);
         }
         return e;
     }
@@ -636,11 +617,8 @@ public abstract class Config {
     }
 
     public Config getChild(String sectionName) {
-        Config c = null;
-        if (children != null) {
-            c = children.get(sectionName);
-            }
-        return c == null ? newChild(sectionName) : c;
+        if (children == null) return null;
+        return children.get(sectionName);
     }
 
     public void loadDataVal(BufferedReader in) {
@@ -648,7 +626,6 @@ public abstract class Config {
         try {
             while ((tk = in.readLine()) != null) {
                 String trim = tk.trim();
-//                if(trim.startsWith("[*"))continue;  //不使用的单元
                 while (trim.startsWith("[") && trim.endsWith("]")) {
                     if (children == null) {
                         children = new Hashtable<>();
@@ -656,12 +633,9 @@ public abstract class Config {
                     }
                     Config cfg = new ConfigF();
                     String name = trim.replace("[", "").replace("]", "").toUpperCase();
+                    children.put(name, cfg);
+                    childrenIndex.add(name);
                     trim = cfg.loadChild(in);
-
-                    if(!name.startsWith("*")) {//不使用的单元
-                        children.put(name, cfg);
-                        childrenIndex.add(name);
-                    }
                 }
                 if (trim.length() == 0) continue;
                 item e = new item(tk);
@@ -680,8 +654,6 @@ public abstract class Config {
 
     public void loadDataVal(String lines) {
         String[] tk = lines.split("\n");
-        datas.clear();
-        index.clear();
 
         for (String l : tk) {
             if (l.length() == 0) continue;
@@ -798,16 +770,11 @@ public abstract class Config {
         return o != null && o instanceof Config && this.getConfigUrl().equals(((Config) o).getConfigUrl());
     }
 
-    public void setHideProtect(boolean hideProtect) {
-        this.hideProtect = hideProtect;
-    }
-
     public class item {
         String name = null;
         String value = null;
         String comment = "";
         String old_value = null;
-        String encript_ = null;
 
         item(String name, String value) {
             this.name = name;
@@ -816,18 +783,18 @@ public abstract class Config {
         }
 
         item(String line) {
-            if (!line.contains("=")) return;
-
             old_value = value;
             String e[] = getEquation(decodeLine(line));
-            if (e[0] == null) return;
-
             name = e[0];
+            value = e[1];
             comment = e[2];
-            setValue(e[1]);
             cfgDirty = true;
-//            String encryptedString = AES.encrypt(originalString, secretKey_) ;
-//            String decryptedString = AES.decrypt(encryptedString, secretKey_) ;
+            if(comment != null && comment.trim().equalsIgnoreCase("[password!]")){
+                //  TODO value = decrypt(e[1], secretKey);
+                //  TODO tvalue = decrypt(e[1], secretKey);
+            }
+//            String encryptedString = AES.encrypt(originalString, secretKey) ;
+//            String decryptedString = AES.decrypt(encryptedString, secretKey) ;
         }
 
 
@@ -840,27 +807,15 @@ public abstract class Config {
             if ("".equals(name)) {
                 l = getComment();
             } else {
-                l = name + "=" + (encript_ != null ? encript_ : value);
-                if (getComment().trim().length() > 0) l += "    //" + getComment();
-            }
-            return l;
-        }
-
-        public String toString_() {
-            String l = "";
-            if ("".equals(name)) {
-                l = getComment();
-            } else {
                 String val = "";
-//                if (getComment().trim().equalsIgnoreCase("[Password]")){
-//                    val = getValue();
-////                    val = encrypt(getValue(), "");
-//                    l = name + "=" + val;
-//                    l += "    //" + "[Password!]";
-//                }else{
-//                    val = getValue();
-//                    l = name + "=" + val + "    //" + getComment();;
-//                }
+                if (getComment().trim().equalsIgnoreCase("[Password]")){
+                    val = getValue();
+//                    val = encrypt(getValue(), "");
+                }else{
+                    val = getValue();
+                }
+                l = name + "=" + val;
+                l += "    //" + "[Password!]";
             }
             return l;
         }
@@ -879,44 +834,21 @@ public abstract class Config {
         }
 
         public void setValue(String value) {
-            if (isSafeModle()) {
-                setValue_s(value);
-            } else {
-                old_value = this.value;
-                this.value = decodeLine(value);
-                cfgDirty = true;
-
-            }
-        }
-
-
-        protected void setValue_s(String value_) {
             old_value = this.value;
-            this.value = decodeLine(value_);
-
-
-            // 已加密数值用{}括起
-            if (value.startsWith("{") && value.endsWith("}")) {
-                encript_ = value;
-                String val = keyMap.get(encript_);
-                if (val == null) {
-                    val = value.substring(1, value.length() - 1);
-                    val = Chelper.decrypt(val, secretKey_);
-                    keyMap.put(encript_, val);
-                }
-                value = val;
-            } else if (value.startsWith("<") && value.endsWith(">")) {
-                if (checkPassword)
-                    logger.info(getConfigUrl() + "\t" + name + "=" + value_ + " encript!");
-
-                //加密明码
-                value = value.substring(1, value.length() - 1);
-                encript_ = "{" + Chelper.encrypt(value, secretKey_) + "}";
-                keyMap.putIfAbsent(encript_, value);
-            }
+            this.value = decodeLine(value);
             cfgDirty = true;
         }
 
+//        boolean isDirty() {
+//            if (value == null) {
+//                return old_value != null;
+//            }
+//            return !value.equals(old_value);
+//        }
+//
+//        void clearDirty() {
+//            old_value = null;
+//        }
 
         public String getComment() {
             return comment;
@@ -963,14 +895,49 @@ public abstract class Config {
 
     }
 
-    public boolean isSafeModle() {
-        return allSaveModel || isSafe;
+    private static String secretKey = "H2ua543n8g00He54R7u8Ha8iLiu";
+    private static String salt = "Ba8iR2iYi23Shan82647Jin";
+    private static String encrypt(String strToEncrypt, String secret)
+    {
+        try{
+
+            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), salt.getBytes(), 65536, 256);
+            SecretKey tmp = factory.generateSecret(spec);
+            SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+        }
+        return null;
     }
 
-    public void setSafe(boolean safe) {
-        this.isSafe = safe;
-    }
+    private static String decrypt(String strToDecrypt, String secret) {
+        try
+        {
+            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-    private static final String secretKey_ = "H2ua543n8g00He54R7u8Ha8iLiu";
-    private static final String salt_ = "Ba8iR2iYi23Shan82647Jin";
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), salt.getBytes(), 65536, 256);
+            SecretKey tmp = factory.generateSecret(spec);
+            SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+        }
+        catch (Exception e) {
+            System.out.println("Error while decrypting: " + e.toString());
+        }
+        return null;
+    }
 }

@@ -7,8 +7,6 @@ import szhzz.Table.Filters.RowFilter;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -41,7 +39,7 @@ public class MatrixTable {
     private Comparator comparator = null;
     private int readLines = 0;
     private String charsetName = null;
-    private boolean noTrim = false;
+
     private MatrixTableModel tableModel = null;
 
     public MatrixTable() {
@@ -68,13 +66,55 @@ public class MatrixTable {
     }
 
     public int getColumnNo(String col) {
-        if (header == null || col == null) return -1;
-        return header.indexOf(col);
+        int cNo = -1;
+        if (col != null && header != null) {
+            for (int i = 0; i < header.size(); i++) {
+                if (col.equals(header.get(i))) {
+                    cNo = i;
+                    break;
+                }
+            }
+        }
+        return cNo;
     }
 
     public boolean hasColumn(String col) {
-        return getColumnNo(col) >= 0;
+        boolean has = false;
+        if (col != null && header != null) {
+            for (String aHeader : header) {
+                if (col.equals(aHeader)) {
+                    has = true;
+                    break;
+                }
+            }
+        }
+        return has;
     }
+//    public void setPrimariKey(String col) {
+//        setPrimariKey(col, false);
+//    }
+//
+//    public void setPrimariKey(String col, boolean reverse) {
+//        setPrimariKey(getColumnNo(col), reverse, DataTypeString);
+//    }
+//
+//    public void setPrimariKey(int col) {
+//        setPrimariKey(col, false, DataTypeString);
+//    }
+//
+//    public void setPrimariKey(int col, boolean reverse) {
+//        setPrimariKey(col, reverse, DataTypeString);
+//    }
+//
+//    public void setPrimariKey(int col, boolean reverse, int dataType) {
+//        if (col < 0) return;
+//        sortColumnDataType = dataType;
+//
+//        sortColumn = col;
+//        sortReves = reverse;
+//        isDirty = true;
+//        reSort();
+//    }
 
     public int find(String col, String val) {
         return find(col, val, 0);
@@ -196,27 +236,16 @@ public class MatrixTable {
     public String get(int row, String col) {
         return get(row, getColumnNo(col));
     }
-    public String get(int row, String col, String def) {
-        return get(row, getColumnNo(col),def);
-    }
 
-    public String get(int row, int col, String def) {
+    public String get(int row, int col) {
         String val = null;
         LinkedList<String> dataRow = getRow(row);
         if (dataRow != null && col >= 0 && col < dataRow.size())
             val = dataRow.get(col);
         if (val != null) {
-            if (!noTrim) {
-                val = val.trim();
-            }
+            val = val.trim();
         }
-        if (val == null) return def;
-
         return val;
-    }
-
-    public String get(int row, int col) {
-        return get(row, col, null);
     }
 
     public String[] getHeader() {
@@ -364,7 +393,7 @@ public class MatrixTable {
     }
 
     public void saveAs(File file) throws IOException {
-        PrintWriter out = new PrintWriter(file.getAbsolutePath(), "UTF-8");
+        PrintWriter out = new PrintWriter(new FileWriter(file, false));
         reSort();
         try {
             if (has_Header) {
@@ -405,7 +434,7 @@ public class MatrixTable {
     }
 
     public void readZipFile(File file, int startLine) {
-        readZipFile(file, startLine, null);
+        readZipFile(file, startLine, null) ;
     }
 
     public void readZipFile(File file, int startLine, String fName) {
@@ -423,7 +452,7 @@ public class MatrixTable {
 //                if(f.indexOf(".") > 0){
 //                    f = f.substring(0,f.indexOf("."));
 //                }
-                if (fName == null || f.equalsIgnoreCase(fName)) {
+                if (fName == null || f.equalsIgnoreCase(fName)){
                     if (charsetName == null) {
                         in = new BufferedReader(new InputStreamReader(zipIn));
                     } else {
@@ -483,25 +512,16 @@ public class MatrixTable {
 
             if (counter == 0) {
                 l = l.replace("\uFEFF", "");//UTF-8 with sing
-            }
-            if (counter == 0 && this.isHasHeader()) {
-                if (!this.headerFilled()) {
-                    StringTokenizer tok = new StringTokenizer(l, delimiter);
-                    while (tok.hasMoreTokens()) {
-                        this.setColumnName(tok.nextToken());
+                if (this.isHasHeader()) {
+                    if (!this.headerFilled()) {
+                        StringTokenizer tok = new StringTokenizer(l, delimiter);
+                        while (tok.hasMoreTokens()) {
+                            this.setColumnName(tok.nextToken());
+                        }
                     }
                 }
             } else {
-                if (noTrim) {
-                    String e[] = l.split(delimiter);
-
-                    if (filter != null && !filter.accept(e)) continue;
-
-                    LinkedList<String> row = this.appendRow();
-                    for (String anE : e) {
-                        row.add(anE);
-                    }
-                } else if (l.trim().length() > 0) {
+                if (l.trim().length() > 0) {
                     String e[] = l.split(delimiter);
 
                     if (filter != null && !filter.accept(e)) continue;
@@ -600,10 +620,6 @@ public class MatrixTable {
 
     public void setCharsetName(String charsetName) {
         this.charsetName = charsetName;
-    }
-
-    public void setNoTrim(boolean noTrim) {
-        this.noTrim = noTrim;
     }
 
     //

@@ -26,7 +26,6 @@ public class ClusterClients {
     private Hashtable<String, NettyClient> clients = new Hashtable<String, NettyClient>();
     private int defaultPort = 7522;
     private int circleTime = 10* 1000;
-    private int connectionTimeout = 1000;
 
     public void setTimer(int circleTime) {
         if(circleTime <= 0) return;
@@ -109,10 +108,7 @@ public class ClusterClients {
      * 无需等待回答
      */
     public long tell(String stationName, NettyExchangeData msg) {
-        NettyClient client = null;
-        if(stationName != null && clients.contains(stationName)){
-            client = clients.get(stationName);
-        }
+        NettyClient client = clients.get(stationName);
         if (client == null) {
             logger.debug("Client " + stationName + " not create error!");
             return -1;
@@ -198,22 +194,18 @@ public class ClusterClients {
     }
 
 
-
     public NettyClient registerClient(String computerName, String[] address, int port) {
         NettyClient client = clients.get(computerName);
         if (client == null) {
             try {
                 client = new NettyClient(address, port);
-                client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
+
                 clients.put(computerName, client);
                 App.logit(computerName + " " + client.getHost() + " to be connect");
             } catch (Exception e) {
                 logger.error(e);
             }
-        }else{
-            client.disconnectFromServer();
-            client.setHost(address, port);
         }
         client.start();
         return client;
@@ -255,7 +247,4 @@ public class ClusterClients {
         }
     };
 
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
-    }
 }
