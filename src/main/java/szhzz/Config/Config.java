@@ -2,6 +2,7 @@ package szhzz.Config;
 
 
 import org.apache.commons.io.FileUtils;
+import szhzz.Utils.Chelper;
 import szhzz.Calendar.MiscDate;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
@@ -29,6 +30,7 @@ import static szhzz.Utils.Utilities.getEquation;
 public abstract class Config {
     private static DawLogger logger = DawLogger.getLogger(Config.class);
 
+    static boolean checkPassword = false;
     static int masterIndex = 0;
     Hashtable<String, item> datas;
     LinkedList<item> index;
@@ -39,6 +41,8 @@ public abstract class Config {
     private boolean reloadProtect = false;
     private Hashtable<String, Config> children = null;
     private LinkedList<String> childrenIndex = null;
+    private boolean autoSave = false; //未实现
+
 
     public Config() {
         datas = new Hashtable<String, item>();
@@ -117,6 +121,7 @@ public abstract class Config {
         String ret = null;
         if (datas.get(name) != null)
             ret = decodeLine(datas.get(name).value);
+
         return ret;
     }
 
@@ -414,6 +419,14 @@ public abstract class Config {
             if (getProperty(k, null) != null) {
                 e.add(k);
             }
+        }
+        return e;
+    }
+
+    Vector<String> getAllKeys() {
+        Vector<String> e = new Vector();
+        for (int i = 0; i < index.size(); i++) {
+             e.add(index.get(i).name);
         }
         return e;
     }
@@ -766,6 +779,7 @@ public abstract class Config {
         String value = null;
         String comment = "";
         String old_value = null;
+        String encript_ = null;
 
         item(String name, String value) {
             this.name = name;
@@ -777,9 +791,11 @@ public abstract class Config {
             old_value = value;
             String e[] = getEquation(decodeLine(line));
             name = e[0];
-            value = e[1];
             comment = e[2];
+            setValue(e[1]);
             cfgDirty = true;
+//            String encryptedString = AES.encrypt(originalString, secretKey_) ;
+//            String decryptedString = AES.decrypt(encryptedString, secretKey_) ;
         }
 
 
@@ -792,8 +808,27 @@ public abstract class Config {
             if ("".equals(name)) {
                 l = getComment();
             } else {
-                l = name + "=" + getValue();
+                l = name + "=" + (encript_ != null ? encript_ : value);
                 if (getComment().trim().length() > 0) l += "    //" + getComment();
+            }
+            return l;
+        }
+
+        public String toString_() {
+            String l = "";
+            if ("".equals(name)) {
+                l = getComment();
+            } else {
+                String val = "";
+//                if (getComment().trim().equalsIgnoreCase("[Password]")){
+//                    val = getValue();
+////                    val = encrypt(getValue(), "");
+//                    l = name + "=" + val;
+//                    l += "    //" + "[Password!]";
+//                }else{
+//                    val = getValue();
+//                    l = name + "=" + val + "    //" + getComment();;
+//                }
             }
             return l;
         }
@@ -812,21 +847,59 @@ public abstract class Config {
         }
 
         public void setValue(String value) {
+            if(isSafeModle()){
+                setValue_s(value);
+            }else {
+                old_value = this.value;
+                this.value = decodeLine(value);
+                cfgDirty = true;
+
+                if(checkPassword && isPassword(this.value)){
+                    logger.warn(getConfigUrl() + "\t" + name + "=" + this.value + " need encript!");
+                }
+            }
+        }
+
+        /**
+         * TODO 删除此函数
+         * @param val
+         * @return
+         */
+        private boolean isPassword(String val){
+//            return false;
+            // TODO TBM t and v_t
+            String en = Chelper.encrypt(val, secretKey_);
+            if ("nqjFR6HNPmgdxpajkaNmlA==".equals(en)){
+                return true;
+            }else if ("/pD4O78AUJm6MlhFnP1NBQ==".equals(en)){
+                return true;
+            }else if ("sw/zy6kl9FYxJUjjiw6P2A==".equals(en)){
+                return true;
+            }
+            return false;
+        }
+
+        protected void setValue_s(String value_) {
             old_value = this.value;
-            this.value = decodeLine(value);
+            this.value = decodeLine(value_);
+
+            if(isPassword(value)){
+                value = "<" + value + ">";
+            }
+
+            if (value.startsWith("{") && value.endsWith("}")) {
+                encript_ = value;
+                String val = value.substring(1, value.length() - 1);
+                value = Chelper.decrypt(val, secretKey_);
+
+            } else if (value.startsWith("<") && value.endsWith(">")) {
+                logger.info(getConfigUrl() + "\t" + name + "=" + value_ + " encript!");
+                value = value.substring(1, value.length() - 1);
+                encript_ = "{" + Chelper.encrypt(value, secretKey_) + "}";
+            }
             cfgDirty = true;
         }
 
-//        boolean isDirty() {
-//            if (value == null) {
-//                return old_value != null;
-//            }
-//            return !value.equals(old_value);
-//        }
-//
-//        void clearDirty() {
-//            old_value = null;
-//        }
 
         public String getComment() {
             return comment;
@@ -872,4 +945,10 @@ public abstract class Config {
         cfgDirty = true;
 
     }
+
+    protected boolean isSafeModle(){
+        return false;
+    }
+    private static final String secretKey_ = "H2ua543n8g00He54R7u8Ha8iLiu";
+    private static final String salt_ = "Ba8iR2iYi23Shan82647Jin";
 }

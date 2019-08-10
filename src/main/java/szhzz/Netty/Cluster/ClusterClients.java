@@ -108,7 +108,10 @@ public class ClusterClients {
      * 无需等待回答
      */
     public long tell(String stationName, NettyExchangeData msg) {
-        NettyClient client = clients.get(stationName);
+        NettyClient client = null;
+        if(stationName != null && clients.contains(stationName)){
+            client = clients.get(stationName);
+        }
         if (client == null) {
             logger.debug("Client " + stationName + " not create error!");
             return -1;

@@ -103,4 +103,11 @@ public class ConfigF extends Config {
     public String getConfigFolder() {
         return new File(configFileName).getParent();
     }
+
+    public static void main(String[] args ){
+        ConfigF cfg = new ConfigF();
+        cfg.load("D:\\tbd\\第一创业王宁C.ini");
+        cfg.save();
+        cfg = null;
+    }
 }

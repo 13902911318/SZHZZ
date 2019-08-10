@@ -11,10 +11,24 @@ public class SharedCfgProvider extends CfgProvider {
     private static SharedCfgProvider onlyOne = null;
     private String shareFolder = null;
 
+//    public static CfgProvider getInstance(String groupName) {
+//        CfgProvider onlyOne = provider.get(groupName);
+//        if (onlyOne == null) {
+//            onlyOne = new SharedCfgProvider();
+//            onlyOne.laodCfgs(groupName);
+//            provider.put(groupName, onlyOne);
+//        }
+//        return onlyOne;
+//    }
+
     public static CfgProvider getInstance(String groupName) {
+        return getInstance(groupName, false);
+    }
+    public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null) {
             onlyOne = new SharedCfgProvider();
+            onlyOne.setSafeModel(safeModel);
             onlyOne.laodCfgs(groupName);
             provider.put(groupName, onlyOne);
         }

@@ -159,6 +159,7 @@ public class StockRegulate {
         if (code.startsWith("500")) return "SHJ";    // ×××基金；
         if (code.startsWith("550")) return "SHJ";    // ×××基金；
         if (code.startsWith("60")) return "SHA";    // ×××A股；
+        if (code.startsWith("688")) return "SHA";    // ×××创业板；
 //        if (code.startsWith("601")) return "SHA";    // ×××A股；
         if (code.startsWith("700")) return "PG";    // ×××配股；
         if (code.startsWith("710")) return "ZPG";    // ×××转配股；

@@ -26,8 +26,10 @@ public class MailMsg {
 
     private static void loadMailBox() {
         LinkedList<String> ids = SharedCfgProvider.getInstance("MailBox").getCfgIDs();
+//        LinkedList<String> ids = SharedCfgProvider.getInstance("MailBox", true).getCfgIDs();
         for (String id : ids) {
             Config cfg = SharedCfgProvider.getInstance("MailBox").getCfg(id);
+//            Config cfg = SharedCfgProvider.getInstance("MailBox", true).getCfg(id);
             MailMsg mm = new MailMsg();
             mm.smtp = cfg.getProperty("smtp", mm.smtp);
             mm.mailTo = cfg.getProperty("mailTo", mm.mailTo);

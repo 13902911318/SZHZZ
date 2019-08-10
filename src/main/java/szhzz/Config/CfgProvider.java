@@ -32,13 +32,30 @@ public class CfgProvider {
     protected static String appClass = "default";
     private static CfgEditor cfgEditor = null;
     private static String configRoot = "Quant";
+    private boolean safeModel = false;
 
+    void setSafeModel(boolean safeModle){
+        this.safeModel = safeModle;
+    }
+
+    public boolean isSafeModel(){
+        return safeModel;
+    }
     public static CfgProvider getInstance(String groupName) {
+        return getInstance(groupName, false) ;
+    }
+    public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null) {
             onlyOne = new CfgProvider();
+            onlyOne.setSafeModel(safeModel);
             onlyOne.laodCfgs(groupName);
             provider.put(groupName, onlyOne);
+        }else{
+            if (safeModel && !onlyOne.isSafeModel()){
+                onlyOne.setSafeModel(safeModel);
+                onlyOne.reloadCfgs();
+            }
         }
         return onlyOne;
     }
@@ -155,7 +172,12 @@ public class CfgProvider {
         if (file != null) {
             for (File aFile : file) {
                 if (aFile.getName().toLowerCase().endsWith(".ini")) {
-                    Config c = new ConfigF();
+                    Config c;
+                    if(isSafeModel()){
+                        c = new ConfigF_s();
+                    }else{
+                        c = new ConfigF();
+                    }
                     try {
                         c.load(aFile.getCanonicalPath());
                         cfgNames.add(c.getConfigID());
