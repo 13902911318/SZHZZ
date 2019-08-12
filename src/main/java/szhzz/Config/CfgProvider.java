@@ -9,7 +9,6 @@ import szhzz.Utils.Utilities;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -24,8 +23,8 @@ public class CfgProvider {
     static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
     protected static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
     protected Config cfg = null;
-    protected HashMap<String, Config> allCfgs = new HashMap<>() ;
-    //protected LinkedList<String> cfgNames = new LinkedList<String>();
+    protected Hashtable<Object, Config> allCfgs;
+    protected LinkedList<String> cfgNames = new LinkedList<String>();
 
     protected String cfgFolder = null;
     protected String groupName = null;
@@ -35,7 +34,7 @@ public class CfgProvider {
     private static String configRoot = "Quant";
     private boolean safeModel = false;
 
-    protected void setSafeModel(boolean safeModle){
+    void setSafeModel(boolean safeModle){
         this.safeModel = safeModle;
     }
 
@@ -48,11 +47,7 @@ public class CfgProvider {
     public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null) {
-            if(groupName.equals(DbCfgProvider.gourpID) && DbConfig.isNewVersion()){
-                onlyOne = DbCfgProvider.getInstance();
-            }else {
-                onlyOne = new CfgProvider();
-            }
+            onlyOne = new CfgProvider();
             onlyOne.setSafeModel(safeModel);
             onlyOne.laodCfgs(groupName);
             provider.put(groupName, onlyOne);
@@ -106,8 +101,8 @@ public class CfgProvider {
     }
 
     public void addCfg(Config c) {
-//        String fileName = cfgFolder + "\\" + c.getConfigID() + ".ini";
-//        cfgNames.add(c.getConfigID());
+        String fileName = cfgFolder + "\\" + c.getConfigID() + ".ini";
+        cfgNames.add(c.getConfigID());
         allCfgs.put(c.getConfigID(), c);  //.toLowerCase()
     }
 
@@ -139,9 +134,7 @@ public class CfgProvider {
     }
 
     public LinkedList<String> getCfgIDs() {
-        LinkedList<String> list = new LinkedList<>();
-        list.addAll(allCfgs.keySet());
-        return list;
+        return (LinkedList<String>) cfgNames.clone();
     }
 
     public void reloadCfgs() {
@@ -172,22 +165,22 @@ public class CfgProvider {
         cfgFolder = getDir();
         (new File(cfgFolder)).mkdirs();
 
-        allCfgs.clear();
+        allCfgs = new Hashtable<Object, Config>();
+        cfgNames.clear();
 
         File[] file = (new File(cfgFolder)).listFiles();
         if (file != null) {
             for (File aFile : file) {
                 if (aFile.getName().toLowerCase().endsWith(".ini")) {
                     Config c;
-//                    if(isSafeModel()){
-//                        c = new ConfigF_s();
-//                    }else{
+                    if(isSafeModel()){
+                        c = new ConfigF_s();
+                    }else{
                         c = new ConfigF();
-//                    }
-                    c.setSafe(isSafeModel());
+                    }
                     try {
                         c.load(aFile.getCanonicalPath());
-//                        cfgNames.add(c.getConfigID());
+                        cfgNames.add(c.getConfigID());
                         allCfgs.put(c.getConfigID(), c);  //.toLowerCase()
                         changeCfg(c);
                     } catch (IOException e) {
