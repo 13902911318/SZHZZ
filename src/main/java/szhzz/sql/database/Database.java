@@ -240,17 +240,17 @@ public class Database {
             return true;
         }
         try {
-            loadDriverClass(map.getProperty(DRIVER));
+            loadDriverClass(map.getProperty(DRIVER).trim());
             prepareLogging();
             Properties p = new Properties();
 
 
-            String user = map.getProperty(USER);
+            String user = map.getProperty(USER).trim();
             if (user != null && user.length() > 0) {
                 p.put("user", user);
             }
 
-            String password = map.getProperty(PASSWORD);
+            String password = map.getProperty(PASSWORD).trim();
             if (password != null) {
                 p.put("password", password);
             }

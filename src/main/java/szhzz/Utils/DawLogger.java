@@ -47,7 +47,7 @@ public class DawLogger {
     private static int level = ALL;
     private static int maxBufferSize = 102400;  // 100K
     private static int errorCount = 0;
-
+    private static int maxErrorCount = 2;
     private org.apache.log4j.Logger logger = null;
 
     private DawLogger() {
@@ -144,6 +144,10 @@ public class DawLogger {
         return errorCount;
     }
 
+    public static void setMaxErrorCount(int maxErrorCount) {
+        DawLogger.maxErrorCount = maxErrorCount;
+    }
+
     public void setLogFile(String f) {
         setLogFile(f, false);
     }
@@ -219,7 +223,7 @@ public class DawLogger {
 
     public void error(String s) {
         errorCount++;
-        if (errorCount <= 2) {
+        if (errorCount <= maxErrorCount) {
             try {
                 Utilities.String2File(MyDate.getToday().getDateTime() + ">" + s, "error.txt", true);
             } catch (IOException e) {
@@ -236,7 +240,7 @@ public class DawLogger {
 
     public void error(String s, Throwable e) {
         errorCount++;
-        if (errorCount <= 2) {
+        if (errorCount <= maxErrorCount) {
             try {
                 Writer result = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(result);
@@ -260,7 +264,7 @@ public class DawLogger {
 
     public void error(Throwable e) {
         errorCount++;
-        if (errorCount <= 2) {
+        if (errorCount <= maxErrorCount) {
             try {
                 Writer result = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(result);

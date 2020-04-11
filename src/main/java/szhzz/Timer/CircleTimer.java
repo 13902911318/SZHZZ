@@ -51,7 +51,7 @@ public abstract class CircleTimer implements DawCountdown, Runnable {
 
     public void run() {
         if(processing){
-            logger.error(new Exception("可能错误使用CircleTimer, execTask() 出现重叠调用."));
+            logger.info(new Exception("可能错误使用CircleTimer, execTask() 出现重叠调用."));
             return;
         }
         processing =true;

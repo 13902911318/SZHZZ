@@ -102,8 +102,11 @@ public class AppEventExchange {
         return eventType;
     }
 
+    public void setEvent(String name, String value, String comment) {
+        setEvent(name, value, false, comment);
+    }
     public void setEvent(String name, String value) {
-        setEvent(name, value, false);
+        setEvent(name, value, null);
     }
 
     public int getTimeOffset() {
@@ -139,12 +142,15 @@ public class AppEventExchange {
 //    }
 
     public void setEvent(String name, String value, boolean broadcast) {
+        setEvent(name, value, broadcast, null);
+    }
+    public void setEvent(String name, String value, boolean broadcast, String comment) {
         try {
             if (name == null || value == null || name.length() == 0) return;
 
             onSelfModify = true;
             cfg.reLoad();//避免覆盖其它程序的更新
-            cfg.setProperty(name, value);
+            cfg.setProperty(name, value, comment);
             cfg.save();
 
             if("时间误差".equals(name)){

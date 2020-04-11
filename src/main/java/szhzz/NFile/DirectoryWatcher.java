@@ -31,6 +31,7 @@ public class DirectoryWatcher extends Observable implements Runnable {
     private Path path;
     private WatchKey key;
     private String onPath = "";
+    private boolean close = false;
 
     public DirectoryWatcher(String dir) throws IOException {
         watcher = FileSystems.getDefault().newWatchService();
@@ -50,8 +51,9 @@ public class DirectoryWatcher extends Observable implements Runnable {
     /**
      * 监控文件系统事件
      */
-    void processEvents() {
-        while (true) {
+    private void processEvents() {
+        try {
+        while (!close) {
             // 等待直到获得事件信号
 
             try {
@@ -79,16 +81,16 @@ public class DirectoryWatcher extends Observable implements Runnable {
                 }
                 //    为监控下一个通知做准备
                 if (!key.reset()) {
-                    try {
-
-                        // Exit if directory is deleted
-                        watcher.close();
                         break;
-                    } catch (IOException e) {
-//                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    }
                 }
             }
+        }
+        // Exit if directory is deleted
+        watcher.close();
+        } catch (Exception e) {
+            logger.error(e);
+        }finally {
+            close = false;
         }
     }
 
@@ -106,5 +108,9 @@ public class DirectoryWatcher extends Observable implements Runnable {
     @Override
     public void run() {
         processEvents();
+     }
+
+    public void stopWatch() {
+        this.close = close;
     }
 }

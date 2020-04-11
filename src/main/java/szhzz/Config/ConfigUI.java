@@ -18,6 +18,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Enumeration;
@@ -114,6 +116,22 @@ public class ConfigUI {
         compareClipboard.setToolTipText("与剪贴板比较");
         compareClipboard.setEnabled(true);
         cfgEditor.getToolBar().add(compareClipboard);
+
+//        dw.addKeyListener(
+//                new KeyAdapter() {
+//                    public void keyReleased(KeyEvent e) {
+//                        int m = e.getModifiers();
+//                        int n = KeyEvent.CTRL_MASK;
+//                        if (e.getModifiers() == KeyEvent.CTRL_MASK) {
+//                            int a = e.getKeyCode();
+//                            int b = KeyEvent.VK_S;
+//                            if (e.getKeyCode() == KeyEvent.VK_S) {
+//                                onWrite();
+//                            }
+//                        }
+//                    }
+//                }
+//        );
 
 //        compareCfg = new JButton();
 //        compareCfg.setIcon(new ImageIcon(getClass().ResourceManager("/GUIS/resources/and.gif")));

@@ -268,18 +268,28 @@ public class Utilities {
     public static String[] getEquation(String equation) {
         String e[] = new String[3];
         int pos;
+
         pos = equation.indexOf("=");
         if (pos >= 0 && pos < equation.length()) {
             e[0] = equation.substring(0, pos).trim();
 
             equation = equation.substring(pos + 1);
             pos = equation.indexOf("//");
-            if (pos >= 0 && pos < equation.length()) {
-                e[1] = equation.substring(0, pos).trim();
-                e[2] = equation.substring(pos + 2).trim();
-            } else {
-                e[1] = equation.substring(pos + 1).trim();
-                e[2] = "";
+            if(pos == 0){
+                e[1] = "";
+                e[2] = equation.substring(pos + 3).trim();
+            }else {
+                pos = equation.indexOf(" //");
+                if (pos < 0) {
+                    pos = equation.indexOf("\t//");
+                }
+                if (pos >= 0 && pos < equation.length()) {
+                    e[1] = equation.substring(0, pos).trim();
+                    e[2] = equation.substring(pos + 3).trim();
+                } else {
+                    e[1] = equation.substring(pos + 1).trim();
+                    e[2] = "";
+                }
             }
         } else {
             if (equation.startsWith("#")) {

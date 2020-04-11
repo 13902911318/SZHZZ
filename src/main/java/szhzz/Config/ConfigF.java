@@ -59,7 +59,6 @@ public class ConfigF extends Config {
             if (cs == null) {
                 cs = System.getProperty("file.encoding");
             }
-
             in = new FileInputStream(configFileName);
             buff = new BufferedReader(new InputStreamReader(in, cs));
             loadDataVal(buff);

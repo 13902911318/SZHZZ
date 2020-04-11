@@ -103,7 +103,8 @@ public class MyDate implements Serializable {
     private static final int millisOneDay = 24 * 60 * 60 * 1000;
     public static final int secondsOneDay = 24 * 60 * 60;
     private static final String DELIMITER = "-";
-    public static String[] m60 = new String[]{"09:30:00",
+
+    public static final String[] m60 = new String[]{"09:30:00",
             "10:30:00",
             "11:30:00",
             "14:00:00",
@@ -696,7 +697,12 @@ public class MyDate implements Serializable {
 
         if (input == null || "".equals(input)) return false;
 
-        String ts[] = input.split(":");
+        String ts[] = input.split(" ");
+        if(ts.length > 1){
+            ts = ts[1].split(":");
+        }else{
+            ts = input.split(":");
+        }
 
         try {
             if (ts.length > 0) hour = Integer.parseInt(ts[0]);
