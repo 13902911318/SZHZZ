@@ -103,6 +103,7 @@ public class DataWindow extends JTable {
     private ArrayList<String> userMenuTitle = new ArrayList<String>();
     private IdleTimer idleTimer = null;
     private boolean copyScriptToClipbaod = false;
+    private boolean findDownModel = false;
 
     public DataWindow() {
         super();
@@ -163,7 +164,7 @@ public class DataWindow extends JTable {
 
     public Object getValueAt(int row, int col, Object defaultVal) {
         Object val = getValueAt(row, col);
-        if(val == null) return defaultVal;
+        if (val == null) return defaultVal;
         return val;
     }
 
@@ -572,13 +573,39 @@ public class DataWindow extends JTable {
      */
     public int find(int col, Object value) {
         //return ds.find(col, value);
-
+        if (findDownModel) {
+            return findDown(col, value);
+        }
         if (value == null) return -1;
         TableModel tm = this.getModel();
         int rows = tm.getRowCount();
         for (int i = 0; i < rows; i++) {
             if (value.equals(tm.getValueAt(i, col))) {
                 return i;
+            }
+        }
+        return -1;
+    }
+
+    private int findDown(int col, Object value) {
+        if (value == null) return -1;
+        int rows = this.getRowCount();
+        int currentRow = this.getCurrentRow();
+
+        if (currentRow < 0) {
+            currentRow = 0;
+        }
+
+        for (int i = currentRow + 1; i < rows; i++) {
+            if (value.equals(this.getValueAt(i, col))) {
+                return i;
+            }
+        }
+        if (currentRow > 0) {
+            for (int i = 0; i < currentRow; i++) {
+                if (value.equals(this.getValueAt(i, col))) {
+                    return i;
+                }
             }
         }
         return -1;
@@ -600,6 +627,7 @@ public class DataWindow extends JTable {
         }
         return null;
     }
+
 
     /**
      * Apply modfied data to database
@@ -1161,6 +1189,10 @@ public class DataWindow extends JTable {
 
     public void setCopyScriptToClipbaod(boolean copyScriptToClipbaod) {
         this.copyScriptToClipbaod = copyScriptToClipbaod;
+    }
+
+    public void setFindDownModel(boolean findDownModel) {
+        this.findDownModel = findDownModel;
     }
 
     private class rowsDebug extends DWRowChanged {

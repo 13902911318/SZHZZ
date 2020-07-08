@@ -21,10 +21,15 @@ public class NettyServer {
     private static DawLogger logger = DawLogger.getLogger(NettyServer.class);
     private static AppManager App = AppManager.getApp();
     private final int port;
+    private String inetHost = null;
     private boolean onServer = false;
     private boolean isNio = true;
 
     public NettyServer(int port) {
+        this.port = port;
+    }
+    public NettyServer(String inetHost, int port) {
+        this.inetHost = inetHost;
         this.port = port;
     }
 
@@ -49,7 +54,6 @@ public class NettyServer {
 
     public void startServerNio() throws InterruptedException {
         if (onServer) return;
-
         onServer = true;
         EventLoopGroup bodsGroup = new NioEventLoopGroup();
         EventLoopGroup wookerGroup = new NioEventLoopGroup();
@@ -61,8 +65,11 @@ public class NettyServer {
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
-
-            bootstrap.bind(port).sync().channel().closeFuture().sync();
+            if(inetHost != null){
+                bootstrap.bind(inetHost, port).sync().channel().closeFuture().sync();
+            }else{
+                bootstrap.bind(port).sync().channel().closeFuture().sync();
+            }
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {
@@ -88,7 +95,12 @@ public class NettyServer {
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
 
-            bootstrap.bind(port).sync().channel().closeFuture().sync();
+            if(inetHost != null){
+                bootstrap.bind(inetHost, port).sync().channel().closeFuture().sync();
+            }else{
+                bootstrap.bind(port).sync().channel().closeFuture().sync();
+            }
+
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {

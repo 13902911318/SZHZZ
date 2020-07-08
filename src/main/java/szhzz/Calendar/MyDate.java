@@ -992,7 +992,7 @@ public class MyDate implements Serializable {
     public boolean isOpenDay() {
         initCalendar();
         if (this.compareDays(minTradeDay) < 0) return true;
-//        if (this.compareDays(getToday()) > 0) return false;
+        if (this.compareDays(lastCloseDay) > 0) return true;
         return (stockCalendar.contains(this.getDate()));
     }
 

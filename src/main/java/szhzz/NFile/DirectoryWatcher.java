@@ -111,6 +111,7 @@ public class DirectoryWatcher extends Observable implements Runnable {
      }
 
     public void stopWatch() {
-        this.close = close;
+        this.close = true;
+        AppManager.logEvent("Directory Watcher stop on " + onPath);
     }
 }

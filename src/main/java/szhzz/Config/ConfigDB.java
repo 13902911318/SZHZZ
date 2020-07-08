@@ -87,6 +87,7 @@ public class ConfigDB extends Config {
             e.printStackTrace();
         } finally {
             Database.closeResultSet(rs);
+            checkCfg();
         }
     }
 

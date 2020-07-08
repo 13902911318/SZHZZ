@@ -72,6 +72,7 @@ public class ConfigF extends Config {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
+            checkCfg();
         }
     }
 

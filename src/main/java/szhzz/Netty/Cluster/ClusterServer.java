@@ -31,7 +31,7 @@ public class ClusterServer {
 
     private String serverName = null;
     private int localLevel = 0;
-
+    private String inetHost = null;
     private ClusterServer() {
 
     }
@@ -111,7 +111,7 @@ public class ClusterServer {
     boolean startServer() {
         if (server == null) {
 
-            server = new NettyServer(port);
+            server = new NettyServer(inetHost, port);
             try {
                 server.startup();
             } catch (Exception e) {
@@ -120,7 +120,7 @@ public class ClusterServer {
 
             }
         }
-        AppManager.logit("启动服务器 " + serverName + " " + port);
+        AppManager.logEvent("启动服务器 " +  (inetHost == null ? serverName : inetHost ) + " " + port);
         return server.isOnServer();
     }
 
@@ -158,5 +158,11 @@ public class ClusterServer {
         if (this.port == 0) {
             this.port = port;
         }
+    }
+    public void setPort(String inetHost, int port) {
+        if (this.port == 0) {
+            this.port = port;
+        }
+        this.inetHost = inetHost;
     }
 }

@@ -46,12 +46,22 @@ public abstract class Config {
     private LinkedList<String> childrenIndex = null;
     private boolean autoSave = false; //未实现
     private boolean isSafe = false; //
-
+    private static CfgChecker checker = null;
 
     public Config() {
         datas = new Hashtable<String, item>();
         index = new LinkedList<item>();
         if(allSaveModel)isSafe = allSaveModel;
+    }
+
+    public static void setChecker(CfgChecker checker) {
+        Config.checker = checker;
+    }
+
+    public void checkCfg(){
+        if(checker!= null){
+            checker.checkCfg(this);
+        }
     }
 
     public boolean isMerged() {
