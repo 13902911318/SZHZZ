@@ -31,6 +31,9 @@ public abstract class Config {
     private static DawLogger logger = DawLogger.getLogger(Config.class);
 
     static boolean checkPassword = false;
+    private static Hashtable<String, String> keyMap = new Hashtable<>();
+
+    public static boolean allSaveModel = false;
     static int masterIndex = 0;
     Hashtable<String, item> datas;
     LinkedList<item> index;
@@ -42,11 +45,23 @@ public abstract class Config {
     private Hashtable<String, Config> children = null;
     private LinkedList<String> childrenIndex = null;
     private boolean autoSave = false; //未实现
-
+    private boolean isSafe = false; //
+    private static CfgChecker checker = null;
 
     public Config() {
         datas = new Hashtable<String, item>();
         index = new LinkedList<item>();
+        if(allSaveModel)isSafe = allSaveModel;
+    }
+
+    public static void setChecker(CfgChecker checker) {
+        Config.checker = checker;
+    }
+
+    public void checkCfg(){
+        if(checker!= null){
+            checker.checkCfg(this);
+        }
     }
 
     public boolean isMerged() {
@@ -854,7 +869,7 @@ public abstract class Config {
                 this.value = decodeLine(value);
                 cfgDirty = true;
 
-                if(checkPassword && isPassword(this.value)){
+                if(isPassword(this.value)){
                     logger.warn(getConfigUrl() + "\t" + name + "=" + this.value + " need encript!");
                 }
             }
@@ -866,6 +881,7 @@ public abstract class Config {
          * @return
          */
         private boolean isPassword(String val){
+            if(!checkPassword ) return false;
 //            return false;
             // TODO TBM t and v_t
             String en = Chelper.encrypt(val, secretKey_);
@@ -875,7 +891,10 @@ public abstract class Config {
                 return true;
             }else if ("sw/zy6kl9FYxJUjjiw6P2A==".equals(en)){
                 return true;
+            }else if("Vg8i/gqk0UnIDVzFtM6g/Q==".equals(en)) {
+                return true;
             }
+
             return false;
         }
 
@@ -883,19 +902,29 @@ public abstract class Config {
             old_value = this.value;
             this.value = decodeLine(value_);
 
+            //初次定义为密码, value 为明码.
             if(isPassword(value)){
                 value = "<" + value + ">";
             }
 
+            // 已加密数值用{}括起
             if (value.startsWith("{") && value.endsWith("}")) {
                 encript_ = value;
-                String val = value.substring(1, value.length() - 1);
-                value = Chelper.decrypt(val, secretKey_);
-
+                String val = keyMap.get(encript_);
+                if(val == null){
+                    val = value.substring(1, value.length() - 1);
+                    val = Chelper.decrypt(val, secretKey_);
+                    keyMap.put(encript_ , val);
+                }
+                value = val;
             } else if (value.startsWith("<") && value.endsWith(">")) {
-                logger.info(getConfigUrl() + "\t" + name + "=" + value_ + " encript!");
+                if(checkPassword)
+                    logger.info(getConfigUrl() + "\t" + name + "=" + value_ + " encript!");
+
+                //加密明码
                 value = value.substring(1, value.length() - 1);
                 encript_ = "{" + Chelper.encrypt(value, secretKey_) + "}";
+                keyMap.putIfAbsent(encript_ , value);
             }
             cfgDirty = true;
         }
@@ -946,9 +975,13 @@ public abstract class Config {
 
     }
 
-    protected boolean isSafeModle(){
-        return false;
+    public boolean isSafeModle(){
+        return allSaveModel || isSafe;
     }
+    public void setSafe(boolean safe){
+        this.isSafe = safe;
+    }
+
     private static final String secretKey_ = "H2ua543n8g00He54R7u8Ha8iLiu";
     private static final String salt_ = "Ba8iR2iYi23Shan82647Jin";
 }

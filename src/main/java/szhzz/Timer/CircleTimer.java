@@ -4,8 +4,6 @@ import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Utils.DawLogger;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * Created with IntelliJ IDEA.
  * User: HuangFang
@@ -20,7 +18,7 @@ public abstract class CircleTimer implements DawCountdown, Runnable {
     protected MyDate date = new MyDate();
     protected String title = null;
     protected boolean useThread = true;
-    private AtomicBoolean processing = new AtomicBoolean(false);
+    private boolean processing = false;
     private long interval = 100;
     private boolean waiting = false;
 
@@ -52,7 +50,13 @@ public abstract class CircleTimer implements DawCountdown, Runnable {
     public abstract void execTask();
 
     public void run() {
+        if(processing){
+            logger.info(new Exception("可能错误使用CircleTimer, execTask() 出现重叠调用."));
+            return;
+        }
+        processing =true;
         execTask();
+        processing = false;
     }
 
     public void stopTimer() {
@@ -61,27 +65,22 @@ public abstract class CircleTimer implements DawCountdown, Runnable {
 
     @Override
     public void timeup() {
-        // Block to process or skip
-        if (processing.compareAndSet(false, true)) {
+        waiting = false;
+        if (interval < minIdleTime) {
+            minIdleTime = 0;
+        }
+        // idleTime/1000 秒内多次启动
+        //if (interval - clock.leftTime() < idleTime) return;
+
+        clock.stopTimer();
+        if (useThread) {
             try {
-                waiting = false;
-                if (interval < minIdleTime) {
-                    minIdleTime = 0;
-                }
-                clock.stopTimer();
-                if (useThread) {
-                    AppManager.executeInBack(this);
-                } else {
-                    run();
-                }
+                AppManager.executeInBack(this);
             } catch (InterruptedException e) {
-                logger.error(e);
-            } finally {
-                processing.set(false);
+
             }
-        }else{
-            logger.info(new Exception("过于频繁使用CircleTimer, execTask() 出现重叠调用."));
-            return;
+        } else {
+            run();
         }
     }
 
@@ -106,14 +105,10 @@ public abstract class CircleTimer implements DawCountdown, Runnable {
     }
 
     public boolean isProcessing() {
-        return processing.get();
+        return processing;
     }
 
     public void setProcessing(boolean processing) {
-        this.processing.set(processing);
-    }
-
-    public void setInterval(long interval) {
-        this.interval = interval;
+        this.processing = processing;
     }
 }

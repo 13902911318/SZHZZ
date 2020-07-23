@@ -434,7 +434,7 @@ public class MatrixTable {
     }
 
     public void readZipFile(File file, int startLine) {
-        readZipFile(file, startLine, null) ;
+        readZipFile(file, startLine, null);
     }
 
     public void readZipFile(File file, int startLine, String fName) {
@@ -452,7 +452,7 @@ public class MatrixTable {
 //                if(f.indexOf(".") > 0){
 //                    f = f.substring(0,f.indexOf("."));
 //                }
-                if (fName == null || f.equalsIgnoreCase(fName)){
+                if (fName == null || f.equalsIgnoreCase(fName)) {
                     if (charsetName == null) {
                         in = new BufferedReader(new InputStreamReader(zipIn));
                     } else {
@@ -512,12 +512,12 @@ public class MatrixTable {
 
             if (counter == 0) {
                 l = l.replace("\uFEFF", "");//UTF-8 with sing
-                if (this.isHasHeader()) {
-                    if (!this.headerFilled()) {
-                        StringTokenizer tok = new StringTokenizer(l, delimiter);
-                        while (tok.hasMoreTokens()) {
-                            this.setColumnName(tok.nextToken());
-                        }
+            }
+            if (counter == 0 && this.isHasHeader()) {
+                if (!this.headerFilled()) {
+                    StringTokenizer tok = new StringTokenizer(l, delimiter);
+                    while (tok.hasMoreTokens()) {
+                        this.setColumnName(tok.nextToken());
                     }
                 }
             } else {

@@ -12,7 +12,6 @@ import szhzz.sql.database.DBException;
 import szhzz.sql.database.Database;
 import szhzz.sql.jdbcpool.DbStack;
 
-import javax.swing.*;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.util.*;
@@ -118,16 +117,15 @@ public class MyDate implements Serializable {
     private static String openTime2 = "13:00:00";
     private static String closeTime2 = "15:00:00";
     private static MyDate lastOpenDay = null;
-//    private static String lastTradeDay = null;
+    private static String lastTradeDay = null;
     private static String minTradeDay = null;
-    private static String maxTradeDay = null;
     private static MyDate today = null;
     private static HashSet<String> stockCalendar = null;
     private static MyDate lastCloseDay = null;
     //    Calendar c = GregorianCalendar.getInstance(); // current date
     DateTime in = new DateTime();
     private boolean readOnly = false;
-    private static boolean alarmExp = false;
+
     private static ClareBuffer clareBuffer = new ClareBuffer() {
         @Override
         public void clare() {
@@ -181,7 +179,7 @@ public class MyDate implements Serializable {
 
     public static MyDate getLastOpenDay() {
         initCalendar();
-        int c = 360;
+
         MyDate lastOpenDay = new MyDate(false);
         try {
             if (lastOpenDay.beforOpenTime()) {
@@ -189,7 +187,6 @@ public class MyDate implements Serializable {
             }
 
             while (!lastOpenDay.isOpenDay()) {
-                if(c-- < 0) break;
                 lastOpenDay.nextNday(-1);
             }
         } finally {
@@ -201,30 +198,26 @@ public class MyDate implements Serializable {
     private static synchronized void initCalendar() {
         if (stockCalendar == null) {
             ResultSet rs = null;
-
+            lastCloseDay = null;
             stockCalendar = new HashSet<String>();
             String sql = "select  CalendarDate, closed from stockCalendar  " +
                     //" where CalendarDate " +  // <= '" + getToday().getDate() + "'" +
                     " order by 1 desc ";
             Database db = DbStack.getDb(MyDate.class);
-            maxTradeDay = null;
-            String tradeDay = null;
             try {
                 rs = db.dynamicSQL(sql);
-                lastCloseDay = null;
                 while (rs.next()) {
-                    tradeDay = rs.getObject(1).toString();
-                    if(maxTradeDay == null){
-                        maxTradeDay = tradeDay;
-                    }
-
+                    lastTradeDay = rs.getObject(1).toString();
                     boolean closed = rs.getBoolean(2);
-                    stockCalendar.add(tradeDay);
+//                    if (minTradeDay == null) {
+//                        minTradeDay = lastTradeDay;
+//                    }
+                    stockCalendar.add(lastTradeDay);
                     if (lastCloseDay == null && closed) {
-                        lastCloseDay = new MyDate(tradeDay);
+                        lastCloseDay = new MyDate(lastTradeDay);
                     }
                 }
-                minTradeDay = tradeDay;
+                minTradeDay = lastTradeDay;
             } catch (Exception e) {
                 logger.error(e);
             } finally {
@@ -234,9 +227,9 @@ public class MyDate implements Serializable {
         }
     }
 
-    public static MyDate getLastCloseDay() {
+    public static MyDate getLastClosedDay() {
         initCalendar();
-        return lastCloseDay();
+        return lastCloseDay;
     }
 
     public static void setLastClosedDay(String date) {
@@ -244,7 +237,7 @@ public class MyDate implements Serializable {
         Database db = DbStack.getDb(MyDate.class);
         try {
             db.executeUpdate(update);
-            lastCloseDay().setDate(date);
+            lastCloseDay.setDate(date);
         } catch (DBException e) {
             logger.error(e);
         } finally {
@@ -437,11 +430,6 @@ public class MyDate implements Serializable {
 
     public static void calendarChanged() {
         stockCalendar = null;
-    }
-
-    private static MyDate lastCloseDay() {
-        if (lastCloseDay == null) return new MyDate("1954-07-02");
-        return lastCloseDay;
     }
 
     private void current() {
@@ -710,9 +698,9 @@ public class MyDate implements Serializable {
         if (input == null || "".equals(input)) return false;
 
         String ts[] = input.split(" ");
-        if (ts.length > 1) {
+        if(ts.length > 1){
             ts = ts[1].split(":");
-        } else {
+        }else{
             ts = input.split(":");
         }
 
@@ -832,10 +820,9 @@ public class MyDate implements Serializable {
         } while (!this.isOpenDay());
     }
 
-    public boolean isClosed() {
+    public boolean isClosed(){
         initCalendar();
-//        if(getLastCloseDay() == null) return false;
-        return this.compareDays(lastCloseDay()) <= 0;
+        return this.compareDays(lastCloseDay) <= 0;
     }
 
     public boolean nextCloseDay() {
@@ -1018,22 +1005,7 @@ public class MyDate implements Serializable {
     public boolean isOpenDay() {
         initCalendar();
         if (this.compareDays(minTradeDay) < 0) return true;
-        if (this.compareDays(maxTradeDay) > 0) {
-            if(!alarmExp) {
-                String message = this.getDate() + " 超出系统日历";
-                AppManager.MessageBox(message, 30, null);
-            }
-            alarmExp = true;
-//            logger.error(new Exception(message));
-//
-//            int confirm = JOptionPane.showConfirmDialog(null,
-//                    message + "退出程序(System.Exit!, 检查log,并手工更新日历) ?", "确认退出程序", JOptionPane.YES_NO_OPTION);
-//
-//            if (confirm == JOptionPane.YES_OPTION) {
-//                System.exit(1);
-//            }
-            return true;
-        }
+//        if (this.compareDays(getToday()) > 0) return false;  导致错误
         return (stockCalendar.contains(this.getDate()));
     }
 
@@ -1457,123 +1429,69 @@ public class MyDate implements Serializable {
         }
     }
 
-    static long getTradeTimeElaps(long delayMmSecnds) {
-        return getTradeTimeElaps(delayMmSecnds, 0);
-    }
-
-    static long getTradeTimeElaps(long delayMmSecnds, int dumiSeconds) {
-        long ret = delayMmSecnds; //设 delayMmSecnds 为 5 分钟 5*60*1000 = 300000
-        if (getToday().isBeforeTime(closeTime1)) { //closeTime1 = 11:30:00
-            MyDate d = new MyDate(getToday().getDate());  // 假设当前时间 d = 11:29:30
-            d.addTimeInMillis((int) delayMmSecnds);  //则延时时间为 d = 11:34:30,
-
-            long delayMmSecnds_ = d.compareMmSeconds(closeTime1);  // delayMmSecnds_ = 1000* (4 * 60 + 30) = 270000
-            // 跨休市时间?
-            if (delayMmSecnds_ > 0) {
-                d.setTime(openTime2); //openTime2 = 13:00:00
-                if (dumiSeconds != 0) d.addTimeInSecond(dumiSeconds); //(加1分钟) ? 中午开市的不稳定时间?
-                d.addTimeInMillis((int) delayMmSecnds_);  // 13:04:30
-                ret = d.compareMmSeconds(getToday());
-            }
-        }
-        return ret;
-    }
-
-    public static String numberToDate(Object date) {
-        String dateString = date.toString();
-        if (dateString.length() == 6) {
-            dateString = "20" + dateString;
-        }
-        if (dateString.length() == 8) {
-
-            try {
-                return dateString.substring(0, 4) + "-" +
-                        dateString.substring(4, 6) + "-" +
-                        dateString.substring(6);
-            } catch (Exception e) {
-                logger.error(e);
-            }
-        }
-        return date.toString();
-    }
-
-    public static String longNumberToDateTime(Object time) {
-        String ret = "1900-01-01 00:00:00";
-        if (time == null) return ret;
-        ret = numberToDate(time.toString().substring(0, 8)) + " " + numberToTime(time.toString().substring(8));
-        return ret;
-    }
-
-    public static String numberToTime(Object time) {
-        if (time == null) return "00:00:00";
-
-        if (time.toString().contains(":")) {
-            return time.toString();
-        }
-
-        String times = time.toString();
-        while (times.length() < 6) {
-            times = "0" + times;
-        }
-        try {
-            return times.substring(0, 2) + ":" +
-                    times.substring(2, 4) + ":" +
-                    times.substring(4, 6) +
-                    (times.length() > 6 ? "." + times.substring(6) : "");
-        } catch (Exception e) {
-            logger.error(e);
-        }
-        return "00:00:00";
-    }
-
-    public static String longNumberToTime(Object time) {
-        if (time == null) return "00:00:00";
-
-        if (time.toString().contains(":")) {
-            return time.toString();
-        }
-        String times = time.toString();
-        while (times.length() < 9) {
-            times = "0" + times;
-        }
-        try {
-            return times.substring(0, 2) + ":" +
-                    times.substring(2, 4) + ":" +
-                    times.substring(4, 6) +
-                    (times.length() > 6 ? "." + times.substring(6) : "");
-        } catch (Exception e) {
-            logger.error(e);
-        }
-        return "00:00:00";
-    }
-
-    public static Long timeToLong(Object time) {
-        if (time == null) return 0L;
-        return NU.parseLong(time.toString().replace(":", ""), 0L);
-    }
-
-    public static Long dateToLong(Object time) {
-        if (time == null) return 0L;
-        return NU.parseLong(time.toString().replace("-", ""), 0L);
-    }
-
-    public static long numberToMms(Object time) {
-        if (time == null) return 0L;
-
-        String times = time.toString();
-        while (times.length() < 6) {
-            times = "0" + times;
-        }
-        try {
-            long mms = NU.parseLong(times.substring(0, 2), 0l) * (60 * 60 * 1000) +
-                    NU.parseLong(times.substring(2, 4), 0L) * (60 * 1000) +
-                    NU.parseLong(times.substring(4, 6), 0L) * 1000 +
-                    NU.parseLong(times.substring(6), 0L);
-            return mms;
-        } catch (Exception e) {
-            logger.error(e);
-        }
-        return 0L;
-    }
+    //    ///////////////////////////////////////////////////////////
+//    public static boolean NowIsBeforeAmAuctionCloseTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 25;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//    public static boolean NowIsBeforeAmAuctionOpenTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 15;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//    public static boolean NowIsBeforeAmOpenTime() {
+//        today = getToday();
+//        if (today.getHour() == 9) {
+//            return today.getMinute() < 30;
+//        } else {
+//            return today.getHour() < 9;
+//        }
+//    }
+//
+//
+//    public static boolean NowIsBeforeAmCloseTime() {
+//        today = getToday();
+//        if (today.getHour() == 11) {
+//            return today.getMinute() < 30;
+//        } else {
+//            return today.getHour() < 11;
+//        }
+//    }
+//
+//    public static boolean NowIsInOpenTime() {
+//        return (NowIsBeforeAmCloseTime() && !NowIsBeforeAmAuctionOpenTime()) ||
+//                (NowIsBeforePmCloseTime() && !NowIsBeforePmOpenTime());
+//    }
+//
+//    public static boolean NowIsBeforePmOpenTime() {
+//        return getToday().getHour() < 13;
+//    }
+//
+//    public static boolean NowIsBeforePmCloseTime() {
+//        return getToday().getHour() < 15;
+//    }
+//
+//    public static boolean NowIsAfterPmActionStartTime() {
+//        return getToday().getHour() > 14 &&
+//                getToday().getHour() < 15 &&
+//                getToday().getMinute() > 56;
+//    }
+//
+//    public boolean NowIsAmActionTime(){
+//        return !NowIsBeforeAmAuctionOpenTime() && NowIsBeforeAmAuctionCloseTime();
+//    }
+//
+//    public boolean NowIsPmActionTime(){
+//        return !NowIsBeforePmCloseTime() && NowIsAfterPmActionStartTime();
+//    }
 }
 

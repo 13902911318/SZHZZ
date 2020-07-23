@@ -19,7 +19,7 @@ public class StockRegulate {
         if (!isStockCode(code)) return null;
 
         if (code.length() == 6) {
-            if (code.startsWith("60") || code.startsWith("1A")) {
+            if (code.startsWith("60") || code.startsWith("68") || code.startsWith("68") || code.startsWith("1A")) {
                 return "SH" + code;
             } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399")) {
                 return "SZ" + code;
@@ -33,7 +33,7 @@ public class StockRegulate {
     }
 
     public static String stockMarket(String code) {
-        if (code.startsWith("60") || code.startsWith("1A") || code.startsWith("2040")|| code.startsWith("510")) {
+        if (code.startsWith("60") || code.startsWith("68") || code.startsWith("1A") || code.startsWith("2040")|| code.startsWith("510")) {
             return "SH";
         } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399") || code.startsWith("1318")) {
             return "SZ";
@@ -158,8 +158,9 @@ public class StockRegulate {
         if (code.startsWith("310")) return "GZQH";    // ×××国债期货；
         if (code.startsWith("500")) return "SHJ";    // ×××基金；
         if (code.startsWith("550")) return "SHJ";    // ×××基金；
+        if (code.startsWith("510")) return "QQ";    // ×××期权；
         if (code.startsWith("60")) return "SHA";    // ×××A股；
-        if (code.startsWith("688")) return "SHA";    // ×××创业板；
+        if (code.startsWith("68")) return "SHA";    // ×××创业板；
 //        if (code.startsWith("601")) return "SHA";    // ×××A股；
         if (code.startsWith("700")) return "PG";    // ×××配股；
         if (code.startsWith("710")) return "ZPG";    // ×××转配股；
@@ -178,6 +179,13 @@ public class StockRegulate {
         return (cat.equals("SZA") || cat.equals("SZB") || cat.equals("SHA") || cat.equals("SHB") || cat.equals("SZC"));
     }
 
+    public static boolean isFundCat(String cat) {
+        return (cat.equals("SHJ") || cat.equals("SZJ") );
+    }
+
+    public static boolean isFutureCat(String cat) {
+        return (cat.equals("QQ"));
+    }
 
     public static boolean isIndexCat(String cat) {
         return (cat.equals("IND")) || (cat.equals("BAND"));

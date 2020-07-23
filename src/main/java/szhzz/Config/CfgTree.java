@@ -26,6 +26,7 @@ public class CfgTree extends CfgProvider {
     public static CfgTree getInstance(String groupName) {
         return (CfgTree) getInstance(groupName, false);
     }
+
     public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null || !(onlyOne instanceof CfgTree)) {

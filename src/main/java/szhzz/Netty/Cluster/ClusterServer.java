@@ -5,7 +5,6 @@ import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ServerHandler;
-import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Utils.DawLogger;
 
 import java.io.IOException;
@@ -33,8 +32,6 @@ public class ClusterServer {
     private String serverName = null;
     private int localLevel = 0;
     private String inetHost = null;
-    private ServerInitializer serverInitializer = null;
-
     private ClusterServer() {
 
     }
@@ -67,7 +64,6 @@ public class ClusterServer {
 
     public void saBye() {
         ServerHandler.sayBye();
-        server.stop();
     }
 
 
@@ -95,7 +91,7 @@ public class ClusterServer {
      * @return 恢复远程的查询信息
      */
     public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
-        if (Cluster.getInstance() == null || Cluster.getInstance().isOffLine()) return null;
+        if (Cluster.getInstance().isOffLine()) return null;
 //        NettyExchangeData exDate = null;
 //        switch (data.getNettyType()) {
 //            case QueryServerLevel:
@@ -116,8 +112,6 @@ public class ClusterServer {
         if (server == null) {
 
             server = new NettyServer(inetHost, port);
-            server.setServerInitializer(serverInitializer);  // serverInitializer can be null
-
             try {
                 server.startup();
             } catch (Exception e) {
@@ -170,9 +164,5 @@ public class ClusterServer {
             this.port = port;
         }
         this.inetHost = inetHost;
-    }
-
-    public void setServerInitializer(ServerInitializer serverInitializer) {
-        this.serverInitializer = serverInitializer;
     }
 }

@@ -14,6 +14,8 @@ import szhzz.Netty.Cluster.Net.ClientInitializer;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -28,7 +30,7 @@ public class NettyClient {
     private static AppManager App = AppManager.getApp();
     private static long requID = 0l;
     private final Object locker = new Object();
-    private LinkedList<String> host = new LinkedList<>();
+    private ArrayList<String> host = new ArrayList<>();
     private int hostIndex = 0;
     protected int port;
     private Channel channel = null;
@@ -66,19 +68,19 @@ public class NettyClient {
 
 
     public NettyClient(String[] host, int port) {
-        Collections.addAll(this.host, host);
-        hostIndex = 0;
-        retry = this.host.size();
-        this.port = port;
+        setHost(host, port);
     }
 
     public void setHost(String[] host, int port) {
+        this.port = port;
         this.host.clear();
+        addHost(host);
+    }
 
+    public void addHost(String[] host) {
         Collections.addAll(this.host, host);
         hostIndex = 0;
         retry = this.host.size();
-        this.port = port;
     }
 
     public void connected() {

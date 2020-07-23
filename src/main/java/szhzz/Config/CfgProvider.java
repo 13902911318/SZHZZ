@@ -34,7 +34,7 @@ public class CfgProvider {
     private static String configRoot = "Quant";
     private boolean safeModel = false;
 
-    void setSafeModel(boolean safeModle){
+    protected void setSafeModel(boolean safeModle){
         this.safeModel = safeModle;
     }
 
@@ -173,11 +173,12 @@ public class CfgProvider {
             for (File aFile : file) {
                 if (aFile.getName().toLowerCase().endsWith(".ini")) {
                     Config c;
-                    if(isSafeModel()){
-                        c = new ConfigF_s();
-                    }else{
+//                    if(isSafeModel()){
+//                        c = new ConfigF_s();
+//                    }else{
                         c = new ConfigF();
-                    }
+//                    }
+                    c.setSafe(isSafeModel());
                     try {
                         c.load(aFile.getCanonicalPath());
                         cfgNames.add(c.getConfigID());
