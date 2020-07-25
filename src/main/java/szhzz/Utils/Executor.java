@@ -96,7 +96,7 @@ public class Executor {
         }
     }
 
-    public boolean taskkill(String taskName){
+    public boolean taskkill(String taskName) {
         boolean isRunning = isRunning(taskName, null);
         boolean isKilled = !isRunning;
         if (isRunning) {
@@ -195,6 +195,7 @@ public class Executor {
         String type;
         boolean isError = false;
         private OutputResolve extReader = null;
+        boolean silent = false;
 
         public StreamGobbler(InputStream is, String type) {
             this.is = is;
@@ -219,9 +220,9 @@ public class Executor {
                         //需要对输出进行处理
                         extReader.readLine(line);
                     } else {
-                        AppManager.logit(type + "=>" + line);
+                        if (!silent) AppManager.logit(type + "=>" + line);
                     }
-                    logger.info(type + "=>" + line);
+                    //logger.info(type + "=>" + line);
                 }
             } catch (IOException ioe) {
                 ioe.printStackTrace();
@@ -276,10 +277,10 @@ public class Executor {
                 }
 
 
-                if(firstLine.toLowerCase().endsWith(".lnk") || firstLine.endsWith("快捷方式")){
+                if (firstLine.toLowerCase().endsWith(".lnk") || firstLine.endsWith("快捷方式")) {
                     //"cmd /c start \"\" \"D:/JNIProject/VC2010/MarketAp/Debug/MarketAp.exe - 快捷方式\"";
                     proc = Runtime.getRuntime().exec("cmd /c start \"\" \"" + firstLine + "\"");//避开win10的权限限制
-                }else if (!firstLine.toLowerCase().startsWith("task") && firstLine.toLowerCase().contains(".exe") || firstLine.toLowerCase().contains(".com")) {
+                } else if (!firstLine.toLowerCase().startsWith("task") && firstLine.toLowerCase().contains(".exe") || firstLine.toLowerCase().contains(".com")) {
 //                    if(privileges){
 //                    proc = Runtime.getRuntime().exec("runas /profile /user:Administrator "+command, null, workFolder);
 
@@ -289,15 +290,12 @@ public class Executor {
                 }
                 StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), title + " Error", errorReader);
                 StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), title + " Output", outputReader);
+                outputGobbler.silent = silent;
                 errorGobbler.start();
                 outputGobbler.start();
                 if (waitFor) {
                     runningJobs.add(title);
-                    if (!silent) {
-                        AppManager.logEvent("启动 " + title);
-                    } else {
-                        logger.info("启动 " + title);
-                    }
+                    if (!silent) AppManager.logEvent("启动 " + title);
                     exitCode = proc.waitFor();
                 }
                 errorGobbler.interrupt();
@@ -310,15 +308,15 @@ public class Executor {
                 }
 
                 if (!runningJobs.remove(title) && waitFor) {
-                    AppManager.logEvent(title + " 退出时进程丢失错误");
+                    if(!silent) AppManager.logEvent(title + " 退出时进程丢失错误");
                 }
 
-                if (proc != null && !silent && waitFor) {
-                    AppManager.logEvent(title + " 退出, Exit(" + exitCode + ")");
+                if (proc != null && waitFor) {
+                    if (!silent) AppManager.logEvent(title + " 退出, Exit(" + exitCode + ")");
                 } else if (waitFor) {
-                    logger.info(title + " 退出, Exit(" + exitCode + ")");
+                    if (!silent) logger.info(title + " 退出, Exit(" + exitCode + ")");
                 }
-//                AppManager.logit(title + " sendMessage(" + exitInformation.name() + ", false)");
+
                 if (exitInformation != null) {
                     MessageAbstract.getInstance().sendMessage(exitInformation, false);
                 }
@@ -327,11 +325,11 @@ public class Executor {
     }
 
     private static boolean checkPrivileges() {
-        if(privileges == null) {
+        if (privileges == null) {
             File testPriv = new File("C:\\Program Files\\");
             if (!testPriv.canWrite()) {
                 privileges = new Boolean(false);
-            }else {
+            } else {
                 File fileTest = null;
                 try {
                     fileTest = File.createTempFile("test", ".dll", testPriv);

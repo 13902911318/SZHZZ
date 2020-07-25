@@ -103,7 +103,7 @@ public class DataWindow extends JTable {
     private ArrayList<String> userMenuTitle = new ArrayList<String>();
     private IdleTimer idleTimer = null;
     private boolean copyScriptToClipbaod = false;
-    private boolean findDownModel = false;
+    private boolean findDownModel = true;
 
     public DataWindow() {
         super();
@@ -589,13 +589,13 @@ public class DataWindow extends JTable {
 
     private int findDown(int col, Object value) {
         if (value == null) return -1;
+
         int rows = this.getRowCount();
         int currentRow = this.getCurrentRow();
 
         if (currentRow < 0) {
             currentRow = 0;
         }
-
         for (int i = currentRow + 1; i < rows; i++) {
             if (value.equals(this.getValueAt(i, col))) {
                 return i;
