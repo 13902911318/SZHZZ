@@ -1,18 +1,16 @@
 package szhzz.Utils;
 
 
-import org.apache.commons.lang3.ClassUtils;
 import szhzz.App.AppManager;
 import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Vector;
 
 /**
  * Created with IntelliJ IDEA.
- * User: HuangFang
+ * User: Administrator
  * Date: 14-8-10
  * Time: 下午9:07
  * To change this template use File | Settings | File Templates.
@@ -20,11 +18,9 @@ import java.util.Vector;
 public class Executor {
     private static DawLogger logger = DawLogger.getLogger(Executor.class);
     private static Vector<String> runningJobs = new Vector<>();
-    private static Vector<MessageCode> mainJobs = new Vector<>(); //For my self only
+    private static Vector<MessageCode> mainJobs = new Vector<>();
     private static Executor onlyOne = null;
     private static Boolean privileges = null;
-
-    private ArrayList<EventInspector> inspectors = new ArrayList<>();
 
     private Executor() {
     }
@@ -101,20 +97,10 @@ public class Executor {
     }
 
     public boolean taskkill(String taskName) {
-        return taskkill(taskName, false);
-    }
-
-    public boolean taskkill(String taskName, boolean force) {
         boolean isRunning = isRunning(taskName, null);
         boolean isKilled = !isRunning;
         if (isRunning) {
-            String[] p;
-            if (force) {
-                p = new String[]{"Taskkill /IM " + taskName + " /F"};
-            } else {
-                p = new String[]{"Taskkill /IM " + taskName};
-            }
-
+            String[] p = new String[]{"Taskkill /IM " + taskName};
             try {
                 execute(p, taskName); //, null,
                 isKilled = true;
@@ -162,30 +148,6 @@ public class Executor {
         ExecWaitForEnd exec = new ExecWaitForEnd(commands);
         exec.waitFor = true;
         exec.run();
-    }
-
-
-    public void executeWithCallBack(String[] commands, EventInspector<Object> inspector, String title,
-                                    OutputResolve outputReader, OutputResolve errorReader, boolean silent)
-            throws IOException, InterruptedException {
-        if (commands.length == 0) return;
-        if (inspector != null) inspectors.add(inspector);
-
-        if (title == null) {
-            title = commands[0];
-        }
-
-        if (runningJobs.contains(title)) {
-            AppManager.logit(title + " 正在运行");
-            return;
-        }
-
-        ExecWaitForEnd exec = new ExecWaitForEnd(commands, outputReader, errorReader);
-        exec.exitInformation = null;
-        exec.waitFor = true;
-        exec.title = title;
-        exec.silent = silent;
-        AppManager.executeInBack(exec);
     }
 
     public void executeIfRunningAbandon(String[] commands, MessageCode exitInformation, String title,
@@ -329,8 +291,6 @@ public class Executor {
                 StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), title + " Error", errorReader);
                 StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), title + " Output", outputReader);
                 outputGobbler.silent = silent;
-                errorGobbler.silent = silent;
-
                 errorGobbler.start();
                 outputGobbler.start();
                 if (waitFor) {
@@ -348,7 +308,7 @@ public class Executor {
                 }
 
                 if (!runningJobs.remove(title) && waitFor) {
-                    if (!silent) AppManager.logEvent(title + " 退出时进程丢失错误");
+                    if(!silent) AppManager.logEvent(title + " 退出时进程丢失错误");
                 }
 
                 if (proc != null && waitFor) {
@@ -359,9 +319,6 @@ public class Executor {
 
                 if (exitInformation != null) {
                     MessageAbstract.getInstance().sendMessage(exitInformation, false);
-                }
-                for (EventInspector i : inspectors) {
-                    i.callBack(null);
                 }
             }
         }
@@ -387,6 +344,4 @@ public class Executor {
         }
         return privileges;
     }
-
-
 }
