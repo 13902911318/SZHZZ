@@ -10,7 +10,7 @@ import java.util.Vector;
 
 /**
  * Created with IntelliJ IDEA.
- * User: Administrator
+ * User: HuangFang
  * Date: 14-8-10
  * Time: 下午9:07
  * To change this template use File | Settings | File Templates.
@@ -18,7 +18,7 @@ import java.util.Vector;
 public class Executor {
     private static DawLogger logger = DawLogger.getLogger(Executor.class);
     private static Vector<String> runningJobs = new Vector<>();
-    private static Vector<MessageCode> mainJobs = new Vector<>();
+    private static Vector<MessageCode> mainJobs = new Vector<>(); //For my self only
     private static Executor onlyOne = null;
     private static Boolean privileges = null;
 
@@ -97,10 +97,19 @@ public class Executor {
     }
 
     public boolean taskkill(String taskName) {
+        return taskkill(taskName, false);
+    }
+    public boolean taskkill(String taskName, boolean force) {
         boolean isRunning = isRunning(taskName, null);
         boolean isKilled = !isRunning;
         if (isRunning) {
-            String[] p = new String[]{"Taskkill /IM " + taskName};
+            String[] p;
+            if(force){
+                p = new String[]{"Taskkill /IM " + taskName + " /F"};
+            }else{
+                p = new String[]{"Taskkill /IM " + taskName};
+            }
+
             try {
                 execute(p, taskName); //, null,
                 isKilled = true;

@@ -1,7 +1,6 @@
 package szhzz.App;
 
 
-
 import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
@@ -59,7 +58,7 @@ public class AppManager implements DataConsumer {
     private static boolean quitApp = false;
     static private JXBusyLabel Busy = null;
     static private AlarmClock alarmClock = null;
-    private static boolean stopProcess = true;
+    private static boolean stopProcess = false;
     private static String hostName = null;
     private static boolean autoGc = true;
     private static String configFolder = "configs";
@@ -117,7 +116,10 @@ public class AppManager implements DataConsumer {
     public static void setSystemTimeDiff(long systemTimeDiff) {
         AppManager.systemTimeDiff = systemTimeDiff;
     }
-    public boolean isSilentTime(){return false;}
+
+    public boolean isSilentTime() {
+        return false;
+    }
 
     private void prepareIDs() {
         getIP(cfg.getProperty("VPN_Signature", null));
@@ -138,8 +140,8 @@ public class AppManager implements DataConsumer {
         return app;
     }
 
-    public static String getCurrentDisk(){
-        if(currentDisk == null) {
+    public static String getCurrentDisk() {
+        if (currentDisk == null) {
             String cpath = getCurrentFolder();
             currentDisk = cpath.substring(0, cpath.indexOf(":")) + ":";
         }
@@ -256,7 +258,9 @@ public class AppManager implements DataConsumer {
     }
 
     public static void executeInBack(Runnable r, boolean isManaged) throws InterruptedException {
-
+        if (isStopProcess()) {
+            return;
+        }
         if (isManaged) {
             if (executor == null) {
                 executor = new PooledExecutor();
@@ -265,7 +269,7 @@ public class AppManager implements DataConsumer {
 //                executor.runWhenBlocked();
                 executor.setKeepAliveTime(1000); //1min
             }
-            setStopProcess(false);
+            //setStopProcess(false);
             executor.execute(new RunCell(r, isManaged));
             startAProcess();
         } else {
@@ -276,7 +280,7 @@ public class AppManager implements DataConsumer {
 //                executor.runWhenBlocked();
                 sysExecutor.setKeepAliveTime(1000);
             }
-            setStopProcess(false);
+//            setStopProcess(false);
             sysExecutor.execute(new RunCell(r, isManaged));
         }
     }
@@ -327,21 +331,21 @@ public class AppManager implements DataConsumer {
 
 
     public static void debugLogit(String msg) {
-        if(!debug) return;
-        if(debugFile == null){
-            String debugDir = getCurrentFolder() + "\\debug" ;
+        if (!debug) return;
+        if (debugFile == null) {
+            String debugDir = getCurrentFolder() + "\\debug";
             new File(debugDir).mkdirs();
-            debugFile = debugDir + "\\Debug_"+ MyDate.getToday().getDate() + ".txt";
+            debugFile = debugDir + "\\Debug_" + MyDate.getToday().getDate() + ".txt";
         }
         try {
-            Utilities.String2File(msg + "\r\n", debugFile, true );
+            Utilities.String2File(msg + "\r\n", debugFile, true);
         } catch (IOException e) {
             logger.error(e);
         }
     }
 
     public static void debugLogit(Exception er) {
-        if(!debug) return;
+        if (!debug) return;
         StackTraceElement[] msgs = er.getStackTrace();
         for (StackTraceElement st : msgs) {
             debugLogit(st.toString());
@@ -396,8 +400,9 @@ public class AppManager implements DataConsumer {
      * 仅适用于大量同步频繁短暂的数据库操作
      * <p>
      * 持续长时间间断的数据库操作不要使用本功能,以免降低效率
+     * <p>
+     * //     * @param requestor
      *
-     //     * @param requestor
      * @return
      */
 //    public Database getDb(Class requestor) {
@@ -411,7 +416,6 @@ public class AppManager implements DataConsumer {
 //    public void closeDB(Database db) {
 //        DbStack.closeDB(db);
 //    }
-
     public static void setAutoSutdown(final boolean d) {
         autoShutdown = d;
     }
@@ -510,7 +514,7 @@ public class AppManager implements DataConsumer {
     public void setMainFram(JFrame frame) {
         this.frame = frame;
         if (icoUrl != null) {
-            URL url =  getClass().getResource(".");
+            URL url = getClass().getResource(".");
             String path = url.getPath();
             ImageIcon ico = new ImageIcon(getClass().getResource(icoUrl));
             frame.setIconImage(ico.getImage());
@@ -810,7 +814,7 @@ public class AppManager implements DataConsumer {
         if (!isDebug()) {
             try {
                 sendMailNow("程序退出", null);
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             logger.info("程序退出...");
@@ -820,12 +824,12 @@ public class AppManager implements DataConsumer {
             Collections.sort(beQuits);
             for (int i = 0; i < beQuits.size(); i++) {
                 BeQuit bq = beQuits.get(i);
-                logit((beQuits.size()-i) + "\t" + bq.getClass().getName());
+                logit((beQuits.size() - i) + "\t" + bq.getClass().getName());
             }
             logit(" End of BeQuits list //////////////////////////////////");
             for (int i = 0; i < beQuits.size(); i++) {
                 BeQuit bq = beQuits.get(i);
-                logit((beQuits.size()-i) + "\t" + bq.getClass().getName());
+                logit((beQuits.size() - i) + "\t" + bq.getClass().getName());
                 bq.Quit();
             }
             logger.info("BeQuit 程序退出 " + beQuits.size() + " beQuits ...");
@@ -912,7 +916,7 @@ public class AppManager implements DataConsumer {
         } catch (UnknownHostException ignored) {
 
         }
-        if ( result == null || "".equals(result)) {
+        if (result == null || "".equals(result)) {
             result = System.getenv("COMPUTERNAME");
         }
         if (result == null || "".equals(result)) {
@@ -1249,8 +1253,8 @@ public class AppManager implements DataConsumer {
         }
 
         String hostName = getHostName();
-        for(String ip : ips) {
-            if(hostName.equalsIgnoreCase(ip))return true;
+        for (String ip : ips) {
+            if (hostName.equalsIgnoreCase(ip)) return true;
 
             if (localIPs.contains(ip)) return true;
         }
@@ -1277,10 +1281,11 @@ public class AppManager implements DataConsumer {
 
     }
 
-    public static Class getAppClass(){
+    public static Class getAppClass() {
         return appClass;
     }
-    public static void setAppClass(Class c){
+
+    public static void setAppClass(Class c) {
         appClass = c;
         CfgProvider.setAppClass(c);
         configFolder = CfgProvider.getRootFolder();
@@ -1350,7 +1355,7 @@ public class AppManager implements DataConsumer {
             while ((line = bufferedReader.readLine()) != null) {
                 if (processName != null && line.contains(processName)) //判断是否存在
                 {
-                    Runtime.getRuntime().exec( "Taskkill /IM "+processName);//关闭的是对应程序的线程。
+                    Runtime.getRuntime().exec("Taskkill /IM " + processName);//关闭的是对应程序的线程。
                     return true;
                 } else if (title != null && line.contains("=====")) //判断是否存在
                 {
@@ -1374,7 +1379,7 @@ public class AppManager implements DataConsumer {
         }
     }
 
-    public static String getCompileTime(){
+    public static String getCompileTime() {
         ClassLoader cl = AppManager.getApp().getClass().getClassLoader();
         String threadContexteClass = AppManager.getApp().getClass().getName().replace('.', '/');
         URL url = cl.getResource(threadContexteClass + ".class");
