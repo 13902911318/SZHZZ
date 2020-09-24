@@ -90,7 +90,7 @@ public class ObjBufferedIO implements Runnable {
             waringSize = (int) (0.95 * bufferSize);
             if (waringSize < 1) waringSize = 1;
 
-            AppManager.executeInBack(this, false);
+            AppManager.executeInBack(this, true);
         } else {
             close();
         }

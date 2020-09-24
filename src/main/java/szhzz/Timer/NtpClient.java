@@ -22,10 +22,11 @@ public class NtpClient {
 
     private static long offset = 0;
     private static int defaultTimeOut = 1000;
-
+    private static NTPUDPClient timeClient = new NTPUDPClient();
+    
     public static Date getTime(String timeServerUrl) throws IOException  {
         if(timeServerUrl == null) return null;
-        NTPUDPClient timeClient = new NTPUDPClient();
+
         InetAddress timeServerAddress = InetAddress.getByName(timeServerUrl);
         timeClient.setDefaultTimeout(defaultTimeOut);
         TimeInfo timeInfo = timeClient.getTime(timeServerAddress);
@@ -36,11 +37,11 @@ public class NtpClient {
     public static long getOffset()  {
         return offset;
     }
-    public static long getOffset(String timeServerUrl) throws IOException  {
+    
+    public static synchronized long getOffset(String timeServerUrl) throws IOException  {
         offset = Long.MIN_VALUE;
         if(timeServerUrl == null) return offset;
 
-        NTPUDPClient timeClient = new NTPUDPClient();
         InetAddress timeServerAddress = InetAddress.getByName(timeServerUrl);
         timeClient.setDefaultTimeout(defaultTimeOut);
         TimeInfo timeInfo = timeClient.getTime(timeServerAddress);

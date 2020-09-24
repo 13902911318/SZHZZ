@@ -353,7 +353,7 @@ public abstract class Config {
         String val = getProperty(name);
         if (val != null)
             try {
-                return NU.parseLong(val, (long) defalt).intValue();
+                return NU.parseInt(val, defalt);
             } catch (Exception e) {
 
             }

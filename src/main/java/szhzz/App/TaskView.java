@@ -61,8 +61,9 @@ public class TaskView extends JDialog {
             int row = ds.appendRow();
             ds.setValueAt(r.getStartTime(), row, 0);
             ds.setValueAt(r.getTask().toString(), row, 1);
-            ds.setValueAt(r.isManaged(), row, 2);
-            ds.setValueAt(r.printStackTrace(), row, 3);
+            ds.setValueAt(r.getThreadName(), row, 2);
+            ds.setValueAt(r.isManaged(), row, 3);
+            ds.setValueAt(r.printStackTrace(), row, 4);
         }
         for (String s : RunCell.past) {
             int row = ds.appendRow();
@@ -98,6 +99,11 @@ public class TaskView extends JDialog {
         ds.setColName("运行任务", c);
         ds.setColTypeName("String", c);
         ds.setColLength(c, 100);
+
+        c++;
+        ds.setColName("线程", c);
+        ds.setColTypeName("String", c);
+        ds.setColLength(c, 30);
 
         c++;
         ds.setColName("监管", c);

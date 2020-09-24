@@ -66,55 +66,13 @@ public class MatrixTable {
     }
 
     public int getColumnNo(String col) {
-        int cNo = -1;
-        if (col != null && header != null) {
-            for (int i = 0; i < header.size(); i++) {
-                if (col.equals(header.get(i))) {
-                    cNo = i;
-                    break;
-                }
-            }
-        }
-        return cNo;
+        if (header == null || col == null)  return -1;
+        return header.indexOf(col);
     }
 
     public boolean hasColumn(String col) {
-        boolean has = false;
-        if (col != null && header != null) {
-            for (String aHeader : header) {
-                if (col.equals(aHeader)) {
-                    has = true;
-                    break;
-                }
-            }
-        }
-        return has;
+        return getColumnNo(col) >= 0;
     }
-//    public void setPrimariKey(String col) {
-//        setPrimariKey(col, false);
-//    }
-//
-//    public void setPrimariKey(String col, boolean reverse) {
-//        setPrimariKey(getColumnNo(col), reverse, DataTypeString);
-//    }
-//
-//    public void setPrimariKey(int col) {
-//        setPrimariKey(col, false, DataTypeString);
-//    }
-//
-//    public void setPrimariKey(int col, boolean reverse) {
-//        setPrimariKey(col, reverse, DataTypeString);
-//    }
-//
-//    public void setPrimariKey(int col, boolean reverse, int dataType) {
-//        if (col < 0) return;
-//        sortColumnDataType = dataType;
-//
-//        sortColumn = col;
-//        sortReves = reverse;
-//        isDirty = true;
-//        reSort();
-//    }
 
     public int find(String col, String val) {
         return find(col, val, 0);

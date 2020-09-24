@@ -7,7 +7,6 @@ import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import szhzz.Calendar.MyDate;
 import szhzz.Config.*;
-import szhzz.StatusInspect.StatusInspector;
 import szhzz.Timer.AlarmClock;
 import szhzz.Timer.TimerEvent;
 import szhzz.Utils.*;
@@ -50,8 +49,8 @@ public class AppManager implements DataConsumer {
     public static SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd");
     static protected JTextComponent logAre = null;
     protected static AppManager app = null;
-    static PooledExecutor executor = null;
-    static PooledExecutor sysExecutor = null;
+    static PooledExecutor staticExecutor = null;
+    static PooledExecutor dynamicExecutor = null;
     static processWatcher thredWatcher = null;
     private static DawLogger logger = DawLogger.getLogger(AppManager.class);
     private static Vector<BeQuit> beQuits = new Vector<BeQuit>();
@@ -254,7 +253,7 @@ public class AppManager implements DataConsumer {
     }
 
     public static void executeInBack(Runnable r) throws InterruptedException {
-        executeInBack(r, true);
+        executeInBack(r, false);
     }
 
     public static void executeInBack(Runnable r, boolean isManaged) throws InterruptedException {
@@ -262,33 +261,33 @@ public class AppManager implements DataConsumer {
             return;
         }
         if (isManaged) {
-            if (executor == null) {
-                executor = new PooledExecutor();
-                executor.setMinimumPoolSize(5);
-                executor.waitWhenBlocked();
+            if (staticExecutor == null) {
+                staticExecutor = new PooledExecutor();
+                staticExecutor.setMinimumPoolSize(5);
+                staticExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                executor.setKeepAliveTime(1000); //1min
+                staticExecutor.setKeepAliveTime(60*1000); //1min
             }
             //setStopProcess(false);
-            executor.execute(new RunCell(r, isManaged));
+            staticExecutor.execute(new RunCell(r, isManaged));
             startAProcess();
         } else {
-            if (sysExecutor == null) {
-                sysExecutor = new PooledExecutor();
-                sysExecutor.setMinimumPoolSize(3);
-                sysExecutor.waitWhenBlocked();
+            if (dynamicExecutor == null) {
+                dynamicExecutor = new PooledExecutor();
+                dynamicExecutor.setMinimumPoolSize(3);
+                dynamicExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                sysExecutor.setKeepAliveTime(1000);
+                dynamicExecutor.setKeepAliveTime(60*1000);
             }
 //            setStopProcess(false);
-            sysExecutor.execute(new RunCell(r, isManaged));
+            dynamicExecutor.execute(new RunCell(r, isManaged));
         }
     }
 
     public static void addExecutors(int n) {
-        if (executor != null) {
+        if (dynamicExecutor != null) {
             logit("Increase threads to " + n);
-            executor.createThreads(n);
+            dynamicExecutor.createThreads(n);
         }
     }
 
@@ -837,26 +836,26 @@ public class AppManager implements DataConsumer {
             e.printStackTrace();
         }
 
-        if (executor != null) {
+        if (staticExecutor != null) {
 
-            executor.shutdownAfterProcessingCurrentlyQueuedTasks();
+            staticExecutor.shutdownAfterProcessingCurrentlyQueuedTasks();
         }
-        if (sysExecutor != null) {
-            sysExecutor.shutdownAfterProcessingCurrentlyQueuedTasks();
+        if (dynamicExecutor != null) {
+            dynamicExecutor.shutdownAfterProcessingCurrentlyQueuedTasks();
         }
-        if (executor != null) {
-            logger.info("程序退出 " + executor.getPoolSize() + " executor ...");
+        if (staticExecutor != null) {
+            logger.info("程序退出 " + staticExecutor.getPoolSize() + " executor ...");
             try {
-                executor.awaitTerminationAfterShutdown(1000);
+                staticExecutor.awaitTerminationAfterShutdown(1000);
             } catch (InterruptedException ignored) {
 
             }
         }
-        if (sysExecutor != null) {
-            logger.info("程序退出 " + sysExecutor.getPoolSize() + " sysExecutor ...");
+        if (dynamicExecutor != null) {
+            logger.info("程序退出 " + dynamicExecutor.getPoolSize() + " sysExecutor ...");
             try {
                 //ExecutorService ep = newFixedThreadPool(5);
-                sysExecutor.awaitTerminationAfterShutdown(1000);
+                dynamicExecutor.awaitTerminationAfterShutdown(1000);
             } catch (InterruptedException ignored) {
 
             }
@@ -875,22 +874,22 @@ public class AppManager implements DataConsumer {
         for (BeQuit bq : beQuits) {
             bq.Quit();
         }
-        if (executor != null) {
-            executor.shutdownNow();
+        if (staticExecutor != null) {
+            staticExecutor.shutdownNow();
         }
-        if (sysExecutor != null) {
-            sysExecutor.shutdownNow();
+        if (dynamicExecutor != null) {
+            dynamicExecutor.shutdownNow();
         }
-        if (executor != null) {
+        if (staticExecutor != null) {
             try {
-                executor.awaitTerminationAfterShutdown(1000);
+                staticExecutor.awaitTerminationAfterShutdown(1000);
             } catch (InterruptedException ignored) {
 
             }
         }
-        if (sysExecutor != null) {
+        if (dynamicExecutor != null) {
             try {
-                sysExecutor.awaitTerminationAfterShutdown(1000);
+                dynamicExecutor.awaitTerminationAfterShutdown(1000);
             } catch (InterruptedException ignored) {
 
             }
@@ -1056,11 +1055,11 @@ public class AppManager implements DataConsumer {
 //                        stopButton.setEnabled(true);
 //                    }
                     setIndeterminate(true);
-                    if (executor != null)
-                        while ((executor.getPoolSize()) > 0) {
+                    if (staticExecutor != null)
+                        while ((staticExecutor.getPoolSize()) > 0) {
                             if (threadLabel != null) {
-                                threadLabel.setText("T=" + (executor == null ? "0" : executor.getPoolSize()) +
-                                        (sysExecutor == null ? 0 : " S=" + sysExecutor.getPoolSize()));
+                                threadLabel.setText("S=" + (staticExecutor == null ? "0" : staticExecutor.getPoolSize()) +
+                                        (" D=" + (dynamicExecutor == null ? "0" : dynamicExecutor.getPoolSize())));
                             }
                             lock.wait(500);
                         }
@@ -1122,8 +1121,8 @@ public class AppManager implements DataConsumer {
                     }
 
                     if (threadLabel != null && (thredWatcher == null || !thredWatcher.waiting)) {
-                        threadLabel.setText("T=" + (executor == null ? "0" : executor.getPoolSize()) +
-                                (sysExecutor == null ? 0 : " S=" + sysExecutor.getPoolSize()));
+                        threadLabel.setText("S=" + (staticExecutor == null ? "0" : staticExecutor.getPoolSize()) +
+                                (" D=" + (dynamicExecutor == null ? "0" : dynamicExecutor.getPoolSize())));
                     }
 
                     if (running) countDown.start();

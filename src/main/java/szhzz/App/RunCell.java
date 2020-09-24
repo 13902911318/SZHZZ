@@ -21,18 +21,22 @@ public class RunCell implements Runnable {
 
 
     private String startTime = "";
+    private String threadName = "";
     private final boolean managed;
     private final String stackTrace;
     private Runnable task;
 
 
     RunCell(Runnable task, boolean managed) {
+        String stackTrace1;
         this.managed = managed;
         this.task = task;
+
         Writer result = new StringWriter();
         PrintWriter printWriter = new PrintWriter(result);
         new Exception().printStackTrace(printWriter);
-        stackTrace = result.toString();
+        stackTrace1 = result.toString();
+        stackTrace = stackTrace1.replace("java.lang.Exception", "").replace("\t","");
     }
 
     public static Vector<RunCell> getPooledTasks() {
@@ -52,7 +56,7 @@ public class RunCell implements Runnable {
         synchronized (pooledTasks) {
             pooledTasks.add(this);
             startTime = MyDate.getToday().getTime();
-
+            threadName = Thread.currentThread().getName();
             if (managed) {
                 managedNo++;
             } else {
@@ -97,5 +101,9 @@ public class RunCell implements Runnable {
 
     public boolean isManaged() {
         return managed;
+    }
+
+    public String getThreadName() {
+        return threadName;
     }
 }

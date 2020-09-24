@@ -6,8 +6,6 @@ import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
 
 
-//import EDU.oswego.cs.dl.util.concurrent.SynchronizedLong;
-
 /**
  * Created with IntelliJ IDEA.
  * User: HuangFang
@@ -208,7 +206,7 @@ public class NettyRequystor {
 //        long lastID = requestID;
         try {
             if (data instanceof NettyExchangeData) {
-//TODO ?                ((NettyExchangeData) data).setIpAddress(ipAddress);
+//TODO ?          ((NettyExchangeData) data).setIpAddress(ipAddress);
 //                ((NettyExchangeData) data).setMack(mack);
 
             }
