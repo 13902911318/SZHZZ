@@ -180,6 +180,8 @@ public class AppManager implements DataConsumer {
         bp.setHighlightColor(old.getHighlightColor());
         bp.setBaseColor(old.getBaseColor());
         Busy.repaint();
+        Busy.setEnabled(true);
+        Busy.setBusy(true);
     }
 
     public static String getConfigFolder() {
