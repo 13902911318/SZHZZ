@@ -353,7 +353,7 @@ public abstract class Config {
         String val = getProperty(name);
         if (val != null)
             try {
-                return NU.parseLong(val, (long) defalt).intValue();
+                return NU.parseInt(val, defalt);
             } catch (Exception e) {
 
             }
@@ -789,6 +789,10 @@ public abstract class Config {
         return o != null && o instanceof Config && this.getConfigUrl().equals(((Config) o).getConfigUrl());
     }
 
+    public void setHideProtect(boolean hideProtect) {
+        this.hideProtect = hideProtect;
+    }
+
     public class item {
         String name = null;
         String value = null;
@@ -803,8 +807,12 @@ public abstract class Config {
         }
 
         item(String line) {
+            if(!line.contains("=")) return;
+
             old_value = value;
             String e[] = getEquation(decodeLine(line));
+            if(e[0] == null) return;
+
             name = e[0];
             comment = e[2];
             setValue(e[1]);

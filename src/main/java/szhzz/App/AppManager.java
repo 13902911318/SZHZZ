@@ -230,19 +230,6 @@ public class AppManager implements DataConsumer {
         });
     }
 
-    public static void MessageBox(final String string, int seconds, String wavFile) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-
-                TimeOutMessageBox dialog = new TimeOutMessageBox();
-                dialog.showMessage(string, seconds, wavFile);
-                dialog.pack();
-                dialog.setVisible(true);
-
-            }
-        });
-    }
-
     public static void MessageBox(final String string, int seconds) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -279,7 +266,7 @@ public class AppManager implements DataConsumer {
                 staticExecutor.setMinimumPoolSize(5);
                 staticExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                staticExecutor.setKeepAliveTime(60 * 1000); //1min
+                staticExecutor.setKeepAliveTime(60*1000); //1min
             }
             //setStopProcess(false);
             staticExecutor.execute(new RunCell(r, isManaged));
@@ -290,7 +277,7 @@ public class AppManager implements DataConsumer {
                 dynamicExecutor.setMinimumPoolSize(3);
                 dynamicExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                dynamicExecutor.setKeepAliveTime(60 * 1000);
+                dynamicExecutor.setKeepAliveTime(60*1000);
             }
 //            setStopProcess(false);
             dynamicExecutor.execute(new RunCell(r, isManaged));
@@ -389,6 +376,12 @@ public class AppManager implements DataConsumer {
 
     public String getDbPort() {
         return getTargetDbProp().getProperty("port");
+    }
+
+    public static boolean canShutdown() {
+        //排除编程失误,误操作等造成的关机. 下述机器不得关闭
+        return !("DellE5".equalsIgnoreCase(getHostName()) ||
+                "DELL690".equalsIgnoreCase(getHostName()));
     }
 
     public boolean canRemoteShutdown() {
@@ -1061,11 +1054,9 @@ public class AppManager implements DataConsumer {
 //                    if (stopButton != null) {
 //                        stopButton.setEnabled(true);
 //                    }
+                    setIndeterminate(true);
                     if (staticExecutor != null)
                         while ((staticExecutor.getPoolSize()) > 0) {
-                            if (Busy != null && !Busy.isBusy()) {
-                                setIndeterminate(true);
-                            }
                             if (threadLabel != null) {
                                 threadLabel.setText("S=" + (staticExecutor == null ? "0" : staticExecutor.getPoolSize()) +
                                         (" D=" + (dynamicExecutor == null ? "0" : dynamicExecutor.getPoolSize())));
@@ -1386,7 +1377,6 @@ public class AppManager implements DataConsumer {
             }
         }
     }
-
 
     public static String getCompileTime() {
         ClassLoader cl = AppManager.getApp().getClass().getClassLoader();

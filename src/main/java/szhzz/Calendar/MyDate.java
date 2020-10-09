@@ -179,7 +179,7 @@ public class MyDate implements Serializable {
 
     public static MyDate getLastOpenDay() {
         initCalendar();
-
+        int c = 360;
         MyDate lastOpenDay = new MyDate(false);
         try {
             if (lastOpenDay.beforOpenTime()) {
@@ -187,6 +187,7 @@ public class MyDate implements Serializable {
             }
 
             while (!lastOpenDay.isOpenDay()) {
+                if(c-- < 0) break;
                 lastOpenDay.nextNday(-1);
             }
         } finally {
