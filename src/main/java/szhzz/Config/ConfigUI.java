@@ -18,8 +18,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Enumeration;
@@ -40,13 +38,15 @@ public class ConfigUI {
     protected Vector<String> enabledItems = null;
     protected DataWindow dw = null;
     JButton buttonCfgFile;
-    JButton buttonLook;
+    JButton buttonLock;
     JButton compareClipboard;
+    JButton copyCfg;
     //    JButton compareCfg;
     ImageIcon lookIcon;
     ImageIcon unLookIcon;
     ImageIcon compareClipboardIcon;
-    TextTransfer ClipboardReader = null;
+    ImageIcon copyIcon;
+    private static TextTransfer ClipboardReader = null;
     private boolean clearBeforeSave = false;
 
     public void setEnabledItems(Vector<String> enabledItems) {
@@ -82,10 +82,10 @@ public class ConfigUI {
     }
 
     protected void initDw() {
-        lookIcon = new ImageIcon(getClass().getResource("/resources/Lock.gif"));
-        unLookIcon = new ImageIcon(getClass().getResource("/resources/key.gif"));
-        compareClipboardIcon = new ImageIcon(getClass().getResource("/resources/Clipboard Copy.gif"));
-
+        lookIcon = AppManager.createImageIcon("/resources/Lock.gif");
+        unLookIcon = AppManager.createImageIcon("/resources/key.gif");
+        compareClipboardIcon = AppManager.createImageIcon("/resources/equal.gif");
+        copyIcon = AppManager.createImageIcon("/resources/Clipboard Copy.gif");
 
         cfgEditor.addToolbarEvent(new triggerRetrive());
         cfgEditor.getToolBar().setFloatable(false);
@@ -103,19 +103,26 @@ public class ConfigUI {
         cfgEditor.getToolBar().addSeparator();
         cfgEditor.getToolBar().add(buttonCfgFile);
 
-        buttonLook = new JButton();
-        buttonLook.setIcon(lookIcon);
-        buttonLook.setToolTipText("打开文件");
-        buttonLook.setEnabled(false);
-        cfgEditor.getToolBar().addSeparator();
-        cfgEditor.getToolBar().add(buttonLook);
-
+        copyCfg = new JButton();
+        copyCfg.setIcon(copyIcon);
+        copyCfg.setToolTipText("拷贝文件到剪贴板");
+        copyCfg.setEnabled(true);
+        cfgEditor.getToolBar().add(copyCfg);
 
         compareClipboard = new JButton();
         compareClipboard.setIcon(compareClipboardIcon);
         compareClipboard.setToolTipText("与剪贴板比较");
         compareClipboard.setEnabled(true);
         cfgEditor.getToolBar().add(compareClipboard);
+
+        buttonLock = new JButton();
+        buttonLock.setIcon(lookIcon);
+        buttonLock.setToolTipText("锁定");
+        buttonLock.setEnabled(false);
+        cfgEditor.getToolBar().add(buttonLock);
+
+
+
 
 //        dw.addKeyListener(
 //                new KeyAdapter() {
@@ -146,6 +153,16 @@ public class ConfigUI {
 //            }
 //        });
 
+        copyCfg.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (ClipboardReader == null) {
+                    ClipboardReader = new TextTransfer();
+                }
+                ClipboardReader.setClipboardContents(cfg.getTxt());
+
+            }
+        });
+
         compareClipboard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compareWithClipboard();
@@ -168,7 +185,7 @@ public class ConfigUI {
         });
 
 
-        buttonLook.addActionListener(new ActionListener() {
+        buttonLock.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (cfg != null) {
@@ -236,6 +253,7 @@ public class ConfigUI {
         if (ClipboardReader == null) {
             ClipboardReader = new TextTransfer();
         }
+
         String text = ClipboardReader.getClipboardContents();
         ConfigF cfg2 = new ConfigF();
         cfg2.loadDataVal(text);
@@ -320,7 +338,7 @@ public class ConfigUI {
             }
             cfgEditor.getDataWindow().repaintDataWindow();
             buttonCfgFile.setEnabled(true);
-            buttonLook.setEnabled(true);
+            buttonLock.setEnabled(true);
             looked = cfg.getBooleanVal("锁定", false);
         }
 
@@ -328,11 +346,11 @@ public class ConfigUI {
         dw.setDataWindowReadOnly(looked);
 
         if (looked) {
-            buttonLook.setIcon(unLookIcon);
-            buttonLook.setToolTipText("解锁");
+            buttonLock.setIcon(unLookIcon);
+            buttonLock.setToolTipText("解锁");
         } else {
-            buttonLook.setIcon(lookIcon);
-            buttonLook.setToolTipText("锁定");
+            buttonLock.setIcon(lookIcon);
+            buttonLock.setToolTipText("锁定");
         }
 
     }
