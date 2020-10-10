@@ -3,9 +3,10 @@ package JNI;
 import szhzz.Utils.NU;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * TODO 此数据包在C++接口已经定于了属于 JNI 包. 不可移动到其它位置
@@ -44,9 +45,9 @@ public class ExchangeData implements Serializable {
 //    ExchangeObjAddLongData(env, execData, (jlong)ErrID);
 //    ExchangeObjAddLongData(env, execData, (jlong)LogonID);
 
-    protected Vector<Vector> table = null;
+    protected ArrayList<ArrayList> table = null;
     protected String logFile = null;
-    private Vector currentRecord = null;
+    private ArrayList currentRecord = null;
 
     public void clear() {
         if (table != null) {
@@ -60,9 +61,9 @@ public class ExchangeData implements Serializable {
     }
 
     protected void setTitleCol(Object o, int col) {
-        Vector row0 = null;
+        ArrayList row0 = null;
         if (table.size() == 0) {
-            row0 = new Vector();
+            row0 = new ArrayList();
             table.add(row0);
         } else {
             row0 = table.get(0);
@@ -71,19 +72,19 @@ public class ExchangeData implements Serializable {
             while (row0.size() <= col) {
                 row0.add("");
             }
-            row0.setElementAt(o, col);
+            row0.set(col, o);
         }
     }
 
     public void appendRow() {
         if (table == null) {
-            table = new Vector<Vector>();
+            table = new ArrayList<ArrayList>();
         }
-        currentRecord = new Vector();
+        currentRecord = new ArrayList();
         table.add(currentRecord);
     }
 
-    public Vector getRow(int rowNo) {
+    public ArrayList getRow(int rowNo) {
         if (rowNo < 0 || rowNo >= table.size()) return null;
         return table.get(rowNo);
     }
@@ -167,11 +168,11 @@ public class ExchangeData implements Serializable {
     }
 
     public void setDataValue(int row, int col, Object o) {
-        Vector row0 = null;
+        ArrayList row0 = null;
         int realRow = row + 2;
 
         while (table.size() <= realRow) {
-            row0 = new Vector();
+            row0 = new ArrayList();
             table.add(row0);
         }
         if (row0 == null) {
@@ -182,7 +183,7 @@ public class ExchangeData implements Serializable {
             while (row0.size() <= col) {
                 row0.add("");
             }
-            row0.setElementAt(o, col);
+            row0.set(col, o);
         }
     }
 
@@ -289,7 +290,7 @@ public class ExchangeData implements Serializable {
     public String toString() {
         if (table == null) return "";
         StringBuilder sb = new StringBuilder();
-        for (Vector row : table) {
+        for (ArrayList row : table) {
             int count = 0;
             for (Object o : row) {
                 if (count++ > 0) {
@@ -307,7 +308,7 @@ public class ExchangeData implements Serializable {
     public String toDataString(String separator) {
         StringBuilder sb = new StringBuilder();
         for (int i = 2; i < table.size(); i++) {
-            Vector row = table.get(i);
+            ArrayList row = table.get(i);
             int count = 0;
             for (Object o : row) {
                 if (count++ > 0) {
@@ -320,7 +321,7 @@ public class ExchangeData implements Serializable {
         return sb.toString();
     }
 
-    public Vector<Vector> getTable() {
+    public ArrayList<ArrayList> getTable() {
         return table;
     }
 
@@ -335,7 +336,7 @@ public class ExchangeData implements Serializable {
 
 
     public void sort(Comparator comparator) {
-        Vector<Vector> tRows = new Vector<Vector>();
+        ArrayList<ArrayList> tRows = new ArrayList<ArrayList>();
         for (int i = table.size() - 1; i > 1; i--) {
             tRows.add(table.remove(i));
         }

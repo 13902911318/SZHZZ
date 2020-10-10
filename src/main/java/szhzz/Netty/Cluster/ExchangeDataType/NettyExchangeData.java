@@ -13,7 +13,7 @@ import szhzz.Utils.Utilities;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -61,11 +61,11 @@ public class NettyExchangeData extends ExchangeData {
     }
 
     public NettyExchangeData() {
-        this.table = new Vector<Vector>();
+        this.table = new ArrayList<ArrayList>();
     }
 
     public NettyExchangeData(ExchangeData eData) {
-        this.table = (Vector<Vector>) eData.getTable().clone();
+        this.table = (ArrayList<ArrayList>) eData.getTable().clone();
     }
 
     public NettyExchangeData(ArrayList<String> msg) {
@@ -252,7 +252,7 @@ public class NettyExchangeData extends ExchangeData {
 
         try {
             if (table != null && table.size() > 0) {
-                Vector row0 = table.get(0);
+                ArrayList row0 = table.get(0);
                 if (row0.size() > (colExt + col)) {
                     Object o = row0.get(colExt + col);
                     if (o != null) {
@@ -270,7 +270,7 @@ public class NettyExchangeData extends ExchangeData {
         if (encodeString != null) return encodeString;
 
         if (getTable() == null) {
-            table = new Vector<Vector>();
+            table = new ArrayList<ArrayList>();
         }
         //Forward 的数据不要改变数据源的信息
         if (StringUtil.isNullOrEmpty(getCpuID())) {
@@ -284,7 +284,7 @@ public class NettyExchangeData extends ExchangeData {
         }
 
         StringBuilder sb = new StringBuilder(BoD).append(nl);
-        for (Vector row : getTable()) {
+        for (ArrayList row : getTable()) {
             int count = 0;
             for (Object o : row) {
                 if(count++ > 0){
@@ -312,9 +312,9 @@ public class NettyExchangeData extends ExchangeData {
 
     public void decode(String data) {
         if (getTable() == null) {
-            table = new Vector<Vector>();
+            table = new ArrayList<ArrayList>();
         }
-        Vector currentRecord = new Vector();
+        ArrayList currentRecord = new ArrayList();
         getTable().add(currentRecord);
         String[] cols = data.split("\t");
         Collections.addAll(currentRecord, cols);
@@ -323,10 +323,10 @@ public class NettyExchangeData extends ExchangeData {
 
     public void decode(ArrayList<String> data) {
         if (getTable() == null) {
-            table = new Vector<Vector>();
+            table = new ArrayList<ArrayList>();
         }
         for (String line : data) {
-            Vector currentRecord = new Vector();
+            ArrayList currentRecord = new ArrayList();
             getTable().add(currentRecord);
             String[] cols = line.split("\t");
             Collections.addAll(currentRecord, cols);
