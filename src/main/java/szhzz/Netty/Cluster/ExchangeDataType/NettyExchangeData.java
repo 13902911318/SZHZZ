@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 
 import JNI.ExchangeData;
 import io.netty.util.internal.StringUtil;
+import org.apache.commons.io.FileUtils;
 import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Netty.Cluster.Cluster;
@@ -81,7 +82,7 @@ public class NettyExchangeData extends ExchangeData {
     }
 
     public boolean isSameCharset() {
-        String l = getValue(0, colLanguage).toString();
+        Object l = getValue(0, colLanguage);
         if (language.equals(l) || "ASC_II".equals(l)) {
             return true;
         } else {
@@ -89,6 +90,13 @@ public class NettyExchangeData extends ExchangeData {
             logger.info(this.toString());
             return false;
         }
+    }
+
+    public boolean isSameGroup(){
+        if(Cluster.getInstance()!=null){
+            return  Cluster.getInstance().isGroupMenber(getGroup());
+        }
+        return false;
     }
 
     private void setLanguage() {
@@ -393,5 +401,12 @@ public class NettyExchangeData extends ExchangeData {
             cs = System.getProperty("file.encoding");
         }
         return cs;
+    }
+
+    public void writeFile(String file) throws IOException {
+        writeFile(new File(file));
+    }
+    public void writeFile(File file) throws IOException {
+        FileUtils.write(file, this.encode());
     }
 }

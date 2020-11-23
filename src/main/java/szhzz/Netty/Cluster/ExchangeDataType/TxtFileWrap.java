@@ -14,6 +14,11 @@ public class TxtFileWrap {
     private static DawLogger logger = DawLogger.getLogger(TxtFileWrap.class);
     NettyExchangeData data = null;
     Integer row = null;
+    public final static String BoD = "[BoD]";
+    public final static String EoD = "[EoD]";
+
+    public final static String alias_BoD = "{BoD}";
+    public final static String alias_EoD = "{EoD}";
 
     public TxtFileWrap(NettyExchangeData data) {
         this.data = data;
@@ -41,6 +46,15 @@ public class TxtFileWrap {
     public static NettyExchangeData getTextFile(String fileName, String toFile){
         return getTextFile(fileName, toFile, true);
     }
+
+    /**
+     * 不可用于 ExchangeData 文件
+     * @param fileName
+     * @param toFile
+     * @param sameGroup
+     * @return
+     */
+
     public static NettyExchangeData getTextFile(String fileName, String toFile, boolean sameGroup) {
         String encode = fileEncode(fileName);//可以确保文件已经生成并关闭.
         encode = "UTF-8";
@@ -70,6 +84,12 @@ public class TxtFileWrap {
             BufferedReader buff = new BufferedReader(new InputStreamReader(in, encode));
             String tk;
             while ((tk = buff.readLine()) != null) {
+                if(tk.equals(BoD)){
+                    tk = alias_BoD;
+                }else if(tk.equals(EoD)){
+                    tk = alias_EoD;
+                }
+
                 eData.appendRow();
                 eData.addData(tk);
             }
@@ -178,6 +198,11 @@ public class TxtFileWrap {
             f = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileName, false), encode));
             String line;
             while ((line = readLine()) != null) {
+                if(line.equals(alias_BoD)){
+                    line = BoD;
+                }else if(line.equals(alias_EoD)){
+                    line = EoD;
+                }
                 f.println(line);
             }
         } catch (IOException e) {

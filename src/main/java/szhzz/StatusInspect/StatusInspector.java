@@ -153,8 +153,8 @@ public class StatusInspector {
         }
     }
 
-    public void setSilentCheckBoxVisible(boolean visibale) {
-        silent.setVisible(visibale);
+    public void setSilentCheckBoxVisible(boolean visible) {
+        silent.setVisible(visible);
     }
 
     private void initDw() {

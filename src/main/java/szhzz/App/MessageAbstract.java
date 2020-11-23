@@ -5,7 +5,9 @@ import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Utils.DawLogger;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -27,6 +29,8 @@ public abstract class MessageAbstract implements Comparable {
     private static WatchMessage messageWatch = null;
     private static Vector<MessageAbstract> messageObject = new Vector<MessageAbstract>();
     private static final Vector<MessageAbstract> newObject = new Vector<MessageAbstract>();
+    private static final HashSet<MessageCode> messageStack = new HashSet<>();
+
     private Integer weight = 10;  // 0 - 10
 
 
@@ -51,6 +55,11 @@ public abstract class MessageAbstract implements Comparable {
                 logger.error(e);
             }
         }
+        if(messageStack.contains(messageID)){
+            logger.info("Drop message " + messageID);
+            return;
+        }
+
         dataBuffer.push(new MessageObj(messageID, caller, message));
     }
 
@@ -134,6 +143,8 @@ public abstract class MessageAbstract implements Comparable {
                         }
                     } catch (Exception ignored) {
                         //prevent any Error may break this thread
+                    }finally {
+                        messageStack.remove(msg.messageID) ;
                     }
                 }
             }
