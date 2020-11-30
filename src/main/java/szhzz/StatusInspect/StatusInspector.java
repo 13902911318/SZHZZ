@@ -16,6 +16,7 @@ import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.Utilities;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -52,8 +53,8 @@ public class StatusInspector {
     private int sendMailCount = 0;
     private String errorMsg = null;
     private int errorCount = -1;
-    private JCheckBox popup = null;
     private JCheckBox silent = null;
+
     private StatusInspector() {
         App.logEvent("状态监控已经启动");
         loadResource();
@@ -125,9 +126,8 @@ public class StatusInspector {
         StatusDw.getToolBar().setFloatable(false);
         StatusDw.setTitle(null);
 
-
-        silent = new JCheckBox("静音");
-        silent.setToolTipText("静音弹出提示窗口");
+        silent = new JCheckBox("不再提示");
+        silent.setToolTipText("不再弹出提示窗口");
         silent.setSelected(false);
         StatusDw.getToolBar().add(silent);
 
@@ -135,18 +135,6 @@ public class StatusInspector {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DialogManager.setStatusViewSilent(silent.isSelected());
-            }
-        });
-
-        popup = new JCheckBox("不再提示");
-        popup.setToolTipText("不再弹出提示窗口");
-        popup.setSelected(false);
-        StatusDw.getToolBar().add(popup);
-
-        popup.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DialogManager.setStatusViewNotPopup(popup.isSelected());
             }
         });
 
@@ -166,7 +154,7 @@ public class StatusInspector {
     }
 
     public void setSilentCheckBoxVisible(boolean visible) {
-        popup.setVisible(visible);
+        silent.setVisible(visible);
     }
 
     private void initDw() {
@@ -349,19 +337,12 @@ public class StatusInspector {
         if (inited && !ok && needed) {
             if (!isWithinTime(startTime, endTime)) return;
 
-            DialogManager.getInstance().openStatuesView(false); //打开并置于顶端
+            DialogManager.getInstance().openStatuesView();
             try {
                 if (MyDate.getToday().isOpenTime(300)) {
-                    if(!silent.isSelected()){
-                        AppManager.MessageBox(report.note, 10, null);
-                    }
-
-
                     if ("集群节点".equals(report.relate)) {
                         sendMail = true;
-//                        String wavFile = App.getCfg().getProperty("AlertSound", "\\resources\\AlertSound\\alert.wav");
-//                        Utilities.playSound(wavFile);
-                        logger.info(report.name + "\t" + report.locate + "\t" + report.status + "\t" + report.note);
+                        Utilities.playSound("\\resources\\AlertSound\\alert.wav");
                     }
                 }
             } catch (Exception e) {

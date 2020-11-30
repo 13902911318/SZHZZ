@@ -391,15 +391,15 @@ public abstract class Config {
         return getLongVal(name, 0l);
     }
 
-    public float getFloatVal(String name, float defalt) {
+    public float getFloatVal(String name, float defaults) {
         String val = getProperty(name);
         if (val != null)
             try {
-                return NU.parseDouble(val, (double) defalt).floatValue();
+                return NU.parseDouble(val, (double) defaults).floatValue();
             } catch (Exception ignored) {
 
             }
-        return defalt;
+        return defaults;
     }
 
     public float getFloatVal(String name) {
@@ -423,22 +423,18 @@ public abstract class Config {
         return getDoubleVal(name, 0d);
     }
 
-
     public Vector<String> getKeys() {
         Vector<String> e = new Vector();
         for (int i = 0; i < index.size(); i++) {
             String k = index.get(i).name;
-            if (hideProtect && isProtected(k)) {
-                continue;
-            }
-            if (getProperty(k, null) != null) {
+            if (!(this.hideProtect && this.isProtected(k))) {
                 e.add(k);
             }
         }
         return e;
     }
 
-    Vector<String> getAllKeys() {
+    public Vector<String> getAllKeys() {
         Vector<String> e = new Vector();
         for (int i = 0; i < index.size(); i++) {
              e.add(index.get(i).name);
@@ -877,43 +873,14 @@ public abstract class Config {
                 this.value = decodeLine(value);
                 cfgDirty = true;
 
-                if(isPassword(this.value)){
-                    logger.warn(getConfigUrl() + "\t" + name + "=" + this.value + " need encript!");
-                }
             }
         }
 
-        /**
-         * TODO 删除此函数
-         * @param val
-         * @return
-         */
-        private boolean isPassword(String val){
-            if(!checkPassword ) return false;
-//            return false;
-            // TODO TBM t and v_t
-            String en = Chelper.encrypt(val, secretKey_);
-            if ("nqjFR6HNPmgdxpajkaNmlA==".equals(en)){
-                return true;
-            }else if ("/pD4O78AUJm6MlhFnP1NBQ==".equals(en)){
-                return true;
-            }else if ("sw/zy6kl9FYxJUjjiw6P2A==".equals(en)){
-                return true;
-            }else if("Vg8i/gqk0UnIDVzFtM6g/Q==".equals(en)) {
-                return true;
-            }
-
-            return false;
-        }
 
         protected void setValue_s(String value_) {
             old_value = this.value;
             this.value = decodeLine(value_);
 
-            //初次定义为密码, value 为明码.
-            if(isPassword(value)){
-                value = "<" + value + ">";
-            }
 
             // 已加密数值用{}括起
             if (value.startsWith("{") && value.endsWith("}")) {

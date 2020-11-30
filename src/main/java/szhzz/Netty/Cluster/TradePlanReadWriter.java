@@ -12,7 +12,6 @@ import szhzz.Utils.DawLogger;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by HuangFang on 2015/4/5.
@@ -81,7 +80,7 @@ public class TradePlanReadWriter extends SharedCfgProvider {
     }
 
     public String getBackupPath() {
-        MyDate dateSuffix = new MyDate(MyDate.getLastCloseDay().getDate());
+        MyDate dateSuffix = new MyDate(MyDate.getLastClosedDay().getDate());
         dateSuffix.futureOpenDay();
         return getBackupPath(dateSuffix.getDate());
     }
@@ -129,11 +128,7 @@ public class TradePlanReadWriter extends SharedCfgProvider {
 //            deleteBackupFiles();  //TODO No!
             }
             amAuctionFiles.clear();
-            try {
-                TimeUnit.MILLISECONDS.sleep(500);
-            } catch (InterruptedException e) {
-                logger.error(e);
-            }
+
 //            try {
 //                TimeUnit.SECONDS.sleep(2);
 //            } catch (InterruptedException e) {
