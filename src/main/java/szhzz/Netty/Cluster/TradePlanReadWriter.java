@@ -12,6 +12,7 @@ import szhzz.Utils.DawLogger;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by HuangFang on 2015/4/5.
@@ -100,7 +101,7 @@ public class TradePlanReadWriter extends SharedCfgProvider {
             for (File f : files) {
                 if (!f.isDirectory()) {
                     NettyExchangeData eData = TradePlanWrap.getTextFile(f.getAbsolutePath());
-//                    eData.setNettyType(ClusterProtocal.FUNCTION.TradePlan);
+                    eData.setNettyType(ClusterProtocal.FUNCTION.TradePlan);
                     updateFiles.add(eData);
                 }
             }
@@ -128,7 +129,11 @@ public class TradePlanReadWriter extends SharedCfgProvider {
 //            deleteBackupFiles();  //TODO No!
             }
             amAuctionFiles.clear();
-
+            try {
+                TimeUnit.MILLISECONDS.sleep(500);
+            } catch (InterruptedException e) {
+                logger.error(e);
+            }
 //            try {
 //                TimeUnit.SECONDS.sleep(2);
 //            } catch (InterruptedException e) {

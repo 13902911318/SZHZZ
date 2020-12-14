@@ -17,6 +17,7 @@ import szhzz.Utils.DawLogger;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -54,6 +55,24 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
             }else{
                 logger.debug("!channel.isWritable() ");
             }
+        }
+    }
+
+    public static void broadcast(NettyExchangeData msg, List<String> host) {
+        if (Cluster.getInstance().isOffLine()) return;
+        Channel channel;
+        for (Channel channel_ : channels) {
+            channel = null;
+            for (String address : host) {
+                if (channel_.remoteAddress().toString().contains(address)) {
+                    if (channel_.isWritable()) {
+                        channel =  channel_;
+                        break;
+                    }
+                }
+            }
+            if(channel == null) continue;
+            channel.writeAndFlush(msg.encode());
         }
     }
 
