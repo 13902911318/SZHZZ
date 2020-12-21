@@ -105,7 +105,6 @@
             <version>2.23</version>
         </dependency>
 
-
         <!--
         <dependency>
             <groupId>org.jasypt</groupId>
@@ -114,13 +113,6 @@
             <scope>compile</scope>
         </dependency>
     -->
-
-        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.7</version>
-        </dependency>
 
     </dependencies>
 

@@ -300,6 +300,8 @@ public class Executor {
                 StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), title + " Error", errorReader);
                 StreamGobbler outputGobbler = new StreamGobbler(proc.getInputStream(), title + " Output", outputReader);
                 outputGobbler.silent = silent;
+                errorGobbler.silent = silent;
+
                 errorGobbler.start();
                 outputGobbler.start();
                 if (waitFor) {

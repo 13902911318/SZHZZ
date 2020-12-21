@@ -24,6 +24,7 @@ public class NettyServer {
     private String inetHost = null;
     private boolean onServer = false;
     private boolean isNio = true;
+    private ServerInitializer serverInitializer = null;
 
     public NettyServer(int port) {
         this.port = port;
@@ -55,13 +56,16 @@ public class NettyServer {
     public void startServerNio() throws InterruptedException {
         if (onServer) return;
         onServer = true;
+        if(serverInitializer == null){
+            serverInitializer = new ServerInitializer();
+        }
         EventLoopGroup bodsGroup = new NioEventLoopGroup();
         EventLoopGroup wookerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bodsGroup, wookerGroup);
             bootstrap.channel(NioServerSocketChannel.class);
-            bootstrap.childHandler(new ServerInitializer());
+            bootstrap.childHandler(serverInitializer);
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
@@ -86,11 +90,14 @@ public class NettyServer {
         onServer = true;
         EventLoopGroup bodsGroup = new OioEventLoopGroup();
         EventLoopGroup wookerGroup = new OioEventLoopGroup();
+        if(serverInitializer == null){
+            serverInitializer = new ServerInitializer();
+        }
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bodsGroup, wookerGroup);
             bootstrap.channel(OioServerSocketChannel.class);
-            bootstrap.childHandler(new ServerInitializer());
+            bootstrap.childHandler(serverInitializer);
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
@@ -121,6 +128,10 @@ public class NettyServer {
 
     public boolean isOnServer() {
         return onServer;
+    }
+
+    public void setServerInitializer(ServerInitializer serverInitializer) {
+        this.serverInitializer = serverInitializer;
     }
 
     class Runer implements Runnable {

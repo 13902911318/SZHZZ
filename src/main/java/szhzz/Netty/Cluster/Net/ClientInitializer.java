@@ -16,6 +16,18 @@ import java.nio.charset.Charset;
  * Created by Administrator on 2015/2/15.
  */
 public class ClientInitializer extends ChannelInitializer<SocketChannel> {
+    private static ClientInitializer onlyOne = null;
+
+    public static ClientInitializer getInstance() {
+        if(onlyOne == null) return new ClientInitializer();
+        return onlyOne;
+    }
+
+    public static void setOnlyOne(ClientInitializer onlyOne) {
+        ClientInitializer.onlyOne = onlyOne;
+    }
+
+    private ClientInitializer(){}
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();

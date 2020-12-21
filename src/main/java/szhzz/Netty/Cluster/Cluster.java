@@ -185,6 +185,8 @@ public class Cluster {
             forceTakeover = cfg_.getBooleanVal("强制接管交易", false);
             setOffLine(cfg_.getBooleanVal("离线", false));
 
+            ClusterClients.getInstance().setConnectionTimeout(clusterCfg.getIntVal("ConnectionTimeout", 1000));
+
             if (clusterCfg.getChildrenNames() == null || clusterCfg.getChildrenNames().size() == 0) {
                 AppManager.MessageBox("请定义 " + clusterCfg.getConfigUrl() + " 集群节点设置文件");
             }

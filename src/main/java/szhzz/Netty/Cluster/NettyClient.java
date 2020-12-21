@@ -15,9 +15,7 @@ import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -40,7 +38,7 @@ public class NettyClient {
     private boolean autoReconnect = false;
     protected boolean isNio = true;
     private int retry = 0;
-    private int connectionTimeout = 10;
+    private int connectionTimeout = 1000;
     private ClientInspector inspector = null;
     private int circleTime = 10* 1000;
 
@@ -125,7 +123,7 @@ public class NettyClient {
 
     protected void connectNio() {
         if (clientInitializer == null) {
-            clientInitializer = new ClientInitializer();
+            clientInitializer = ClientInitializer.getInstance();
         }
         group = new NioEventLoopGroup();
         try {
@@ -159,7 +157,7 @@ public class NettyClient {
 
     protected void connectOio() {
         if (clientInitializer == null) {
-            clientInitializer = new ClientInitializer();
+            clientInitializer = ClientInitializer.getInstance();
         }
         group = new OioEventLoopGroup();
         try {
@@ -177,6 +175,7 @@ public class NettyClient {
             ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();
+            logger.info("Connected to " + host.get(hostIndex) + " " + port);
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             logger.error("Error on connect to " + host + " " + port, e);

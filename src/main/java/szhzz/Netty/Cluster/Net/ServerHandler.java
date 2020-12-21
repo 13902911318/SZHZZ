@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 //@Immutable
 public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData> {
     private static DawLogger logger = DawLogger.getLogger(ServerHandler.class);
-    private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private ClusterServer clusterServer = null;
+    static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    ClusterServer clusterServer = null;
 
 
     public ServerHandler() {
@@ -132,7 +132,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         if (AppManager.isQuitApp()) return;
-        ArrayList<NettyExchangeData> exDates = clusterServer.answer(msg);
+        ArrayList<NettyExchangeData> exDates = answer(msg);
         if(exDates!= null && exDates.size() > 0){
             for(NettyExchangeData exDate : exDates){
                 if (exDate != null) {
@@ -140,6 +140,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
                 }
             }
         }
+    }
+
+    public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
+        return clusterServer.answer(data);
     }
 
     @Override

@@ -93,7 +93,7 @@ public class Shutdown extends JDialog {
 
         try {
             if (!command.equalsIgnoreCase("-Q")) {
-                if (!AppManager.getApp().canShutdown()) {
+                if (!AppManager.getApp().canRemoteShutdown()) {
                     command = "-R";
                 }
                 AppManager.logit("Shutdown invoked");

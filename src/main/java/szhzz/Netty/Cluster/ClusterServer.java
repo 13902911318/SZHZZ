@@ -5,6 +5,7 @@ import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ServerHandler;
+import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Utils.DawLogger;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ public class ClusterServer {
     private String serverName = null;
     private int localLevel = 0;
     private String inetHost = null;
+    private ServerInitializer serverInitializer = null;
+
     private ClusterServer() {
 
     }
@@ -112,6 +115,8 @@ public class ClusterServer {
         if (server == null) {
 
             server = new NettyServer(inetHost, port);
+            server.setServerInitializer(serverInitializer);  // serverInitializer can be null
+
             try {
                 server.startup();
             } catch (Exception e) {
@@ -164,5 +169,9 @@ public class ClusterServer {
             this.port = port;
         }
         this.inetHost = inetHost;
+    }
+
+    public void setServerInitializer(ServerInitializer serverInitializer) {
+        this.serverInitializer = serverInitializer;
     }
 }

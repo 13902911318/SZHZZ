@@ -14,10 +14,15 @@ import java.util.List;
  */
 public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
     private static DawLogger logger = DawLogger.getLogger(ExchangeDataDecoder.class);
-    private NettyExchangeData data = null;
+    protected NettyExchangeData data = null;
 
     @Override
     protected final void decode(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
+        decode_(ctx, msg, out);
+    }
+
+
+    protected void decode_(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
         if ("bye".equals(msg)) {
             ctx.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
             return;

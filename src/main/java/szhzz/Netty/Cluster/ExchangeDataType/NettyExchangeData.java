@@ -12,6 +12,7 @@ import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ArrayList;
@@ -407,6 +408,6 @@ public class NettyExchangeData extends ExchangeData {
         writeFile(new File(file));
     }
     public void writeFile(File file) throws IOException {
-        FileUtils.write(file, this.encode());
+        FileUtils.write(file, this.encode(), Charset.forName("UTF-8"));
     }
 }
