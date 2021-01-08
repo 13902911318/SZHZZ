@@ -1,4 +1,4 @@
-package szhzz.Netty.Proxy;
+package szhzz.Netty.MarketProxy;
 
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;

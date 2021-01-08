@@ -40,7 +40,7 @@ public class NettyClient {
     private int retry = 0;
     private int connectionTimeout = 1000;
     private ClientInspector inspector = null;
-    private int circleTime = 10* 1000;
+    private int circleTime = 10 * 1000;
 
     public static void main(String[] args) {
         App.setLog4J();
@@ -137,7 +137,7 @@ public class NettyClient {
             bootstrap.handler(clientInitializer);
 
 
-            logger.info("Try to connect " + host.get(hostIndex) + " " + port);
+            logger.info("Try to connect (Nio)" + host.get(hostIndex) + " " + port);
             ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();
@@ -171,7 +171,7 @@ public class NettyClient {
             bootstrap.handler(clientInitializer);
 
 
-            logger.info("Try to connect " + host.get(hostIndex) + " " + port);
+            logger.info("Try to connect (Oio)" + host.get(hostIndex) + " " + port);
             ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();

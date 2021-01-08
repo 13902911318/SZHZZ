@@ -1,4 +1,4 @@
-package szhzz.Netty.Proxy;
+package szhzz.Netty.MarketProxy;
 
 import szhzz.App.AppManager;
 import szhzz.Netty.Cluster.NettyClient;
