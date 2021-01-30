@@ -308,6 +308,39 @@ public class NettyExchangeData extends ExchangeData {
         return sb.toString();
     }
 
+    public String encode(String nl_) {
+        if (encodeString != null) return encodeString;
+
+        if (getTable() == null) {
+            table = new ArrayList<ArrayList>();
+        }
+        //Forward 的数据不要改变数据源的信息
+        if (StringUtil.isNullOrEmpty(getCpuID())) {
+            setLanguage();
+            setCpuID(Cluster.getCpuID());
+            setAppClassName(Cluster.getAppClassName());
+            setGroup(Cluster.getInstance().getGroup());
+            setTimeStamp();
+            setHostName(Cluster.getHostName());
+            setMac(Cluster.getMac());
+        }
+
+        StringBuilder sb = new StringBuilder(BoD).append(nl_);
+        for (ArrayList row : getTable()) {
+            int count = 0;
+            for (Object o : row) {
+                if(count++ > 0){
+                    sb.append("\t");
+                }
+                sb.append(o);
+            }
+            sb.append(nl_);
+        }
+
+        sb.append(EoD).append(nl_);
+        return sb.toString();
+    }
+
     public void setReadOnly(boolean onOff) {
         encodeString = null;
         if (onOff) {

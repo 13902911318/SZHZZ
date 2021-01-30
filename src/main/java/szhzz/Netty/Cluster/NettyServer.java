@@ -1,10 +1,12 @@
 package szhzz.Netty.Cluster;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
 import szhzz.App.AppManager;
@@ -12,6 +14,8 @@ import szhzz.Config.Config;
 import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -22,9 +26,9 @@ public class NettyServer {
     private static AppManager App = AppManager.getApp();
     private final int port;
     private String inetHost = null;
-    private boolean onServer = false;
+    private AtomicBoolean onServer = new AtomicBoolean(false);
     private boolean isNio = true;
-    private ServerInitializer serverInitializer = null;
+    private ChannelInitializer<SocketChannel> serverInitializer = null;
 
     public NettyServer(int port) {
         this.port = port;
@@ -54,8 +58,8 @@ public class NettyServer {
     }
 
     public void startServerNio() throws InterruptedException {
-        if (onServer) return;
-        onServer = true;
+        if (!onServer.compareAndSet(false, true)) return;
+
         if(serverInitializer == null){
             serverInitializer = new ServerInitializer();
         }
@@ -77,17 +81,16 @@ public class NettyServer {
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {
-            onServer = false;
             bodsGroup.shutdownGracefully();
             wookerGroup.shutdownGracefully();
-            connectionListener.setCircleTime(10000);
+            connectionListener.setCircleTime(10000); //delay and restart
+            onServer.set(false);
         }
     }
 
     public void startServerOio() throws InterruptedException {
-        if (onServer) return;
+        if (!onServer.compareAndSet(false, true)) return;
 
-        onServer = true;
         EventLoopGroup bodsGroup = new OioEventLoopGroup();
         EventLoopGroup wookerGroup = new OioEventLoopGroup();
         if(serverInitializer == null){
@@ -111,10 +114,10 @@ public class NettyServer {
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {
-            onServer = false;
             bodsGroup.shutdownGracefully();
             wookerGroup.shutdownGracefully();
             connectionListener.setCircleTime(10000);
+            onServer.set(false);
         }
     }
 
@@ -127,10 +130,10 @@ public class NettyServer {
     }
 
     public boolean isOnServer() {
-        return onServer;
+        return onServer.get();
     }
 
-    public void setServerInitializer(ServerInitializer serverInitializer) {
+    public void setServerInitializer(ChannelInitializer<SocketChannel> serverInitializer) {
         this.serverInitializer = serverInitializer;
     }
 

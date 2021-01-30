@@ -31,7 +31,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 //        pipeline.addLast("deflater", ZlibCodecFactory.newZlibEncoder(ZlibWrapper.ZLIB));
 //        pipeline.addLast("inflater", ZlibCodecFactory.newZlibDecoder(ZlibWrapper.ZLIB));
 
-        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(2* 1024 * 1024, Delimiters.lineDelimiter()));
         pipeline.addLast("decoder", new StringDecoder(Charset.forName("UTF-8")));
         pipeline.addLast("decoder2", new ExchangeDataDecoder());
 
