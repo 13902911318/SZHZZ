@@ -8,7 +8,6 @@ import szhzz.NFile.FileSystemEventArgs;
 import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.ExchangeDataType.CfgUpdateWrap;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
-import szhzz.Netty.MarketProxy.MarketProxy;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
@@ -184,10 +183,10 @@ public class AppEventExchange {
                     }
                     MessageAbstract.getInstance().sendMessage(MessageCode.ExternalEvent, name.get(i));
 
-                    if (broadcast && MarketProxy.getInstance().isServerAlive()) {
-                        NettyExchangeData data = CfgUpdateWrap.getCfgUpdate(cfg.getConfigUrl(), name.get(i), value.get(i), comments.get(i));
-                        MarketProxy.getInstance().broadcast(data);
-                    }
+//                    if (broadcast && MarketProxy.getInstance().isServerAlive()) {
+//                        NettyExchangeData data = CfgUpdateWrap.getCfgUpdate(cfg.getConfigUrl(), name.get(i), value.get(i), comments.get(i));
+//                        MarketProxy.getInstance().broadcast(data);
+//                    }
                 }
                 cfg.save();
             }

@@ -31,7 +31,7 @@ public class UdpClient_Netty extends UdpClient_Abstract {
     }
 
 
-    UdpClient_Netty() {
+    public UdpClient_Netty() {
     }
 
     @Override
@@ -61,6 +61,11 @@ public class UdpClient_Netty extends UdpClient_Abstract {
         for (Client c : clients.values()) {
             c.writeAndFlush(data);
         }
+    }
+
+    @Override
+    public void send(String data) {
+
     }
 
     public void close() {
@@ -109,6 +114,10 @@ public class UdpClient_Netty extends UdpClient_Abstract {
         }
     }
 
+
+    /**
+     * test only
+     */
     CircleTimer ConnectionListener = new CircleTimer() {
         int count = 0;
 

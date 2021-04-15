@@ -67,6 +67,7 @@ public class ClusterServer {
 
     public void saBye() {
         ServerHandler.sayBye();
+        server.stop();
     }
 
 
@@ -94,7 +95,7 @@ public class ClusterServer {
      * @return 恢复远程的查询信息
      */
     public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
-        if (Cluster.getInstance().isOffLine()) return null;
+        if (Cluster.getInstance() == null || Cluster.getInstance().isOffLine()) return null;
 //        NettyExchangeData exDate = null;
 //        switch (data.getNettyType()) {
 //            case QueryServerLevel:

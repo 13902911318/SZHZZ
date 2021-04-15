@@ -61,7 +61,7 @@ public class ConfigMerged extends Config {
     }
 
     public String getProperty(String name) {
-        if (master.hasProperty(name)) return master.getProperty(name);
+        if (master.getProperty(name) != null) return master.getProperty(name);
         return slave.getProperty(name);
     }
 
@@ -133,11 +133,8 @@ public class ConfigMerged extends Config {
 
 
     public String getProperty(String name, String defaultValue) {
-        if (slave.hasProperty(name)) {
-            return slave.getProperty(name, defaultValue);
-        } else {
-            return master.getProperty(name, defaultValue);
-        }
+        if (master.getProperty(name, null) != null) return master.getProperty(name);
+        return slave.getProperty(name, defaultValue);
     }
 
 

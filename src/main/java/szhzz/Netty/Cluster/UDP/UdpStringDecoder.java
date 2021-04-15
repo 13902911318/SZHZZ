@@ -97,40 +97,5 @@ public class UdpStringDecoder extends MessageToMessageDecoder<DatagramPacket> {
 //            count = 0;
 //        }
     }
-
-
-    protected void decode_(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
-        if ("bye".equals(msg)) {
-            ctx.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
-            return;
-        }
-
-        //System.out.println(msg);
-
-        if (NettyExchangeData.isBeggingOfData(msg)) {
-            if (data != null) {
-                System.out.println("数据序列错误");
-                logger.error(new Exception("数据序列错误!"));
-            }
-            data = new NettyExchangeData();
-        } else if (NettyExchangeData.isEndOfDate(msg)) {
-            if (data != null) {
-                if (data.isSameCharset()) {
-                    out.add(data);
-                } else {
-                    logger.error(msg, new Exception("中文编码错误!"));
-                }
-            } else {
-                logger.error(new Exception("数据序列错误!"));
-            }
-            data = null;
-        } else {
-            if (data != null) {
-                data.decode(msg);
-            } else {
-                logger.error(new Exception("数据序列错误!"));
-            }
-        }
-    }
 }
 

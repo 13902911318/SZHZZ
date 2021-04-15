@@ -1,12 +1,12 @@
 package szhzz.Netty.Cluster.Net;
 
 
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.BusinessRuse;
+import szhzz.Netty.Cluster.Cluster;
 import szhzz.Netty.Cluster.ClusterClients;
 import szhzz.Netty.Cluster.ClusterServer;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
@@ -55,19 +55,19 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         // NettyExchangeData  msg
         //TimeUnit.SECONDS.sleep(2);
-        if(msg.isByPass()){// 这些信息本来就应该有服务器处理
+        if (msg.isByPass()) {// 这些信息本来就应该有服务器处理
             logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
-            ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
-            if(exDates!=null && exDates.size() > 0) {
-                for(NettyExchangeData exDate : exDates) {
-                    if (exDate != null) {
-                        logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
+                ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
+                if (exDates != null && exDates.size() > 0) {
+                    for (NettyExchangeData exDate : exDates) {
+                        if (exDate != null) {
+                            logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
 //                        if(ctx.channel().isWritable())
                             ctx.writeAndFlush(exDate.encode());
+                        }
                     }
                 }
-            }
-            return ;
+            return;
         }
         in(msg);
 
@@ -96,7 +96,8 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
 
     @Override
     public long in(Object obj) {
-        ClusterClients.getInstance().callBack((NettyExchangeData) obj);
+        if (ClusterClients.getInstance() != null)
+            ClusterClients.getInstance().callBack((NettyExchangeData) obj);
         return 0;
     }
 
@@ -108,7 +109,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.info("exceptionCaught!");
         if (!(cause instanceof java.io.IOException)) {
-            if(!cause.getMessage().contains("远程主机强迫关闭了一个现有的连接")){
+            if (!cause.getMessage().contains("远程主机强迫关闭了一个现有的连接")) {
                 logger.error(cause);
             }
         }

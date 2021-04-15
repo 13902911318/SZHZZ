@@ -2,6 +2,7 @@ package szhzz.Config;
 
 
 import szhzz.App.AppManager;
+import szhzz.Utils.EventInspector;
 import szhzz.sql.gui.DwPanel;
 
 import javax.swing.*;
@@ -14,10 +15,16 @@ public class CfgEditor extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private DwPanel CfgDw;
-
+    private EventInspector<Config> onOKInspector = null;
+    private EventInspector<Config> onCancelInspector = null;
 
     public CfgEditor(JFrame frame) {
         super(frame);
+        init();
+    }
+
+    public CfgEditor(Frame owner, String title, boolean modal) {
+        super(owner, title, modal);
         init();
     }
 
@@ -73,12 +80,19 @@ public class CfgEditor extends JDialog {
         configUI.onWrite();
         savePref();
         dispose();
+        if (onOKInspector != null) {
+            onOKInspector.callBack(getCfg());
+        }
     }
 
     private void onCancel() {
 // add your code here if necessary
         getCfg().reLoad();
         savePref();
+        if (onCancelInspector != null) {
+            onCancelInspector.callBack(getCfg());
+        }
+
         dispose();
     }
 
@@ -122,4 +136,11 @@ public class CfgEditor extends JDialog {
         appCfg.save();
     }
 
+    public void setOnOKInspector(EventInspector<Config> onOKInspector) {
+        this.onOKInspector = onOKInspector;
+    }
+
+    public void setOnCancelInspector(EventInspector<Config> onCancelInspector) {
+        this.onCancelInspector = onCancelInspector;
+    }
 }

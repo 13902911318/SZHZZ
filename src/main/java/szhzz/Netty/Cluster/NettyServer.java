@@ -29,6 +29,9 @@ public class NettyServer {
     private AtomicBoolean onServer = new AtomicBoolean(false);
     private boolean isNio = true;
     private ChannelInitializer<SocketChannel> serverInitializer = null;
+    private boolean autoConnect = false;
+    private EventLoopGroup bodsGroup = new OioEventLoopGroup();
+    private EventLoopGroup wookerGroup = new OioEventLoopGroup();
 
     public NettyServer(int port) {
         this.port = port;
@@ -40,10 +43,10 @@ public class NettyServer {
 
     public static void main(String[] args) throws InterruptedException {
         App.setLog4J();
-        new NettyServer(7522).startServer();
+        new NettyServer(7522).startup();
     }
 
-    public void startServer() throws InterruptedException {
+    private void startServer() throws InterruptedException {
         Config systemCfg = App.getCfg();
         if (systemCfg != null && systemCfg.propertyEquals("ProxyType", "Oio")) {
             isNio = false;
@@ -63,8 +66,8 @@ public class NettyServer {
         if(serverInitializer == null){
             serverInitializer = new ServerInitializer();
         }
-        EventLoopGroup bodsGroup = new NioEventLoopGroup();
-        EventLoopGroup wookerGroup = new NioEventLoopGroup();
+        bodsGroup = new NioEventLoopGroup();
+        wookerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bodsGroup, wookerGroup);
@@ -83,7 +86,7 @@ public class NettyServer {
         } finally {
             bodsGroup.shutdownGracefully();
             wookerGroup.shutdownGracefully();
-            connectionListener.setCircleTime(10000); //delay and restart
+            if(autoConnect)connectionListener.setCircleTime(10000); //delay and restart
             onServer.set(false);
         }
     }
@@ -121,7 +124,14 @@ public class NettyServer {
         }
     }
 
+    public void stop(){
+        autoConnect = false;
+        bodsGroup.shutdownGracefully();
+        wookerGroup.shutdownGracefully();
+    }
+
     public void startup() {
+        autoConnect = true;
         try {
             AppManager.executeInBack(new Runer());
         } catch (Exception e) {

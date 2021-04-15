@@ -44,7 +44,7 @@ public abstract class UdpClient_Abstract {
 //    }
 
     public abstract void send(NettyExchangeData data);
-
+    public abstract void send(String data);
     public abstract void close();
 
 

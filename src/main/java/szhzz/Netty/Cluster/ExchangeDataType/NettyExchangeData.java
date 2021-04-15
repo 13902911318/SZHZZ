@@ -66,6 +66,7 @@ public class NettyExchangeData extends ExchangeData {
         this.table = new ArrayList<ArrayList>();
     }
 
+
     public NettyExchangeData(ExchangeData eData) {
         this.table = (ArrayList<ArrayList>) eData.getTable().clone();
     }
@@ -74,6 +75,15 @@ public class NettyExchangeData extends ExchangeData {
         decode(msg);
     }
 
+    public NettyExchangeData(String msg) {
+        String[] a = msg.split("\n");
+        for (String s : a) {
+            if (isBeggingOfData(s) || isEndOfDate(s)) {
+                continue;
+            }
+            decode(s);
+        }
+    }
 
     public void setEvenType(Object coed) {
         setTitleCol(coed, colEventType);
@@ -283,10 +293,11 @@ public class NettyExchangeData extends ExchangeData {
         }
         //Forward 的数据不要改变数据源的信息
         if (StringUtil.isNullOrEmpty(getCpuID())) {
+            int groupID = 0;
             setLanguage();
             setCpuID(Cluster.getCpuID());
             setAppClassName(Cluster.getAppClassName());
-            setGroup(Cluster.getInstance().getGroup());
+            setGroup(Cluster.getInstance() == null ? groupID : Cluster.getInstance().getGroup());
             setTimeStamp();
             setHostName(Cluster.getHostName());
             setMac(Cluster.getMac());
@@ -368,6 +379,9 @@ public class NettyExchangeData extends ExchangeData {
             table = new ArrayList<ArrayList>();
         }
         for (String line : data) {
+            line = line.trim();
+            if (isBeggingOfData(line) || isEndOfDate(line)) continue;
+
             ArrayList currentRecord = new ArrayList();
             getTable().add(currentRecord);
             String[] cols = line.split("\t");
@@ -399,7 +413,8 @@ public class NettyExchangeData extends ExchangeData {
             BufferedReader buff = new BufferedReader(new InputStreamReader(in, encode));
             String tk;
             while ((tk = buff.readLine()) != null) {
-                dataEnd = dataEnd|| tk.equals(NettyExchangeData.EoD);
+
+                dataEnd = ( dataEnd|| tk.equals(NettyExchangeData.EoD));
 
                 if(dataEnd) break;
 

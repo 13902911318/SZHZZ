@@ -44,6 +44,7 @@ public class NettyClient {
     private int circleTime = 10 * 1000;
     private AtomicBoolean lockOrSkip = new AtomicBoolean(false);
 
+
     public static void main(String[] args) {
         App.setLog4J();
         NettyClient client = new NettyClient(args, 7521);
@@ -71,11 +72,20 @@ public class NettyClient {
         setHost(host, port);
     }
 
+    public ArrayList<String> getHosts() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
     public void setHost(String[] host, int port) {
         this.port = port;
         this.host.clear();
         addHost(host);
     }
+
 
     public void setHost(String[] host, int port, int hostIndex) {
         setHost(host, port);
@@ -130,7 +140,7 @@ public class NettyClient {
 
     protected void connectNio() {
         if (!lockOrSkip.compareAndSet(false, true)) return;
-
+        String ip = host.get(hostIndex);
         try {
             if (clientInitializer == null) {
                 clientInitializer = ClientInitializer.getInstance();
@@ -146,18 +156,18 @@ public class NettyClient {
             bootstrap.handler(clientInitializer);
 
 
-            logger.info("Try to connect (Nio)" + host.get(hostIndex) + " " + port);
-            ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); //阻塞,等待建立连接
+            logger.info("Try to connect (Nio)" + ip + " " + port);
+            ChannelFuture future = bootstrap.connect(ip, port).sync(); //阻塞,等待建立连接
             channel = future.channel();   // 连接后获取 channel
 
             connected();
-            logger.info("connected to " + host.get(hostIndex) + " " + port);
+            logger.info("connected to " + ip + " " + port);
 
             channel.closeFuture().sync();  //阻塞直到断开
         } catch (InterruptedException e) {
-            logger.error("Error on connect to " + host + " " + port, e);
+            logger.error("Error on connect to " + ip + " " + port, e);
         } catch (Exception e1) {
-            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
+            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + ip + " " + port);
         } finally {
             if (group != null) {
                 group.shutdownGracefully();
@@ -171,7 +181,7 @@ public class NettyClient {
 
     protected void connectOio() {
         if (!lockOrSkip.compareAndSet(false, true)) return;
-
+        String ip = host.get(hostIndex);
         try {
             if (clientInitializer == null) {
                 clientInitializer = ClientInitializer.getInstance();
@@ -186,17 +196,16 @@ public class NettyClient {
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout);
             bootstrap.handler(clientInitializer);
 
-
-            logger.info("Try to connect (Oio)" + host.get(hostIndex) + " " + port);
-            ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
+            logger.info("Try to connect (Oio)" + ip + " " + port);
+            ChannelFuture future = bootstrap.connect(ip, port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();
-            logger.info("Connected to " + host.get(hostIndex) + " " + port);
+            logger.info("Connected to " + ip + " " + port);
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
-            logger.error("Error on connect to " + host + " " + port, e);
+            logger.error("Error on connect to " + ip + " " + port, e);
         } catch (Exception e1) {
-            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
+            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + ip + " " + port);
         } finally {
             if (group != null) {
                 group.shutdownGracefully();
@@ -220,6 +229,7 @@ public class NettyClient {
     }
 
     public void sayBye() {
+        autoReconnect = false;
         if (channel != null && channel.isActive()) {
             channel.writeAndFlush("bye\r\n");
         }
@@ -256,10 +266,6 @@ public class NettyClient {
         }
     }
 
-    public void start() {
-        autoReconnect = true;
-        ConnectionListener.setCircleTime(100);
-    }
 
     CircleTimer ConnectionListener = new CircleTimer() {
         @Override
@@ -272,6 +278,10 @@ public class NettyClient {
         }
     };
 
+    public void start() {
+        autoReconnect = true;
+        ConnectionListener.setCircleTime(100);
+    }
 
     public void disconnectFromServer() {
         autoReconnect = false;
@@ -305,5 +315,14 @@ public class NettyClient {
 
     public void setTimer(int circleTime) {
         this.circleTime = circleTime;
+    }
+
+    public int getHostIndex() {
+        return hostIndex;
+    }
+
+    public void setHostIndex(int hostIndex) {
+        if(hostIndex >= host.size())hostIndex = 0;
+        this.hostIndex = hostIndex;
     }
 }

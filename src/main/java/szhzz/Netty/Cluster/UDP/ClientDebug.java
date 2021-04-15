@@ -1,5 +1,6 @@
 package szhzz.Netty.Cluster.UDP;
 
+import sun.applet.AppletEvent;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 
 /**
@@ -11,27 +12,28 @@ public class ClientDebug {
 //                DatagramSocket client = new DatagramSocket();
 
 
+//        new UdpServer(7530).startServer();
 //        UdpClient.addRemote("127.0.0.1");
 //        UdpClient client = new UdpClient();
 //        client.setPort(7525);
-        UdpClient_Abstract.setInstance("UdpClient_Netty");
+        UdpClient_Abstract.setInstance("UdpClient"); //"UdpClient_Netty"
         UdpClient_Abstract.getInstance().addRemote(args[0]);
 
 
-        NettyExchangeData data = new NettyExchangeData();
-        data.appendRow();
-
-        data.addData(0); //colErrCode
-        data.addData("login ID"); //colLogonID
-        data.addData("Request");  //colRequestID
-        data.addData("FUN-id");  // colFunID
-        data.addData("No Error");  //colMessage
-
-        data.appendRow();
-        data.appendRow();
-        data.addData("first");
-        data.addData("second");
-        data.addData("3");
+//        NettyExchangeData data = new NettyExchangeData();
+//        data.appendRow();
+//
+//        data.addData(0); //colErrCode
+//        data.addData("login ID"); //colLogonID
+//        data.addData("Request");  //colRequestID
+//        data.addData("FUN-id");  // colFunID
+//        data.addData("No Error");  //colMessage
+//
+//        data.appendRow();
+//        data.appendRow();
+//        data.addData("first");
+//        data.addData("second");
+//        data.addData("3");
 
 //        String sendStr = data.encode();
 //        byte[] sendBuf;
@@ -42,7 +44,7 @@ public class ClientDebug {
 //        client.send(sendPacket);
 
 
-        UdpClient_Abstract.getInstance().send(data);
+        UdpClient_Abstract.getInstance().send("TestString");
 
 
 //        // 初始化本地UDP的Socket

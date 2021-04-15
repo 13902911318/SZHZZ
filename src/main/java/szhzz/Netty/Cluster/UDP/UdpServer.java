@@ -2,13 +2,21 @@ package szhzz.Netty.Cluster.UDP;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
 import szhzz.App.AppManager;
+import szhzz.App.BeQuit;
+import szhzz.Netty.Cluster.NettyServer;
+import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 
 /**
@@ -19,8 +27,10 @@ public class UdpServer {
     private static DawLogger logger = DawLogger.getLogger(UdpServer.class);
     private static AppManager App = AppManager.getApp();
     private final int port;
+    private String hostname = null;
     private boolean onServer = false;
-
+    private ChannelInitializer<Channel> serverInitializer = null;
+    private boolean autoConnect = false;
     private EventLoopGroup wookerGroup = null;
 
     public static void main(String[] args) throws InterruptedException {
@@ -38,16 +48,29 @@ public class UdpServer {
         this.port = port;
     }
 
-    public void startServer() throws InterruptedException {
+    public UdpServer(String hostname, int port) {
+        this.port = port;
+        this.hostname = hostname;
+    }
+
+
+    void startServer() {
+        if (serverInitializer == null) {
+            serverInitializer = new UdpServerInitializer();
+        }
         wookerGroup = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(wookerGroup)
                     .channel(NioDatagramChannel.class)
                     .option(ChannelOption.SO_BROADCAST, true)
-                    .handler(new UdpServerInitializer());
+                    .handler(serverInitializer);
 
-            bootstrap.localAddress(new InetSocketAddress(port));
+            if (hostname == null) {
+                bootstrap.localAddress(new InetSocketAddress(port));
+            } else {
+                bootstrap.localAddress(new InetSocketAddress(hostname, port));
+            }
 
             onServer = true;
             Channel c = bootstrap.bind().syncUninterruptibly().channel();
@@ -57,11 +80,13 @@ public class UdpServer {
         } finally {
             onServer = false;
             wookerGroup.shutdownGracefully();
+            if (autoConnect) connectionListener.setCircleTime(10000);
         }
     }
 
     public void stop() {
         onServer = false;
+        autoConnect = false;
         wookerGroup.shutdownGracefully();
     }
 
@@ -69,5 +94,40 @@ public class UdpServer {
         return onServer;
     }
 
-    //TODO 状态自检报告
+    public void setServerInitializer(ChannelInitializer<Channel> serverInitializer) {
+        this.serverInitializer = serverInitializer;
+    }
+
+    public void startup() {
+        autoConnect = true;
+        try {
+            AppManager.executeInBack(new Runnable() {
+                @Override
+                public void run() {
+                    startServer();
+                }
+            });
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
+
+    CircleTimer connectionListener = new CircleTimer() {
+        @Override
+        public void execTask() {
+            try {
+                logger.info("UDP Server restart...");
+                startServer();
+            } finally {
+            }
+        }
+    };
+
+    BeQuit quit = new BeQuit() {
+        @Override
+        public boolean Quit() {
+            stop();
+            return true;
+        }
+    };
 }

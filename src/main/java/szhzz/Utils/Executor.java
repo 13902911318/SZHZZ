@@ -1,11 +1,13 @@
 package szhzz.Utils;
 
 
+import org.apache.commons.lang3.ClassUtils;
 import szhzz.App.AppManager;
 import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -21,6 +23,8 @@ public class Executor {
     private static Vector<MessageCode> mainJobs = new Vector<>(); //For my self only
     private static Executor onlyOne = null;
     private static Boolean privileges = null;
+
+    private ArrayList<EventInspector> inspectors = new ArrayList<>();
 
     private Executor() {
     }
@@ -99,14 +103,15 @@ public class Executor {
     public boolean taskkill(String taskName) {
         return taskkill(taskName, false);
     }
+
     public boolean taskkill(String taskName, boolean force) {
         boolean isRunning = isRunning(taskName, null);
         boolean isKilled = !isRunning;
         if (isRunning) {
             String[] p;
-            if(force){
+            if (force) {
                 p = new String[]{"Taskkill /IM " + taskName + " /F"};
-            }else{
+            } else {
                 p = new String[]{"Taskkill /IM " + taskName};
             }
 
@@ -157,6 +162,30 @@ public class Executor {
         ExecWaitForEnd exec = new ExecWaitForEnd(commands);
         exec.waitFor = true;
         exec.run();
+    }
+
+
+    public void executeWithCallBack(String[] commands, EventInspector<Object> inspector, String title,
+                                    OutputResolve outputReader, OutputResolve errorReader, boolean silent)
+            throws IOException, InterruptedException {
+        if (commands.length == 0) return;
+        if (inspector != null) inspectors.add(inspector);
+
+        if (title == null) {
+            title = commands[0];
+        }
+
+        if (runningJobs.contains(title)) {
+            AppManager.logit(title + " 正在运行");
+            return;
+        }
+
+        ExecWaitForEnd exec = new ExecWaitForEnd(commands, outputReader, errorReader);
+        exec.exitInformation = null;
+        exec.waitFor = true;
+        exec.title = title;
+        exec.silent = silent;
+        AppManager.executeInBack(exec);
     }
 
     public void executeIfRunningAbandon(String[] commands, MessageCode exitInformation, String title,
@@ -319,7 +348,7 @@ public class Executor {
                 }
 
                 if (!runningJobs.remove(title) && waitFor) {
-                    if(!silent) AppManager.logEvent(title + " 退出时进程丢失错误");
+                    if (!silent) AppManager.logEvent(title + " 退出时进程丢失错误");
                 }
 
                 if (proc != null && waitFor) {
@@ -330,6 +359,9 @@ public class Executor {
 
                 if (exitInformation != null) {
                     MessageAbstract.getInstance().sendMessage(exitInformation, false);
+                }
+                for (EventInspector i : inspectors) {
+                    i.callBack(null);
                 }
             }
         }
@@ -355,4 +387,6 @@ public class Executor {
         }
         return privileges;
     }
+
+
 }

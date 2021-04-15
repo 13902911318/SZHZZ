@@ -17,7 +17,6 @@ public class UdpClient extends UdpClient_Abstract {
     private static DawLogger logger = DawLogger.getLogger(UdpClient.class);
     DatagramSocket client = null;
 
-
     static Hashtable<String, InetAddress> remoteAdress = new Hashtable<>();
 
 
@@ -46,10 +45,9 @@ public class UdpClient extends UdpClient_Abstract {
 
     @Override
     public void close() {
-
     }
 
-    private void send(String sendStr) {
+    public void send(String sendStr) {
         byte[] sendBuf;
 
         sendBuf = sendStr.getBytes(Charset.forName("UTF-8"));
