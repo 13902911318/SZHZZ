@@ -89,20 +89,21 @@ public class AlarmClock implements DawCountdown {
 
 
     public synchronized void removeAlarm(Object o) {
-        if (o instanceof String) {
-            for (Object obj : alarmPool) {
-                if (obj.toString().equals(o)) {
-                    if (alarmPool.remove(obj)) {
-                        logIt(o + " Removed");
-                        timeup();
+        try {
+            if (o instanceof String) {
+                Iterator var2 = alarmPool.iterator();
+
+                while(var2.hasNext()) {
+                    Object obj = var2.next();
+                    if (obj.toString().equals(o) && alarmPool.remove(obj)) {
+                        this.logIt(o + " Removed");
                     }
                 }
+            } else if (alarmPool.remove(o)) {
+                this.logIt(o + " Removed");
             }
-        } else {
-            if (alarmPool.remove(o)) {
-                logIt(o + " Removed");
-                timeup();
-            }
+        }finally {
+            timeup();
         }
     }
 

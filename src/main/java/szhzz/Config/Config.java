@@ -648,6 +648,7 @@ public abstract class Config {
         try {
             while ((tk = in.readLine()) != null) {
                 String trim = tk.trim();
+                if(trim.startsWith("[*"))continue;  // 不使用的单元
                 while (trim.startsWith("[") && trim.endsWith("]")) {
                     if (children == null) {
                         children = new Hashtable<>();
