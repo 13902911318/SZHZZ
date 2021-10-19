@@ -81,7 +81,7 @@ public class TradePlanReadWriter extends SharedCfgProvider {
     }
 
     public String getBackupPath() {
-        MyDate dateSuffix = new MyDate(MyDate.getLastClosedDay().getDate());
+        MyDate dateSuffix = new MyDate(MyDate.getLastCloseDay().getDate());
         dateSuffix.futureOpenDay();
         return getBackupPath(dateSuffix.getDate());
     }

@@ -378,12 +378,6 @@ public class AppManager implements DataConsumer {
         return getTargetDbProp().getProperty("port");
     }
 
-    public static boolean canShutdown() {
-        //排除编程失误,误操作等造成的关机. 下述机器不得关闭
-        return !("DellE5".equalsIgnoreCase(getHostName()) ||
-                "DELL690".equalsIgnoreCase(getHostName()));
-    }
-
     public boolean canRemoteShutdown() {
         if (cfg == null) return false;
         return cfg.getBooleanVal("RemoteShutdown", false);

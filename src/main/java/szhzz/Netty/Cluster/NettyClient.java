@@ -15,9 +15,8 @@ import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -40,9 +39,11 @@ public class NettyClient {
     private boolean autoReconnect = false;
     protected boolean isNio = true;
     private int retry = 0;
-    private int connectionTimeout = 10;
+    private int connectionTimeout = 1000;
     private ClientInspector inspector = null;
-    private int circleTime = 10* 1000;
+    private int circleTime = 10 * 1000;
+    private AtomicBoolean lockOrSkip = new AtomicBoolean(false);
+
 
     public static void main(String[] args) {
         App.setLog4J();
@@ -71,10 +72,24 @@ public class NettyClient {
         setHost(host, port);
     }
 
+    public ArrayList<String> getHosts() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
     public void setHost(String[] host, int port) {
         this.port = port;
         this.host.clear();
         addHost(host);
+    }
+
+
+    public void setHost(String[] host, int port, int hostIndex) {
+        setHost(host, port);
+        this.hostIndex = hostIndex;
     }
 
     public void addHost(String[] host) {
@@ -104,9 +119,9 @@ public class NettyClient {
         if (inspector != null) {
             inspector.disConnected();
         }
-//        if (autoReconnect) {
-//            start();
-//        }
+        if (autoReconnect) {
+            ConnectionListener.setCircleTime(circleTime);
+        }
     }
 
     protected void connect() {
@@ -124,11 +139,13 @@ public class NettyClient {
     }
 
     protected void connectNio() {
-        if (clientInitializer == null) {
-            clientInitializer = new ClientInitializer();
-        }
-        group = new NioEventLoopGroup();
+        if (!lockOrSkip.compareAndSet(false, true)) return;
+        String ip = host.get(hostIndex);
         try {
+            if (clientInitializer == null) {
+                clientInitializer = ClientInitializer.getInstance();
+            }
+            group = new NioEventLoopGroup();
 
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group);
@@ -139,30 +156,37 @@ public class NettyClient {
             bootstrap.handler(clientInitializer);
 
 
-            logger.info("Try to connect " + host.get(hostIndex) + " " + port);
-            ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
+            logger.info("Try to connect (Nio)" + ip + " " + port);
+            ChannelFuture future = bootstrap.connect(ip, port).sync(); //阻塞,等待建立连接
             channel = future.channel();   // 连接后获取 channel
-            connected();
-            logger.info("connected to " + host.get(hostIndex) + " " + port);
 
-            channel.closeFuture().sync();
+            connected();
+            logger.info("connected to " + ip + " " + port);
+
+            channel.closeFuture().sync();  //阻塞直到断开
         } catch (InterruptedException e) {
-            logger.error("Error on connect to " + host + " " + port, e);
+            logger.error("Error on connect to " + ip + " " + port, e);
         } catch (Exception e1) {
-            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
+            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + ip + " " + port);
         } finally {
-            group.shutdownGracefully();
+            if (group != null) {
+                group.shutdownGracefully();
+            }
             group = null;
+
+            lockOrSkip.set(false);
             disConnected();
         }
     }
 
     protected void connectOio() {
-        if (clientInitializer == null) {
-            clientInitializer = new ClientInitializer();
-        }
-        group = new OioEventLoopGroup();
+        if (!lockOrSkip.compareAndSet(false, true)) return;
+        String ip = host.get(hostIndex);
         try {
+            if (clientInitializer == null) {
+                clientInitializer = ClientInitializer.getInstance();
+            }
+            group = new OioEventLoopGroup();
 
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group);
@@ -172,19 +196,22 @@ public class NettyClient {
             bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectionTimeout);
             bootstrap.handler(clientInitializer);
 
-
-            logger.info("Try to connect " + host.get(hostIndex) + " " + port);
-            ChannelFuture future = bootstrap.connect(host.get(hostIndex), port).sync(); // 等待建立连接
+            logger.info("Try to connect (Oio)" + ip + " " + port);
+            ChannelFuture future = bootstrap.connect(ip, port).sync(); // 等待建立连接
             channel = future.channel();   // 连接后获取 channel
             connected();
+            logger.info("Connected to " + ip + " " + port);
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
-            logger.error("Error on connect to " + host + " " + port, e);
+            logger.error("Error on connect to " + ip + " " + port, e);
         } catch (Exception e1) {
-            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + host + " " + port);
+            logger.info("Connection false for " + e1.getClass().getSimpleName() + " " + ip + " " + port);
         } finally {
-            group.shutdownGracefully();
+            if (group != null) {
+                group.shutdownGracefully();
+            }
             group = null;
+            lockOrSkip.set(false);
             disConnected();
         }
     }
@@ -202,6 +229,7 @@ public class NettyClient {
     }
 
     public void sayBye() {
+        autoReconnect = false;
         if (channel != null && channel.isActive()) {
             channel.writeAndFlush("bye\r\n");
         }
@@ -218,7 +246,7 @@ public class NettyClient {
      * @return requID 回执号!
      */
     public long send(NettyExchangeData msg) {
-        if (!connected) {
+        if (!isConnected()) {
             //尝试经由服务器端发送
 //            msg.setByPass();
 //            return ServerHandler.bypassSendTo(msg, host);
@@ -238,32 +266,22 @@ public class NettyClient {
         }
     }
 
-    public void start() {
-        autoReconnect = true;
-        ConnectionListener.setCircleTime(100);
-    }
 
     CircleTimer ConnectionListener = new CircleTimer() {
-        boolean progressing = false;
-
         @Override
         public void execTask() {
-            if (progressing) return;
-            progressing = true;
-            try {
-                if (autoReconnect && !connected) {
-//                    connected = true;
-                    if(!AppManager.getApp().isSilentTime()){
-                        connect();//阻塞直到断开连接
-                    }
-                }
-            } finally {
-                setCircleTime(circleTime);
-                progressing = false;
+            if (autoReconnect && !isConnected()) {
+//                        if (!AppManager.getApp().isSilentTime()) {
+                connect();//阻塞直到断开连接
+//                        }
             }
         }
     };
 
+    public void start() {
+        autoReconnect = true;
+        ConnectionListener.setCircleTime(100);
+    }
 
     public void disconnectFromServer() {
         autoReconnect = false;
@@ -272,7 +290,7 @@ public class NettyClient {
         sayBye(); //不能保证远端服务器会自动断开
         if (group != null) group.shutdownGracefully();
         channel = null;
-        connected = false;
+        lockOrSkip.set(false);
     }
 
     BeQuit quit = new BeQuit() {
@@ -297,5 +315,14 @@ public class NettyClient {
 
     public void setTimer(int circleTime) {
         this.circleTime = circleTime;
+    }
+
+    public int getHostIndex() {
+        return hostIndex;
+    }
+
+    public void setHostIndex(int hostIndex) {
+        if(hostIndex >= host.size())hostIndex = 0;
+        this.hostIndex = hostIndex;
     }
 }

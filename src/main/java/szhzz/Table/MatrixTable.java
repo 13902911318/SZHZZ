@@ -7,6 +7,8 @@ import szhzz.Table.Filters.RowFilter;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -351,7 +353,7 @@ public class MatrixTable {
     }
 
     public void saveAs(File file) throws IOException {
-        PrintWriter out = new PrintWriter(new FileWriter(file, false));
+        PrintWriter out = new PrintWriter( file.getAbsolutePath(), "UTF-8");
         reSort();
         try {
             if (has_Header) {

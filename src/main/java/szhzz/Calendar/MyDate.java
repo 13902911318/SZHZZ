@@ -227,9 +227,9 @@ public class MyDate implements Serializable {
         }
     }
 
-    public static MyDate getLastClosedDay() {
+    public static MyDate getLastCloseDay() {
         initCalendar();
-        return getLastCloseDay();
+        return lastCloseDay();
     }
 
     public static void setLastClosedDay(String date) {
@@ -237,7 +237,7 @@ public class MyDate implements Serializable {
         Database db = DbStack.getDb(MyDate.class);
         try {
             db.executeUpdate(update);
-            getLastCloseDay().setDate(date);
+            lastCloseDay().setDate(date);
         } catch (DBException e) {
             logger.error(e);
         } finally {
@@ -432,7 +432,7 @@ public class MyDate implements Serializable {
         stockCalendar = null;
     }
 
-    public static MyDate getLastCloseDay() {
+    private static MyDate lastCloseDay() {
         if (lastCloseDay == null) return new MyDate("1954-07-02");
         return lastCloseDay;
     }
@@ -828,7 +828,7 @@ public class MyDate implements Serializable {
     public boolean isClosed() {
         initCalendar();
 //        if(getLastCloseDay() == null) return false;
-        return this.compareDays(getLastCloseDay()) <= 0;
+        return this.compareDays(lastCloseDay()) <= 0;
     }
 
     public boolean nextCloseDay() {

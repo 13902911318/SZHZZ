@@ -12,6 +12,7 @@ import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ public class NettyExchangeData extends ExchangeData {
         this.table = new ArrayList<ArrayList>();
     }
 
+
     public NettyExchangeData(ExchangeData eData) {
         this.table = (ArrayList<ArrayList>) eData.getTable().clone();
     }
@@ -73,6 +75,15 @@ public class NettyExchangeData extends ExchangeData {
         decode(msg);
     }
 
+    public NettyExchangeData(String msg) {
+        String[] a = msg.split("\n");
+        for (String s : a) {
+            if (isBeggingOfData(s) || isEndOfDate(s)) {
+                continue;
+            }
+            decode(s);
+        }
+    }
 
     public void setEvenType(Object coed) {
         setTitleCol(coed, colEventType);
@@ -282,10 +293,11 @@ public class NettyExchangeData extends ExchangeData {
         }
         //Forward 的数据不要改变数据源的信息
         if (StringUtil.isNullOrEmpty(getCpuID())) {
+            int groupID = 0;
             setLanguage();
             setCpuID(Cluster.getCpuID());
             setAppClassName(Cluster.getAppClassName());
-            setGroup(Cluster.getInstance().getGroup());
+            setGroup(Cluster.getInstance() == null ? groupID : Cluster.getInstance().getGroup());
             setTimeStamp();
             setHostName(Cluster.getHostName());
             setMac(Cluster.getMac());
@@ -304,6 +316,39 @@ public class NettyExchangeData extends ExchangeData {
         }
 
         sb.append(EoD).append(nl);
+        return sb.toString();
+    }
+
+    public String encode(String nl_) {
+        if (encodeString != null) return encodeString;
+
+        if (getTable() == null) {
+            table = new ArrayList<ArrayList>();
+        }
+        //Forward 的数据不要改变数据源的信息
+        if (StringUtil.isNullOrEmpty(getCpuID())) {
+            setLanguage();
+            setCpuID(Cluster.getCpuID());
+            setAppClassName(Cluster.getAppClassName());
+            setGroup(Cluster.getInstance().getGroup());
+            setTimeStamp();
+            setHostName(Cluster.getHostName());
+            setMac(Cluster.getMac());
+        }
+
+        StringBuilder sb = new StringBuilder(BoD).append(nl_);
+        for (ArrayList row : getTable()) {
+            int count = 0;
+            for (Object o : row) {
+                if(count++ > 0){
+                    sb.append("\t");
+                }
+                sb.append(o);
+            }
+            sb.append(nl_);
+        }
+
+        sb.append(EoD).append(nl_);
         return sb.toString();
     }
 
@@ -334,6 +379,9 @@ public class NettyExchangeData extends ExchangeData {
             table = new ArrayList<ArrayList>();
         }
         for (String line : data) {
+            line = line.trim();
+            if (isBeggingOfData(line) || isEndOfDate(line)) continue;
+
             ArrayList currentRecord = new ArrayList();
             getTable().add(currentRecord);
             String[] cols = line.split("\t");
@@ -365,7 +413,8 @@ public class NettyExchangeData extends ExchangeData {
             BufferedReader buff = new BufferedReader(new InputStreamReader(in, encode));
             String tk;
             while ((tk = buff.readLine()) != null) {
-                dataEnd = dataEnd|| tk.equals(NettyExchangeData.EoD);
+
+                dataEnd = ( dataEnd|| tk.equals(NettyExchangeData.EoD));
 
                 if(dataEnd) break;
 
@@ -407,6 +456,6 @@ public class NettyExchangeData extends ExchangeData {
         writeFile(new File(file));
     }
     public void writeFile(File file) throws IOException {
-        FileUtils.write(file, this.encode());
+        FileUtils.write(file, this.encode(), Charset.forName("UTF-8"));
     }
 }

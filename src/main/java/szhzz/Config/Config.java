@@ -2,8 +2,8 @@ package szhzz.Config;
 
 
 import org.apache.commons.io.FileUtils;
-import szhzz.Utils.Chelper;
 import szhzz.Calendar.MiscDate;
+import szhzz.Utils.Chelper;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
 import szhzz.Utils.Utilities;
@@ -51,15 +51,15 @@ public abstract class Config {
     public Config() {
         datas = new Hashtable<String, item>();
         index = new LinkedList<item>();
-        if(allSaveModel)isSafe = allSaveModel;
+        if (allSaveModel) isSafe = allSaveModel;
     }
 
     public static void setChecker(CfgChecker checker) {
         Config.checker = checker;
     }
 
-    public void checkCfg(){
-        if(checker!= null){
+    public void checkCfg() {
+        if (checker != null) {
             checker.checkCfg(this);
         }
     }
@@ -133,11 +133,14 @@ public abstract class Config {
     }
 
     public String getProperty(String name) {
-        String ret = null;
-        if (datas.get(name) != null)
-            ret = decodeLine(datas.get(name).value);
-
-        return ret;
+        if (datas.get(name) != null) {
+            String val = decodeLine(datas.get(name).value);
+            if ("".equals(val) || "''".equals(val) || "\"\"".equals(val)) {
+                return null;
+            }
+            return val;
+        }
+        return null;
     }
 
     public String getLastVal(String name) {
@@ -261,6 +264,7 @@ public abstract class Config {
     }
 
     private String encodeLine(String lines) {
+        if (lines == null) return "";
         if (lines.contains("\n")) {
             lines = lines.replace("\n", "\\n");
         }
@@ -437,7 +441,7 @@ public abstract class Config {
     public Vector<String> getAllKeys() {
         Vector<String> e = new Vector();
         for (int i = 0; i < index.size(); i++) {
-             e.add(index.get(i).name);
+            e.add(index.get(i).name);
         }
         return e;
     }
@@ -632,8 +636,11 @@ public abstract class Config {
     }
 
     public Config getChild(String sectionName) {
-        if (children == null) return null;
-        return children.get(sectionName);
+        Config c = null;
+        if (children != null) {
+            c = children.get(sectionName);
+        }
+        return c == null ? new ConfigF() : c;
     }
 
     public void loadDataVal(BufferedReader in) {
@@ -803,11 +810,11 @@ public abstract class Config {
         }
 
         item(String line) {
-            if(!line.contains("=")) return;
+            if (!line.contains("=")) return;
 
             old_value = value;
             String e[] = getEquation(decodeLine(line));
-            if(e[0] == null) return;
+            if (e[0] == null) return;
 
             name = e[0];
             comment = e[2];
@@ -866,9 +873,9 @@ public abstract class Config {
         }
 
         public void setValue(String value) {
-            if(isSafeModle()){
+            if (isSafeModle()) {
                 setValue_s(value);
-            }else {
+            } else {
                 old_value = this.value;
                 this.value = decodeLine(value);
                 cfgDirty = true;
@@ -886,20 +893,20 @@ public abstract class Config {
             if (value.startsWith("{") && value.endsWith("}")) {
                 encript_ = value;
                 String val = keyMap.get(encript_);
-                if(val == null){
+                if (val == null) {
                     val = value.substring(1, value.length() - 1);
                     val = Chelper.decrypt(val, secretKey_);
-                    keyMap.put(encript_ , val);
+                    keyMap.put(encript_, val);
                 }
                 value = val;
             } else if (value.startsWith("<") && value.endsWith(">")) {
-                if(checkPassword)
+                if (checkPassword)
                     logger.info(getConfigUrl() + "\t" + name + "=" + value_ + " encript!");
 
                 //加密明码
                 value = value.substring(1, value.length() - 1);
                 encript_ = "{" + Chelper.encrypt(value, secretKey_) + "}";
-                keyMap.putIfAbsent(encript_ , value);
+                keyMap.putIfAbsent(encript_, value);
             }
             cfgDirty = true;
         }
@@ -950,10 +957,11 @@ public abstract class Config {
 
     }
 
-    public boolean isSafeModle(){
+    public boolean isSafeModle() {
         return allSaveModel || isSafe;
     }
-    public void setSafe(boolean safe){
+
+    public void setSafe(boolean safe) {
         this.isSafe = safe;
     }
 

@@ -1,10 +1,12 @@
 package szhzz.Netty.Cluster;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.oio.OioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.oio.OioServerSocketChannel;
 import szhzz.App.AppManager;
@@ -12,6 +14,8 @@ import szhzz.Config.Config;
 import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by HuangFang on 2015/3/15.
@@ -22,8 +26,12 @@ public class NettyServer {
     private static AppManager App = AppManager.getApp();
     private final int port;
     private String inetHost = null;
-    private boolean onServer = false;
+    private AtomicBoolean onServer = new AtomicBoolean(false);
     private boolean isNio = true;
+    private ChannelInitializer<SocketChannel> serverInitializer = null;
+    private boolean autoConnect = false;
+    private EventLoopGroup bodsGroup = new OioEventLoopGroup();
+    private EventLoopGroup wookerGroup = new OioEventLoopGroup();
 
     public NettyServer(int port) {
         this.port = port;
@@ -35,10 +43,10 @@ public class NettyServer {
 
     public static void main(String[] args) throws InterruptedException {
         App.setLog4J();
-        new NettyServer(7522).startServer();
+        new NettyServer(7522).startup();
     }
 
-    public void startServer() throws InterruptedException {
+    private void startServer() throws InterruptedException {
         Config systemCfg = App.getCfg();
         if (systemCfg != null && systemCfg.propertyEquals("ProxyType", "Oio")) {
             isNio = false;
@@ -53,15 +61,18 @@ public class NettyServer {
     }
 
     public void startServerNio() throws InterruptedException {
-        if (onServer) return;
-        onServer = true;
-        EventLoopGroup bodsGroup = new NioEventLoopGroup();
-        EventLoopGroup wookerGroup = new NioEventLoopGroup();
+        if (!onServer.compareAndSet(false, true)) return;
+
+        if(serverInitializer == null){
+            serverInitializer = new ServerInitializer();
+        }
+        bodsGroup = new NioEventLoopGroup();
+        wookerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bodsGroup, wookerGroup);
             bootstrap.channel(NioServerSocketChannel.class);
-            bootstrap.childHandler(new ServerInitializer());
+            bootstrap.childHandler(serverInitializer);
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
@@ -73,24 +84,26 @@ public class NettyServer {
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {
-            onServer = false;
             bodsGroup.shutdownGracefully();
             wookerGroup.shutdownGracefully();
-            connectionListener.setCircleTime(10000);
+            if(autoConnect)connectionListener.setCircleTime(10000); //delay and restart
+            onServer.set(false);
         }
     }
 
     public void startServerOio() throws InterruptedException {
-        if (onServer) return;
+        if (!onServer.compareAndSet(false, true)) return;
 
-        onServer = true;
         EventLoopGroup bodsGroup = new OioEventLoopGroup();
         EventLoopGroup wookerGroup = new OioEventLoopGroup();
+        if(serverInitializer == null){
+            serverInitializer = new ServerInitializer();
+        }
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bodsGroup, wookerGroup);
             bootstrap.channel(OioServerSocketChannel.class);
-            bootstrap.childHandler(new ServerInitializer());
+            bootstrap.childHandler(serverInitializer);
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true); // (6)
             bootstrap.childOption(ChannelOption.SO_REUSEADDR, true); //重要！
 
@@ -104,14 +117,21 @@ public class NettyServer {
         } catch (InterruptedException e) {
             logger.error(e);
         } finally {
-            onServer = false;
             bodsGroup.shutdownGracefully();
             wookerGroup.shutdownGracefully();
             connectionListener.setCircleTime(10000);
+            onServer.set(false);
         }
     }
 
+    public void stop(){
+        autoConnect = false;
+        bodsGroup.shutdownGracefully();
+        wookerGroup.shutdownGracefully();
+    }
+
     public void startup() {
+        autoConnect = true;
         try {
             AppManager.executeInBack(new Runer());
         } catch (Exception e) {
@@ -120,7 +140,11 @@ public class NettyServer {
     }
 
     public boolean isOnServer() {
-        return onServer;
+        return onServer.get();
+    }
+
+    public void setServerInitializer(ChannelInitializer<SocketChannel> serverInitializer) {
+        this.serverInitializer = serverInitializer;
     }
 
     class Runer implements Runnable {

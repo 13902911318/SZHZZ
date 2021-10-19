@@ -279,12 +279,12 @@ public class ConfigUI {
                 if (key != null) {
                     checkedKey.add(key.toString());
                     Object o = dw.getValueAt(row, "数值");
-                    if (o == null) o = "NULL";
+                    if (o == null || "".equals(o) || "''".equals(o) || "\"\"".equals(o)) {
+                        o = "NULL";
+                    }
 
-                    String v = otherCfg.getProperty(key.toString());
-                    if (v == null) {
-                        dw.setValueAt(" X ", row, "对比");
-                    } else if (o.equals(v)) {
+                    String v = otherCfg.getProperty(key.toString(), "NULL");
+                    if (o.equals(v)) {
                         dw.setValueAt("==", row, "对比");
                     } else {
                         dw.setValueAt("!= " + v, row, "对比");
@@ -300,8 +300,8 @@ public class ConfigUI {
                 String v = otherCfg.getProperty(key.toString(), "");
                 int row = dw.find("项目", key);
                 if (row < 0) {
-                    row = dw.appendRow();
-                    dw.setValueAt("+ " + key + " = " + v, row, "对比");
+                        row = dw.appendRow();
+                        dw.setValueAt("+ " + key + " = " + v, row, "对比");
                 } else {
                     Object o = dw.getValueAt(row, "数值");
                     if (o == null || !v.equals(o.toString())) {

@@ -88,4 +88,12 @@ public class NU {
         return b1.compareTo(b2);
     }
 
+    public static int compare(Number v1, Number v2, int scale){
+        double v1_ = Double.parseDouble(v1.toString());
+        double v2_ = Double.parseDouble(v2.toString());;
+        BigDecimal b1 = BigDecimal.valueOf(v1_).setScale(scale, BigDecimal.ROUND_HALF_UP);
+        BigDecimal b2 = BigDecimal.valueOf(v2_).setScale(scale, BigDecimal.ROUND_HALF_UP);
+        return  b1.compareTo(b2);
+    }
+
 }

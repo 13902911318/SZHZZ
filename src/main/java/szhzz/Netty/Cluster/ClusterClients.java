@@ -26,6 +26,7 @@ public class ClusterClients {
     private Hashtable<String, NettyClient> clients = new Hashtable<String, NettyClient>();
     private int defaultPort = 7522;
     private int circleTime = 10* 1000;
+    private int connectionTimeout = 1000;
 
     public void setTimer(int circleTime) {
         if(circleTime <= 0) return;
@@ -202,6 +203,7 @@ public class ClusterClients {
         if (client == null) {
             try {
                 client = new NettyClient(address, port);
+                client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
 
                 clients.put(computerName, client);
@@ -250,4 +252,7 @@ public class ClusterClients {
         }
     };
 
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
 }
