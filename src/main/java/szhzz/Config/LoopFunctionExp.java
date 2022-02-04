@@ -61,25 +61,25 @@ public class LoopFunctionExp {
         }
     }
 
-    public void setCurrentParam(String exp) {
-        ArgumentLoop pramLoop = null;
-
-        if (exp != null) {
-            String express = exp.replace(" ", "");
-            if (express.contains("(")) {
-                String params = express.substring(express.indexOf("(") + 1, express.indexOf(")"));
-                String[] args = params.split(",");
-                for (String arg : args) {
-                    if (pramLoop == null) {
-                        pramLoop = argumentLoop;
-                    } else {
-                        pramLoop = pramLoop.getChild();
-                    }
-                    pramLoop.setCurrentParam_(arg);
-                }
-            }
-        }
-    }
+//    public void setCurrentParam(String exp) {
+//        ArgumentLoop pramLoop = null;
+//
+//        if (exp != null) {
+//            String express = exp.replace(" ", "");
+//            if (express.contains("(")) {
+//                String params = express.substring(express.indexOf("(") + 1, express.indexOf(")"));
+//                String[] args = params.split(",");
+//                for (String arg : args) {
+//                    if (pramLoop == null) {
+//                        pramLoop = argumentLoop;
+//                    } else {
+//                        pramLoop = pramLoop.getChild();
+//                    }
+//                    pramLoop.setCurrentParam_(arg);
+//                }
+//            }
+//        }
+//    }
 
     public void setRelay(Double relay) {
         this.relay = presized(relay);
@@ -222,17 +222,17 @@ public class LoopFunctionExp {
             return p;
         }
 
-        private void setCurrentParam_(String arg) {
-            if (isNumberRanger()) {
-                currentNumber = presized(NU.parseDouble(arg, currentNumber));
-            } else if (isArray) {
-                for (int i = 0; i < params.length; i++) {
-                    if (arg.equals(params[i])) {
-                        arrayIndex = i;
-                    }
-                }
-            }
-        }
+//        private void setCurrentParam_(String arg) {
+//            if (isNumberRanger()) {
+//                currentNumber = presized(NU.parseDouble(arg, currentNumber));
+//            } else if (isArray) {
+//                for (int i = 0; i < params.length; i++) {
+//                    if (arg.equals(params[i])) {
+//                        arrayIndex = i;
+//                    }
+//                }
+//            }
+//        }
 
         public boolean isConstant() {
             return params == null;

@@ -76,6 +76,17 @@ public class ExchangeData implements Serializable {
         }
     }
 
+    /**
+     * 不保证数据解构的一致性
+     * @param row
+     */
+    public void appendRow(ArrayList row) {
+        if (table == null) {
+            table = new ArrayList<ArrayList>();
+        }
+        table.add(row);
+    }
+
     public void appendRow() {
         if (table == null) {
             table = new ArrayList<ArrayList>();
@@ -87,6 +98,12 @@ public class ExchangeData implements Serializable {
     public ArrayList getRow(int rowNo) {
         if (rowNo < 0 || rowNo >= table.size()) return null;
         return table.get(rowNo);
+    }
+
+    public ArrayList getDataRow(int rowNo) {
+        int dataRowNo = rowNo +2;
+        if (rowNo < 0 || dataRowNo >= table.size()) return null;
+        return table.get(dataRowNo);
     }
 
     public void addData(Object o) {

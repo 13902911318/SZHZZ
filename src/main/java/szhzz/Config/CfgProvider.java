@@ -23,8 +23,8 @@ public class CfgProvider {
     static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
     protected static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
     protected Config cfg = null;
-    protected Hashtable<Object, Config> allCfgs;
-    protected LinkedList<String> cfgNames = new LinkedList<String>();
+    protected Hashtable<String, Config> allCfgs;
+    //protected LinkedList<String> cfgNames = new LinkedList<String>();
 
     protected String cfgFolder = null;
     protected String groupName = null;
@@ -47,7 +47,11 @@ public class CfgProvider {
     public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null) {
-            onlyOne = new CfgProvider();
+            if(groupName.equals(DatabaseCfgProvider.gourpID)){
+                onlyOne = new DatabaseCfgProvider();
+            }else {
+                onlyOne = new CfgProvider();
+            }
             onlyOne.setSafeModel(safeModel);
             onlyOne.laodCfgs(groupName);
             provider.put(groupName, onlyOne);
@@ -101,8 +105,8 @@ public class CfgProvider {
     }
 
     public void addCfg(Config c) {
-        String fileName = cfgFolder + "\\" + c.getConfigID() + ".ini";
-        cfgNames.add(c.getConfigID());
+//        String fileName = cfgFolder + "\\" + c.getConfigID() + ".ini";
+//        cfgNames.add(c.getConfigID());
         allCfgs.put(c.getConfigID(), c);  //.toLowerCase()
     }
 
@@ -134,6 +138,7 @@ public class CfgProvider {
     }
 
     public LinkedList<String> getCfgIDs() {
+        LinkedList<String> list = new LinkedList<>();
         return (LinkedList<String>) cfgNames.clone();
     }
 
@@ -166,7 +171,7 @@ public class CfgProvider {
         (new File(cfgFolder)).mkdirs();
 
         allCfgs = new Hashtable<Object, Config>();
-        cfgNames.clear();
+//        cfgNames.clear();
 
         File[] file = (new File(cfgFolder)).listFiles();
         if (file != null) {
@@ -181,7 +186,7 @@ public class CfgProvider {
                     c.setSafe(isSafeModel());
                     try {
                         c.load(aFile.getCanonicalPath());
-                        cfgNames.add(c.getConfigID());
+//                        cfgNames.add(c.getConfigID());
                         allCfgs.put(c.getConfigID(), c);  //.toLowerCase()
                         changeCfg(c);
                     } catch (IOException e) {

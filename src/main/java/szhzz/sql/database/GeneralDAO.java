@@ -274,8 +274,10 @@ public class GeneralDAO implements DaoInterface {
                     String t = rsMeta.getSchemaName(i);
                     if (!tableName.contains(t)) tableName.add(t);
 
-                    //String dbg = rsMeta.getColumnName(i);
+//                    String dbg = rsMeta.getColumnLabel(i);
+//                    dbg = rsMeta.getColumnName(i);
                     ds.setColName(rsMeta.getColumnLabel(i), i - 1);
+                    ds.setOriginalName(rsMeta.getColumnName(i), i - 1);
 
 //                    rsMeta.getColumnName(i);
                     ds.setColTypeName(rsMeta.getColumnTypeName(i), i - 1);

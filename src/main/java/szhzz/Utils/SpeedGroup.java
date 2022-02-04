@@ -7,10 +7,10 @@ import java.util.LinkedList;
 
 /**
  * Created by Administrator on 2018/7/28.
- * 用于测试程序段占用时间的工具
+ * 用于测试程序段占用时间的通用工具
  */
 public class SpeedGroup {
-    private HashMap<String, SpeedTest> sumary = new HashMap<>();
+    private HashMap<String, SpeedTest> summary = new HashMap<>();
     private LinkedList<String> index = new LinkedList<>();
     private static int no = 0;
     private long countTo = 0;
@@ -38,10 +38,10 @@ public class SpeedGroup {
     }
 
     SpeedTest getInstance(String ID) {
-        SpeedTest ret = sumary.get(ID);
+        SpeedTest ret = summary.get(ID);
         if(ret == null) {
             ret = new SpeedTest(ID, countTo);
-            sumary.put(ID, ret);
+            summary.put(ID, ret);
             index.add(ID);
         }
         return ret;
@@ -56,16 +56,16 @@ public class SpeedGroup {
         long total = 0L;
 
         for (String id : index) {
-            total += sumary.get(id).summery();
+            total += summary.get(id).summery();
         }
         if (total == 0d) return;
 
         StringBuffer sb = new StringBuffer();
-        sb.append("Sumary: Total timer (" + FT.format(total/1000000000) + ")============================\n");
+        sb.append("Summary: Total timer (" + FT.format(total/1000000000) + ")\n============================\n");
         sb.append(title+"\n");
         long sum = 0;
         for (String id : index) {
-            long t = sumary.get(id).getSummaryTime();
+            long t = summary.get(id).getSummaryTime();
             sum += t;
             sb.append(id + "\t" + FT.format00(t/1000000000d) + "min\t" + FT.format00(100d * t / total) + "%\n");
         }

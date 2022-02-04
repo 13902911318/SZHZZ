@@ -36,8 +36,8 @@ import java.util.*;
  *
  * @author John
  * @version 1.0
- *          <p/>
- *          see dbquery.database.GeneralDAO
+ * <p/>
+ * see dbquery.database.GeneralDAO
  */
 public class DataStore {
     public static final int CURRENTVALUE = 0;
@@ -46,6 +46,7 @@ public class DataStore {
     int currentRow = 0;          // current editing row number
     HashMap<String, Integer> columnNames = new HashMap<String, Integer>();
     HashMap<Integer, String> columnIndex = new HashMap<Integer, String>();
+    HashMap<Integer, String> columnOriginalName = new HashMap<Integer, String>();
     Hashtable<Integer, Object> defaltValues = new Hashtable<Integer, Object>();
     private String Name = "";
     private Vector<dataRow> rows = new Vector<dataRow>();   // celection of dataRows
@@ -122,6 +123,15 @@ public class DataStore {
         columnNames.put(name, pos);
         columnIndex.put(pos, name);
     }
+
+    public String getOriginalName(int col) {
+        return columnOriginalName.get(new Integer(col));
+    }
+
+    public void setOriginalName(String name, int pos) {
+        columnOriginalName.put(pos, name);
+    }
+
 
     public String getColumnName(int col) {
         return columnIndex.get(new Integer(col));
@@ -495,6 +505,7 @@ public class DataStore {
     public boolean setValueAt(Object value, int row, String col) {
         return setValueAt(value, row, getColIndex(col));
     }
+
 
     public boolean setValueAt(Object value, int row, int col) {
         if (rows.size() == 0 || row < 0 || row >= rows.size()) {
@@ -1007,7 +1018,7 @@ public class DataStore {
     private class dataRow {
         int dbRowIndex = 0; // JDBC row
         Vector cols = new Vector();  // original
-        Hashtable colsNewValue = new Hashtable();  // Modified cols and data
+        Hashtable<Integer, Object> colsNewValue = new Hashtable<>();  // Modified cols and data
         private boolean isDeleteSet = false;
 
 
@@ -1113,6 +1124,9 @@ public class DataStore {
          * just remove any change
          */
         void clearUpdate() {
+            for(Integer i : colsNewValue.keySet()){
+                cols.set(i,colsNewValue.get(i));
+            }
             colsNewValue = new Hashtable();
         }
 
@@ -1239,7 +1253,7 @@ public class DataStore {
             int count = 0;
             boolean updateColDefined = updateCols.size() > 0;
             for (int i = 0; i < getColumnCount(); i++) {
-                if(updateColDefined && !updateCols.contains(i)){
+                if (updateColDefined && !updateCols.contains(i)) {
                     continue;
                 }
 
@@ -1249,7 +1263,7 @@ public class DataStore {
                         names.append(", ");
                     }
                     quotes = dataQuotes(i);
-                    names.append(getColumnName(i));
+                    names.append(getOriginalName(i)); //getColumnName
                     vals.append(quotes);
                     if (getObject(i) instanceof Date) {
                         Date d = (Date) getObject(i);
@@ -1281,7 +1295,7 @@ public class DataStore {
 
                 quotes = dataQuotes(col);
                 if (count > 0) script.append(", ");
-                script.append(getColumnName(col));
+                script.append(getOriginalName(col)); //getColumnName()
                 script.append(" = ");
                 script.append(quotes);
 
@@ -1317,7 +1331,7 @@ public class DataStore {
 
                 quotes = dataQuotes(i);
                 if (count > 0) script.append(" and ");
-                script.append(getColumnName(i));
+                script.append(getOriginalName(i)); //getColumnName
                 script.append(cols.get(i) == JDBCType.isNULL ? " is " : " = ");
                 script.append(quotes);
                 if (cols.get(i) instanceof Date && cols.get(i) != JDBCType.isNULL) {
