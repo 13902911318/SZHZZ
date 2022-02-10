@@ -39,7 +39,7 @@ public class CfgEditor extends JDialog {
 
         setContentPane(contentPane);
         setModal(false);
-        getRootPane().setDefaultButton(buttonOK);
+        //getRootPane().setDefaultButton(buttonOK);
 
         configUI = new ConfigUI();
         configUI.setCfgEditor(CfgDw);

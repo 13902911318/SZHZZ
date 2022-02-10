@@ -1,7 +1,9 @@
 package szhzz.App;
 
 
+import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
+import szhzz.Config.DbCfgProvider;
 import szhzz.Config.SharedCfgProvider;
 import szhzz.NFile.DirectoryWatcher;
 import szhzz.NFile.FileSystemEventArgs;
@@ -82,6 +84,16 @@ public class AppEventExchange {
     private void setLocal() {
         if (watcher != null) return;
         cfg = SharedCfgProvider.getInstance("EVENT").getCfg("event.ini") ;
+//        cfg = CfgProvider.getInstance(DbCfgProvider.gourpID).getCfg("EVENT",true );
+//        Config cfgF = SharedCfgProvider.getInstance("EVENT").getCfg("event.ini") ;
+//        if(cfg.getKeys().size() == 0){
+//            // 转为数据库参数文件
+//            Config cfgF = SharedCfgProvider.getInstance("EVENT").getCfg("event.ini") ;
+//            for (String key: cfgF.getKeys()                 ) {
+//                cfg.setProperty(key, cfgF.getProperty(key));
+//            }
+//            cfg.save();
+//        }
         try {
             watcher = new DirectoryWatcher(SharedCfgProvider.getInstance("EVENT").getDir());
             watcher.register(ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);//

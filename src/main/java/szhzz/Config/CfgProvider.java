@@ -9,6 +9,7 @@ import szhzz.Utils.Utilities;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -23,7 +24,7 @@ public class CfgProvider {
     static DawLogger logger = DawLogger.getLogger(CfgProvider.class);
     protected static Hashtable<String, CfgProvider> provider = new Hashtable<String, CfgProvider>();
     protected Config cfg = null;
-    protected Hashtable<String, Config> allCfgs;
+    protected HashMap<String, Config> allCfgs = new HashMap<>() ;
     //protected LinkedList<String> cfgNames = new LinkedList<String>();
 
     protected String cfgFolder = null;
@@ -47,8 +48,8 @@ public class CfgProvider {
     public static CfgProvider getInstance(String groupName, boolean safeModel) {
         CfgProvider onlyOne = provider.get(groupName);
         if (onlyOne == null) {
-            if(groupName.equals(DatabaseCfgProvider.gourpID)){
-                onlyOne = new DatabaseCfgProvider();
+            if(groupName.equals(DbCfgProvider.gourpID) && DbConfig.isNewVersion()){
+                onlyOne = DbCfgProvider.getInstance();
             }else {
                 onlyOne = new CfgProvider();
             }
@@ -139,7 +140,8 @@ public class CfgProvider {
 
     public LinkedList<String> getCfgIDs() {
         LinkedList<String> list = new LinkedList<>();
-        return (LinkedList<String>) cfgNames.clone();
+        list.addAll(allCfgs.keySet());
+        return list;
     }
 
     public void reloadCfgs() {
@@ -170,8 +172,7 @@ public class CfgProvider {
         cfgFolder = getDir();
         (new File(cfgFolder)).mkdirs();
 
-        allCfgs = new Hashtable<Object, Config>();
-//        cfgNames.clear();
+        allCfgs.clear();
 
         File[] file = (new File(cfgFolder)).listFiles();
         if (file != null) {

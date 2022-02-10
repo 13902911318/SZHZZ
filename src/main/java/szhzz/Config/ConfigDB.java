@@ -1,9 +1,9 @@
 package szhzz.Config;
 
 
-
 import szhzz.App.AppManager;
 import szhzz.sql.database.Database;
+import szhzz.sql.jdbcpool.DbStack;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -18,6 +18,7 @@ import java.sql.ResultSet;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigDB extends Config {
+    private static Boolean isNewVersion = null;
     private Database db = null;
 
     private ConfigDB() {
@@ -40,6 +41,17 @@ public class ConfigDB extends Config {
             this.db = App.getDatabase(this.getClass());
         }
         App.tryOpendb(this.db);
+        if(DbConfig.isNewVersion()){
+            try {
+                Config cfgDB = DbCfgProvider.getInstance().getCfg(configID);
+                this.copyTo(cfgDB);
+                cfgDB.setCfgID(getConfigID());
+                return cfgDB.save();
+            } catch (Exception e) {
+
+            }
+            return false;
+        }
 
         StringBuffer sb = new StringBuffer("");
         for (item e : index) {
@@ -71,6 +83,14 @@ public class ConfigDB extends Config {
         App.tryOpendb(this.db);
 
         this.configID = ID;
+
+        if(DbConfig.isNewVersion()){
+            Config cfgDB = DbCfgProvider.getInstance().getCfg(configID);
+            cfgDB.load(getConfigID());
+            cfgDB.copyTo(this);
+            return;
+        }
+
         clear();
 
         String sql = "SELECT Data FROM cfgTable WHERE ID='" + ID + "'";
@@ -106,4 +126,5 @@ public class ConfigDB extends Config {
     public String getConfigFolder() {
         return AppManager.getApp().getCfg().getConfigFolder();
     }
+
 }

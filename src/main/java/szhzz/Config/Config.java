@@ -271,7 +271,7 @@ public abstract class Config {
         return lines;
     }
 
-    private String decodeLine(String lines) {
+    String decodeLine(String lines) {
         if (lines.contains("\\n")) {
             lines = lines.replace("\\n", "\n");
         }
@@ -680,6 +680,8 @@ public abstract class Config {
 
     public void loadDataVal(String lines) {
         String[] tk = lines.split("\n");
+        datas.clear();
+        index.clear();
 
         for (String l : tk) {
             if (l.length() == 0) continue;
