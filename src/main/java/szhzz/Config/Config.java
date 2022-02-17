@@ -271,7 +271,7 @@ public abstract class Config {
         return lines;
     }
 
-    private String decodeLine(String lines) {
+    String decodeLine(String lines) {
         if (lines.contains("\\n")) {
             lines = lines.replace("\\n", "\n");
         }
@@ -648,6 +648,7 @@ public abstract class Config {
         try {
             while ((tk = in.readLine()) != null) {
                 String trim = tk.trim();
+//                if(trim.startsWith("[*"))continue;  //不使用的单元
                 while (trim.startsWith("[") && trim.endsWith("]")) {
                     if (children == null) {
                         children = new Hashtable<>();
@@ -655,9 +656,12 @@ public abstract class Config {
                     }
                     Config cfg = new ConfigF();
                     String name = trim.replace("[", "").replace("]", "").toUpperCase();
-                    children.put(name, cfg);
-                    childrenIndex.add(name);
                     trim = cfg.loadChild(in);
+
+                    if(!name.startsWith("*")) {//不使用的单元
+                        children.put(name, cfg);
+                        childrenIndex.add(name);
+                    }
                 }
                 if (trim.length() == 0) continue;
                 item e = new item(tk);
@@ -676,6 +680,8 @@ public abstract class Config {
 
     public void loadDataVal(String lines) {
         String[] tk = lines.split("\n");
+        datas.clear();
+        index.clear();
 
         for (String l : tk) {
             if (l.length() == 0) continue;

@@ -41,7 +41,7 @@ public class MatrixTable {
     private Comparator comparator = null;
     private int readLines = 0;
     private String charsetName = null;
-
+    private boolean noTrim = false;
     private MatrixTableModel tableModel = null;
 
     public MatrixTable() {
@@ -68,7 +68,7 @@ public class MatrixTable {
     }
 
     public int getColumnNo(String col) {
-        if (header == null || col == null)  return -1;
+        if (header == null || col == null) return -1;
         return header.indexOf(col);
     }
 
@@ -203,7 +203,9 @@ public class MatrixTable {
         if (dataRow != null && col >= 0 && col < dataRow.size())
             val = dataRow.get(col);
         if (val != null) {
-            val = val.trim();
+            if (!noTrim) {
+                val = val.trim();
+            }
         }
         return val;
     }
@@ -353,7 +355,7 @@ public class MatrixTable {
     }
 
     public void saveAs(File file) throws IOException {
-        PrintWriter out = new PrintWriter( file.getAbsolutePath(), "UTF-8");
+        PrintWriter out = new PrintWriter(file.getAbsolutePath(), "UTF-8");
         reSort();
         try {
             if (has_Header) {
@@ -481,7 +483,16 @@ public class MatrixTable {
                     }
                 }
             } else {
-                if (l.trim().length() > 0) {
+                if(noTrim){
+                    String e[] = l.split(delimiter);
+
+                    if (filter != null && !filter.accept(e)) continue;
+
+                    LinkedList<String> row = this.appendRow();
+                    for (String anE : e) {
+                        row.add(anE);
+                    }
+                }else if (l.trim().length() > 0) {
                     String e[] = l.split(delimiter);
 
                     if (filter != null && !filter.accept(e)) continue;
@@ -580,6 +591,10 @@ public class MatrixTable {
 
     public void setCharsetName(String charsetName) {
         this.charsetName = charsetName;
+    }
+
+    public void setNoTrim(boolean noTrim) {
+        this.noTrim = noTrim;
     }
 
     //

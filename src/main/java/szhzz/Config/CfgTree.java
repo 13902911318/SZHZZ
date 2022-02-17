@@ -53,7 +53,7 @@ public class CfgTree extends CfgProvider {
 
     public void createTree(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode level1 = null;
-        for (String cfgId : cfgNames) {
+        for (String cfgId : allCfgs.keySet()) {
             level1 = createTree(cfgId);
             top.add(level1);
         }

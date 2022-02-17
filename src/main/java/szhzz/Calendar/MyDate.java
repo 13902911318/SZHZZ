@@ -12,6 +12,7 @@ import szhzz.sql.database.DBException;
 import szhzz.sql.database.Database;
 import szhzz.sql.jdbcpool.DbStack;
 
+import javax.swing.*;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.util.*;
@@ -117,8 +118,9 @@ public class MyDate implements Serializable {
     private static String openTime2 = "13:00:00";
     private static String closeTime2 = "15:00:00";
     private static MyDate lastOpenDay = null;
-    private static String lastTradeDay = null;
+//    private static String lastTradeDay = null;
     private static String minTradeDay = null;
+    private static String maxTradeDay = null;
     private static MyDate today = null;
     private static HashSet<String> stockCalendar = null;
     private static MyDate lastCloseDay = null;
@@ -205,19 +207,24 @@ public class MyDate implements Serializable {
                     //" where CalendarDate " +  // <= '" + getToday().getDate() + "'" +
                     " order by 1 desc ";
             Database db = DbStack.getDb(MyDate.class);
+            maxTradeDay = null;
+            String tradeDay = null;
             try {
                 rs = db.dynamicSQL(sql);
-
                 lastCloseDay = null;
                 while (rs.next()) {
-                    lastTradeDay = rs.getObject(1).toString();
+                    tradeDay = rs.getObject(1).toString();
+                    if(maxTradeDay == null){
+                        maxTradeDay = tradeDay;
+                    }
+
                     boolean closed = rs.getBoolean(2);
-                    stockCalendar.add(lastTradeDay);
+                    stockCalendar.add(tradeDay);
                     if (lastCloseDay == null && closed) {
-                        lastCloseDay = new MyDate(lastTradeDay);
+                        lastCloseDay = new MyDate(tradeDay);
                     }
                 }
-                minTradeDay = lastTradeDay;
+                minTradeDay = tradeDay;
             } catch (Exception e) {
                 logger.error(e);
             } finally {
@@ -1011,7 +1018,18 @@ public class MyDate implements Serializable {
     public boolean isOpenDay() {
         initCalendar();
         if (this.compareDays(minTradeDay) < 0) return true;
-//        if (this.compareDays(getToday()) > 0) return false;  导致查找将来开市日错误
+        if (this.compareDays(maxTradeDay) > 0) {
+            String message = this.getDate() + " 超出系统日历";
+            logger.error(new Exception(message));
+
+            int confirm = JOptionPane.showConfirmDialog(null,
+                    message + "退出程序(System.Exit!, 检查log,并手工更新日历) ?", "确认退出程序", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                System.exit(1);
+            }
+            return true;
+        }
         return (stockCalendar.contains(this.getDate()));
     }
 

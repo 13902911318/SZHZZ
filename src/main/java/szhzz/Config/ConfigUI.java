@@ -5,24 +5,23 @@ import szhzz.App.MessageAbstract;
 import szhzz.App.MessageCode;
 import szhzz.Calendar.MyDate;
 import szhzz.Files.TextTransfer;
+import szhzz.Utils.DawLogger;
 import szhzz.Utils.Utilities;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DataStore;
-import szhzz.sql.gui.DataWindow;
-import szhzz.sql.gui.DwPanel;
-import szhzz.sql.gui.DwToobar_Event;
-import szhzz.sql.gui.DwToolBar;
+import szhzz.sql.database.Database;
+import szhzz.sql.gui.*;
+import szhzz.sql.jdbcpool.DbStack;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollPaneUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,6 +31,7 @@ import java.util.Vector;
  * To change this template use File | Settings | File Templates.
  */
 public class ConfigUI {
+    static DawLogger logger = DawLogger.getLogger(ConfigUI.class);
     protected Config cfg = null;
     protected DwPanel cfgEditor;
     protected DataStore ds = null;
@@ -41,13 +41,18 @@ public class ConfigUI {
     JButton buttonLock;
     JButton compareClipboard;
     JButton copyCfg;
+    JButton pastCfg;
+    private JButton newConfig;
     //    JButton compareCfg;
     ImageIcon lookIcon;
     ImageIcon unLookIcon;
     ImageIcon compareClipboardIcon;
     ImageIcon copyIcon;
+    ImageIcon pastIcon;
+    ImageIcon newCfgIcon;
     private static TextTransfer ClipboardReader = null;
     private boolean clearBeforeSave = false;
+    QuickPinYinComboBox dbCfgComboBox;
 
     public void setEnabledItems(Vector<String> enabledItems) {
         this.enabledItems = enabledItems;
@@ -74,6 +79,38 @@ public class ConfigUI {
         if (cfg != null) {
             this.cfg = cfg;
             onRetrieve();
+
+            dbCfgComboBox.setVisible(cfg instanceof DbConfig);
+            newConfig.setVisible(cfg instanceof DbConfig);
+
+            if (cfg instanceof DbConfig) {
+                if (dbCfgComboBox.getItemCount() == 0) {
+                    LinkedList<String> list = DbCfgProvider.getInstance().getCfgIDs();
+                    Hashtable<String, String> elements = new Hashtable<>();
+                    for (String e : list) {
+                        elements.put(e, e);
+                    }
+                    if (elements.get(cfg.configID) == null) {
+                        elements.put(cfg.configID, cfg.configID);
+                    }
+                    try {
+                        dbCfgComboBox.setValues(elements.keys());
+                    } catch (Exception e) {
+                        int a = 0;
+                    }
+                }
+//                boolean found = false;
+//                for (int i = 0; i < dbCfgComboBox.getItemCount(); i++) {
+//                    if(dbCfgComboBox.getItemAt(i).equals(cfg.getConfigID())){
+//                        dbCfgComboBox.setSelectedIndex(i);
+//                        found = true;
+//                        break;
+//                    }
+//                }
+//                if(!found){
+//                    dbCfgComboBox.addItem(cfg.configID);
+//                }
+            }
         }
     }
 
@@ -86,6 +123,8 @@ public class ConfigUI {
         unLookIcon = AppManager.createImageIcon("/resources/key.gif");
         compareClipboardIcon = AppManager.createImageIcon("/resources/equal.gif");
         copyIcon = AppManager.createImageIcon("/resources/Clipboard Copy.gif");
+        pastIcon = AppManager.createImageIcon("/resources/Clipboard Paste.gif");
+        newCfgIcon = AppManager.createImageIcon("/resources/Wizard.gif");
 
         cfgEditor.addToolbarEvent(new triggerRetrive());
         cfgEditor.getToolBar().setFloatable(false);
@@ -109,6 +148,12 @@ public class ConfigUI {
         copyCfg.setEnabled(true);
         cfgEditor.getToolBar().add(copyCfg);
 
+        pastCfg = new JButton();
+        pastCfg.setIcon(pastIcon);
+        pastCfg.setToolTipText("粘帖文本");
+        pastCfg.setEnabled(true);
+        cfgEditor.getToolBar().add(pastCfg);
+
         compareClipboard = new JButton();
         compareClipboard.setIcon(compareClipboardIcon);
         compareClipboard.setToolTipText("与剪贴板比较");
@@ -122,36 +167,29 @@ public class ConfigUI {
         cfgEditor.getToolBar().add(buttonLock);
 
 
+        dbCfgComboBox = new QuickPinYinComboBox();
+        cfgEditor.getToolBar().add(dbCfgComboBox);
+        dbCfgComboBox.setMaximumSize(new Dimension(200, 25));
+        dbCfgComboBox.setVisible(false);
 
+        newConfig = new JButton();
+        newConfig.setIcon(newCfgIcon);
+        newConfig.setToolTipText("新建配置文件");
+        newConfig.setEnabled(true);
+        cfgEditor.getToolBar().add(newConfig);
+        newConfig.setVisible(false);
 
-//        dw.addKeyListener(
-//                new KeyAdapter() {
-//                    public void keyReleased(KeyEvent e) {
-//                        int m = e.getModifiers();
-//                        int n = KeyEvent.CTRL_MASK;
-//                        if (e.getModifiers() == KeyEvent.CTRL_MASK) {
-//                            int a = e.getKeyCode();
-//                            int b = KeyEvent.VK_S;
-//                            if (e.getKeyCode() == KeyEvent.VK_S) {
-//                                onWrite();
-//                            }
-//                        }
-//                    }
+        dbCfgComboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (e.getActionCommand().equals("comboBoxEdited")) {
+//                if(isDirty()){
+//                    onWrite();
 //                }
-//        );
-
-//        compareCfg = new JButton();
-//        compareCfg.setIcon(new ImageIcon(getClass().ResourceManager("/GUIS/resources/and.gif")));
-//        compareCfg.setToolTipText("对照剪贴板数据");
-//        compareCfg.setEnabled(true);
-//        cfgEditor.getToolBar().addSeparator();
-//        cfgEditor.getToolBar().add(compareCfg);
-//
-//        compareCfg.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                compareWithClip();
-//            }
-//        });
+                    String cfgID = dbCfgComboBox.getCurrentValue(0).toString();
+                    setCfgFile(DbCfgProvider.getInstance().getCfg(cfgID, false));
+                }
+            }
+        });
 
         copyCfg.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -163,16 +201,59 @@ public class ConfigUI {
             }
         });
 
+        pastCfg.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (ClipboardReader == null) {
+                    ClipboardReader = new TextTransfer();
+                }
+                String data = ClipboardReader.getClipboardContents();
+                cfg.loadDataVal(data);
+                onRetrieve(false);
+            }
+        });
+
         compareClipboard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compareWithClipboard();
             }
         });
 
+        newConfig.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String newName = (String) JOptionPane.showInputDialog(
+                        null,
+                        "Create a Config, Name:",
+                        "Create a Config",
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        null,
+                        null);
+
+                if (newName == null || newName.length() == 0) return;
+
+                int row = find(newName);
+                if(row > 0){
+                    dbCfgComboBox.setSelectedIndex(row);
+                }else{
+                    Vector<String> newItem= new Vector<>();
+                    newItem.add(newName);
+                    dbCfgComboBox.addNewItem(newItem, 0);
+                    cfg = DbCfgProvider.getInstance().getCfg(newName, true);
+                    cfg.setProperty("简述", "在此添加简述");
+                    onRetrieve(false);
+                }
+            }
+        });
+
+
         buttonCfgFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (cfg != null) {
+                        if (cfg instanceof DbConfig) {
+                            AppManager.MessageBox("存储于数据库的配置文件,\n请用拷贝粘帖的方式进行文本编辑", 10);
+                            return;
+                        }
                         String s = Utilities.programX86Dir();
                         String url = cfg.getConfigUrl();
                         Runtime.getRuntime().exec(s + "\\EmEditor\\EmEditor.exe " + url);
@@ -300,8 +381,8 @@ public class ConfigUI {
                 String v = otherCfg.getProperty(key.toString(), "");
                 int row = dw.find("项目", key);
                 if (row < 0) {
-                        row = dw.appendRow();
-                        dw.setValueAt("+ " + key + " = " + v, row, "对比");
+                    row = dw.appendRow();
+                    dw.setValueAt("+ " + key + " = " + v, row, "对比");
                 } else {
                     Object o = dw.getValueAt(row, "数值");
                     if (o == null || !v.equals(o.toString())) {
@@ -317,10 +398,14 @@ public class ConfigUI {
     }
 
     protected void onRetrieve() {
+        onRetrieve(true);
+    }
+
+    protected void onRetrieve(boolean relaod) {
         dw.removeEditor();
         boolean looked = false;
         if (cfg != null) {//&& dm != null
-            cfg.reLoad();
+            if (relaod) cfg.reLoad();
             ds.clear();
 
             int r;
@@ -371,7 +456,7 @@ public class ConfigUI {
     }
 
     public void onWrite() {
-        if (cfgEditor.getDataWindow().getRowCount() == 0) return;
+        if (!(cfg instanceof DbConfig) && cfgEditor.getDataWindow().getRowCount() == 0) return;
 
         cfgEditor.getDataWindow().removeEditor();
         if (cfg != null) {
@@ -530,4 +615,18 @@ public class ConfigUI {
             return c;
         }
     }
+
+    int find(String cfgID) {
+        int i = 0;
+        int found = -1;
+        for (; i < dbCfgComboBox.getItemCount(); i++) {
+            if (dbCfgComboBox.getItemAt(i).equals(cfgID)) {
+                found = i;
+                break;
+            }
+        }
+        return found;
+    }
+
+
 }
