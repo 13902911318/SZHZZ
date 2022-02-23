@@ -495,17 +495,17 @@ public class MarketInformation {
 
     public static String getAuditCode() {
         return " stockCode REGEXP " +
-                "'^SZ00|^SZ30|^SH60|^SH68|" +  //股票
-                "^SH51|^SZ159|" +               //ETF
-                "^SZ399|^SH1A|^SH00|^88'"; //主要指数
+                "'^SZ00[0-9]{4}|^SZ30[0-9]{4}|^SH60[0-9]{4}|^SH68[0-9]{4}|" +  //股票
+                "^SH51[0-9]{4}|^SZ159[0-9]{3}|" +               //ETF
+                "^SZ399[0-9]{3}|^SH1A[0-9]{4}|^SH00[0-9]{4}|^88'"; //主要指数
     }
 
     public static String getManagedCodeReg() {
         return " stockCode REGEXP " +
-                "'^SZ00|^SZ30|^SH60|^SH68|" +  //股票
-                "^SH51|^SZ159|" +               //ETF
-                "^SZ399|^SH1A|^SH00|^SH1B|^88|" + //主要指数
-                "^SZ131|^SH204' ";              //逆回购
+                "'^SZ00[0-9]{4}|^SZ30[0-9]{4}|^SH60[0-9]{4}|^SH68[0-9]{4}|" +  //股票
+                "^SH51[0-9]{4}|^SZ159[0-9]{3}|" +               //ETF
+                "^SZ399[0-9]{3}|^SH1A[0-9]{4}|^SH00[0-9]{4}|^SH1B[0-9]{4}|^88|" + //主要指数
+                "^SZ131[0-9]{3}|^SH204[0-9]{3}' ";              //逆回购
 
 //        " '^SZ00|^SZ30|^SH60|^SH51|^SZ200|^SZ399|^SZ159|^SH1A|^SH1B|^88|^SH688' "
     }
@@ -517,10 +517,8 @@ public class MarketInformation {
      */
     public static String getTradebleCodeReg() {
         return " stockCode REGEXP " +
-                "'^SZ00|^SZ30|^SH60|^SH68|" +
-                "^SH51|^SZ159|" +
-                "^SZ131|^SH204' " +
-                "";
+                "'^SZ00[0-9]{4}|^SZ30[0-9]{4}|^SH60[0-9]{4}|^SH68[0-9]{4}|^SH51[0-9]{4}|" +
+                "^SZ159[0-9]{3}|^SZ131[0-9]{3}|^SH204[0-9]{3}' ";
     }
 
 
@@ -625,65 +623,63 @@ public class MarketInformation {
      *
      * @return
      */
-    public static String decodeStatus(String stockCode, String status) {
-        //以下仅国泰安数据适用. LJF 无状态标志
-        try {
-            if (status == null || status.isEmpty()) return "";
-            if (isMarketSHA(stockCode)) {
-                // SecurityPhaseTag[PHRASE_TAG_LEN];   ///< 当前品种交易状态
-                ///< 该字段为8位字符串，左起每位表示特定的含义，无定义则填空格。
-                ///< 第1位：‘S’表示启动（开市前）时段，‘C’表示集合竞价时段，‘T’表示连续交易时段，‘E’表示闭市时段，‘P’表示产品停牌，‘M’表示可恢复交易的熔断时段（盘中集合竞价），‘N’表示不可恢复交易的熔断时段（暂停交易至闭市），‘U’表示收盘集合竞价时段。
-                ///< 第2位：‘0’表示此产品不可正常交易，‘1’表示此产品可正常交易，无意义填空格。
-                ///< 第3位：‘0’表示未上市，‘1’表示已上市。
-                ///< 第4位：‘0’表示此产品在当前时段不接受进行新订单申报，‘1’ 表示此产品在当前时段可接受进行新订单申报。无意义填空格。
-                switch (status.charAt(0)) {
-                    case 'N':       //‘N’表示不可恢复交易的熔断时段（暂停交易至闭市）
-                        return "X"; //X SUSP - 停牌
-                    case 'P':       //‘P’表示产品停牌
-                        return "B"; //B 整天停牌
-                    case 'M':       //‘M’表示可恢复交易的熔断时段（盘中集合竞价）
-                        return "D"; //D 暂停交易
-                }
-                if (status.charAt(1) == '0') { //第2位：‘0’表示此产品不可正常交易
-                    return "B"; //B 整天停牌
-                }
-                if (status.charAt(2) == '0') { //第3位：‘0’表示未上市，‘1’表示已上市。
-                    return "B"; //B 整天停牌
-                }
-                if (status.charAt(3) == '0') { //第4位：‘0’表示此产品在当前时段不接受进行新订单申报，‘1’ 表示此产品在当前时段可接受进行新订单申报。无意义填空格。
-                    return "B"; //B 整天停牌
-                }
-                return "";
-
-            } else if (isMarketSZA(stockCode)) {
-                // SecurityPhaseTag[PHRASE_TAG_LEN];   ///< 当前品种交易状态：产品所处的交易阶段代码：
-                ///< 第 0 位：S=启动（开市前），O=开盘集合竞价， T=连续,B=休市
-                ///<          C=收盘集合竞价,E=已闭市,H=临时停牌,A=盘后交易,V=波动性中断;
-                ///< 第 1 位：0=正常状态,1=全天停牌"
-                if (status.charAt(0) == 'H' || status.charAt(0) == 'V') {
-                    //H=临时停牌,V=波动性中断;
-                    return "D"; //D 暂停交易
-                }
-                if (status.charAt(1) == '1') {
-                    //第 1 位：0=正常状态,1=全天停牌"
-                    return "B"; //B 整天停牌
-                }
-                return "";
-            }
-        } catch (Exception e) {
-
-        }
-        return "";
-    }
-
-
+//    public static String decodeStatus(String stockCode, String status) {
+//        //以下仅国泰安数据适用. LJF 无状态标志
+//        try {
+//            if (status == null || status.isEmpty()) return "";
+//            if (isMarketSHA(stockCode)) {
+//                // SecurityPhaseTag[PHRASE_TAG_LEN];   ///< 当前品种交易状态
+//                ///< 该字段为8位字符串，左起每位表示特定的含义，无定义则填空格。
+//                ///< 第1位：‘S’表示启动（开市前）时段，‘C’表示集合竞价时段，‘T’表示连续交易时段，‘E’表示闭市时段，‘P’表示产品停牌，‘M’表示可恢复交易的熔断时段（盘中集合竞价），‘N’表示不可恢复交易的熔断时段（暂停交易至闭市），‘U’表示收盘集合竞价时段。
+//                ///< 第2位：‘0’表示此产品不可正常交易，‘1’表示此产品可正常交易，无意义填空格。
+//                ///< 第3位：‘0’表示未上市，‘1’表示已上市。
+//                ///< 第4位：‘0’表示此产品在当前时段不接受进行新订单申报，‘1’ 表示此产品在当前时段可接受进行新订单申报。无意义填空格。
+//                switch (status.charAt(0)) {
+//                    case 'N':       //‘N’表示不可恢复交易的熔断时段（暂停交易至闭市）
+//                        return "X"; //X SUSP - 停牌
+//                    case 'P':       //‘P’表示产品停牌
+//                        return "B"; //B 整天停牌
+////                    case 'M':       //‘M’表示可恢复交易的熔断时段（盘中集合竞价）
+////                        return "D"; //D 暂停交易
+//                }
+////                if (status.charAt(1) == '0') { //第2位：‘0’表示此产品不可正常交易
+////                    return "B"; //B 整天停牌
+////                }
+//                if (status.charAt(2) == '0') { //第3位：‘0’表示未上市，‘1’表示已上市。
+//                    return "B"; //B 整天停牌
+//                }
+////                if (status.charAt(3) == '0') { //第4位：‘0’表示此产品在当前时段不接受进行新订单申报，‘1’ 表示此产品在当前时段可接受进行新订单申报。无意义填空格。
+////                    return "B"; //B 整天停牌
+////                }
+//                return "";
+//
+//            } else if (isMarketSZA(stockCode)) {
+//                // SecurityPhaseTag[PHRASE_TAG_LEN];   ///< 当前品种交易状态：产品所处的交易阶段代码：
+//                ///< 第 0 位：S=启动（开市前），O=开盘集合竞价， T=连续,B=休市
+//                ///<          C=收盘集合竞价,E=已闭市,H=临时停牌,A=盘后交易,V=波动性中断;
+//                ///< 第 1 位：0=正常状态,1=全天停牌"
+////                if (status.charAt(0) == 'H' || status.charAt(0) == 'V') {
+////                    //H=临时停牌,V=波动性中断;
+////                    return "D"; //D 暂停交易
+////                }
+//                if (status.charAt(1) == '1') {
+//                    //第 1 位：0=正常状态,1=全天停牌"
+//                    return "B"; //B 整天停牌
+//                }
+//                return "";
+//            }
+//        } catch (Exception e) {
+//
+//        }
+//        return "";
+//    }
     public static boolean isClosedStatus(String stockCode, String dataSource, String status) {
         //以下仅国泰安数据适用. LJF 无状态标志
         try {
             if (status == null || status.isEmpty()) return false;
-            if (dataSource == null) {
-                if ("CLOSE".equals(status)) return true;
-            }
+//            if (dataSource == null) {
+            if ("CLOSE".equals(status)) return true;
+//            }
             if (dataSource == null || "SecurityPhaseTag".equals(dataSource)) {
                 if (isMarketSZA(stockCode)) {
                     // RealSZSEL2Quotation->SecurityPhaseTag[PHRASE_TAG_LEN];   ///< 当前品种交易状态
@@ -691,8 +687,7 @@ public class MarketInformation {
                     ///< 第 0 位：S=启动（开市前），O=开盘集合竞价， T=连续,B=休市
                     ///<          C=收盘集合竞价,E=已闭市,H=临时停牌,A=盘后交易,V=波动性中断;
                     ///< 第 1 位：0=正常状态,1=全天停牌"
-                    if (status.charAt(0) == 'E') {
-                        //‘E’表示闭市时段
+                    if (status.charAt(1) == '1') {
                         return true;
                     }
                 } else if (isMarketSHA(stockCode)) {
@@ -703,19 +698,19 @@ public class MarketInformation {
                     ///< 第2位：‘0’表示此产品不可正常交易，‘1’表示此产品可正常交易，无意义填空格。
                     ///< 第3位：‘0’表示未上市，‘1’表示已上市。
                     ///< 第4位：‘0’表示此产品在当前时段不接受进行新订单申报，‘1’ 表示此产品在当前时段可接受进行新订单申报。无意义填空格。
-                    if (status.charAt(0) == 'E' || status.charAt(0) == 'N') {
-                        //‘E’表示闭市时段
+                    if (status.charAt(0) == 'P' || status.charAt(0) == 'N' ) {
+                        //‘P’表示产品停牌
                         //‘N’表示不可恢复交易的熔断时段（暂停交易至闭市）
                         return true;
                     }
                 }
             }
 
-            if ("TradeStatus".equals(dataSource)) {
-                if ("CLOSE".equals(status)) return true;
-            } else {
-                if ("CLOSE".equals(status)) return true;
-            }
+//            if ("TradeStatus".equals(dataSource)) {
+//                if ("CLOSE".equals(status)) return true;
+//            } else {
+//                if ("CLOSE".equals(status)) return true;
+//            }
             //logger.error("无法解析的状态:" + stockCode + "\t" + dataSource + "\t" + status);
         } catch (Exception e) {
             logger.error(e);
@@ -730,80 +725,80 @@ public class MarketInformation {
      * @param mark
      * @return
      */
-    public static boolean isSusbendSignal(String mark) {
-        int suspendCode = 0;
-
-        try {
-            if (mark != null) {
-                String s = mark.trim();
-                if (s.length() == 0) return false;
-
-                if (s.contains("(")) {
-//                    s = s.replace(")", "");
-                    s = s.replace("(", ",");
-                    String[] code = s.split(",");
-                    suspendCode = NU.parseInt(code[0], 0);
-                } else if (NU.isNumber(s)) {
-                    suspendCode = NU.parseInt(s, 0);
-                } else {
-                    suspendCode = s.charAt(0);
-                }
-
-
-                if (suspendCode == 0) return false;
-
-                if (suspendCode == 72) return true; // X SUSP - 停牌
-                if (suspendCode == 66) return true; // B 整天停牌
-//                if (suspendCode == 65) return true; // A 交易节休市
-                if (suspendCode == 67) return true; // C 全天收市
-                if (suspendCode == 68) return true; // D 暂停交易
-//                if (suspendCode == 69) return true; // G DEL - 不可恢复交易的熔断阶段（上交所的N）
-//                if (suspendCode == 70) return true; // H HOLIDAY - 放假
-//                if (suspendCode == 71) return true; // P BREAK - 休市　　
-
-                if (suspendCode == 88) return true; // X 老版标志
-                if (suspendCode == 89) return true; // Y 老版标志
-
-                ///////////////////////////////////////////
-//                if (suspendCode == 0 ) return false; // 0 首日上市　
-//                if (suspendCode == 1 ) return false; // 1 增发新股　
-//                if (suspendCode == 2 ) return false; // 2 上网定价发行　
-//                if (suspendCode == 3 ) return false; // 3 上网竞价发行
-//                if (suspendCode == 69 ) return false; // E START - 启动交易盘
-//                if (suspendCode == 70 ) return false; // F PRETR - 盘前处理
-//                if (suspendCode == 71 ) return false; // I OCALL - 开市集合竞价
-//                if (suspendCode == 72 ) return false; // J ICALL - 盘中集合竞价
-//                if (suspendCode == 73 ) return false; // K OPOBB - 开市订单簿平衡前期　　
-//                if (suspendCode == 74 ) return false; // Y ADD - 新增产品　
-//                if (suspendCode == 75 ) return false; // L IPOBB - 盘中订单簿平衡前期
-//                if (suspendCode == 76 ) return false; // M OOBB - 开市订单簿平衡
-//                if (suspendCode == 77 ) return false; // N IOBB - 盘中订单簿平衡
-//                if (suspendCode == 78 ) return false; // O TRADE - 连续撮合　　
-//                if (suspendCode == 79 ) return false; // Q VOLA - 波动性中断　　　
-//                if (suspendCode == 82 ) return false; // R BETW - 交易间　
-//                if (suspendCode == 83 ) return false; // S NOTRD - 非交易服务支持　　
-//                if (suspendCode == 84 ) return false; // T FCALL - 固定价格集合竞价　　
-//                if (suspendCode == 85 ) return false; // U POSTR - 盘后处理　　
-//                if (suspendCode == 86 ) return false; // V ENDTR - 结束交易　
-//                if (suspendCode == 87 ) return false; // W HALT - 暂停　
-//                if (suspendCode == 100 ) return false; // d 集合竞价阶段结束到连续竞价阶段开始之前的时段（如有）
-//                if (suspendCode == 113 ) return false; // q 可恢复交易的熔断时段(上交所的M)　
-//                if (suspendCode == 65 ) return true; // A 交易节休市
-//                if (suspendCode == 66 ) return true; // B 整天停牌
-//                if (suspendCode == 67 ) return true; // C 全天收市
-//                if (suspendCode == 68 ) return true; // D 暂停交易
-//                if (suspendCode == 69 ) return true; // G DEL - 不可恢复交易的熔断阶段（上交所的N）
-//                if (suspendCode == 70 ) return true; // H HOLIDAY - 放假
-//                if (suspendCode == 71 ) return true; // P BREAK - 休市　　
-//                if (suspendCode == 72 ) return true; // X SUSP - 停牌
-//                if (suspendCode == 73 ) return true; // Z DEL - 可删除的产品
-///////////////////////////////////////////
-                return false;
-            }
-        } catch (Exception e) {
-        }
-        return false;
-    }
+//    public static boolean isSusbendSignal(String mark) {
+//        int suspendCode = 0;
+//
+//        try {
+//            if (mark != null) {
+//                String s = mark.trim();
+//                if (s.length() == 0) return false;
+//
+//                if (s.contains("(")) {
+////                    s = s.replace(")", "");
+//                    s = s.replace("(", ",");
+//                    String[] code = s.split(",");
+//                    suspendCode = NU.parseInt(code[0], 0);
+//                } else if (NU.isNumber(s)) {
+//                    suspendCode = NU.parseInt(s, 0);
+//                } else {
+//                    suspendCode = s.charAt(0);
+//                }
+//
+//
+//                if (suspendCode == 0) return false;
+//
+//                if (suspendCode == 72) return true; // X SUSP - 停牌
+//                if (suspendCode == 66) return true; // B 整天停牌
+////                if (suspendCode == 65) return true; // A 交易节休市
+//                if (suspendCode == 67) return true; // C 全天收市
+//                if (suspendCode == 68) return true; // D 暂停交易
+////                if (suspendCode == 69) return true; // G DEL - 不可恢复交易的熔断阶段（上交所的N）
+////                if (suspendCode == 70) return true; // H HOLIDAY - 放假
+////                if (suspendCode == 71) return true; // P BREAK - 休市　　
+//
+//                if (suspendCode == 88) return true; // X 老版标志
+//                if (suspendCode == 89) return true; // Y 老版标志
+//
+//                ///////////////////////////////////////////
+////                if (suspendCode == 0 ) return false; // 0 首日上市　
+////                if (suspendCode == 1 ) return false; // 1 增发新股　
+////                if (suspendCode == 2 ) return false; // 2 上网定价发行　
+////                if (suspendCode == 3 ) return false; // 3 上网竞价发行
+////                if (suspendCode == 69 ) return false; // E START - 启动交易盘
+////                if (suspendCode == 70 ) return false; // F PRETR - 盘前处理
+////                if (suspendCode == 71 ) return false; // I OCALL - 开市集合竞价
+////                if (suspendCode == 72 ) return false; // J ICALL - 盘中集合竞价
+////                if (suspendCode == 73 ) return false; // K OPOBB - 开市订单簿平衡前期　　
+////                if (suspendCode == 74 ) return false; // Y ADD - 新增产品　
+////                if (suspendCode == 75 ) return false; // L IPOBB - 盘中订单簿平衡前期
+////                if (suspendCode == 76 ) return false; // M OOBB - 开市订单簿平衡
+////                if (suspendCode == 77 ) return false; // N IOBB - 盘中订单簿平衡
+////                if (suspendCode == 78 ) return false; // O TRADE - 连续撮合　　
+////                if (suspendCode == 79 ) return false; // Q VOLA - 波动性中断　　　
+////                if (suspendCode == 82 ) return false; // R BETW - 交易间　
+////                if (suspendCode == 83 ) return false; // S NOTRD - 非交易服务支持　　
+////                if (suspendCode == 84 ) return false; // T FCALL - 固定价格集合竞价　　
+////                if (suspendCode == 85 ) return false; // U POSTR - 盘后处理　　
+////                if (suspendCode == 86 ) return false; // V ENDTR - 结束交易　
+////                if (suspendCode == 87 ) return false; // W HALT - 暂停　
+////                if (suspendCode == 100 ) return false; // d 集合竞价阶段结束到连续竞价阶段开始之前的时段（如有）
+////                if (suspendCode == 113 ) return false; // q 可恢复交易的熔断时段(上交所的M)　
+////                if (suspendCode == 65 ) return true; // A 交易节休市
+////                if (suspendCode == 66 ) return true; // B 整天停牌
+////                if (suspendCode == 67 ) return true; // C 全天收市
+////                if (suspendCode == 68 ) return true; // D 暂停交易
+////                if (suspendCode == 69 ) return true; // G DEL - 不可恢复交易的熔断阶段（上交所的N）
+////                if (suspendCode == 70 ) return true; // H HOLIDAY - 放假
+////                if (suspendCode == 71 ) return true; // P BREAK - 休市　　
+////                if (suspendCode == 72 ) return true; // X SUSP - 停牌
+////                if (suspendCode == 73 ) return true; // Z DEL - 可删除的产品
+/////////////////////////////////////////////
+//                return false;
+//            }
+//        } catch (Exception e) {
+//        }
+//        return false;
+//    }
 
     /**
      * 国泰安 QTS only
@@ -1006,15 +1001,37 @@ public class MarketInformation {
     }
 
 
-    public static boolean isDrName(String stockCode, Database db){
+    /**
+     * N：当股票名称前出现了N字，表示这只股是当日新上市的股票，字母N是英语New(新)的缩写。
+     * 看到带有N字头的股票时，投资者除了知道它是新股，
+     * 还应认识到这只股票的股价当日在市场上是不受涨跌幅限制的，
+     * 涨幅可以高于10％，跌幅也可深于10％。这样就较容易控制风险和把握投资机会。
+     * <p/>
+     * XD：当股票名称前出现XD字样时，表示当日是这只股票的除息日，XD是英语Exclud(除去)Dividend(利息)的简写。
+     * 在除息日的当天，股价的基准价比前一个交易日的收盘价要低，因为从中扣除了利息这一部分的差价。
+     * <p/>
+     * XR：当股票名称前出现XR的字样时，表明当日是这只股票的除权日。XR是英语Exclud(除去)Right(权利)的简写。
+     * 在除权日当天，股价也比前一交易日的收盘价要低，原因由于股数的扩大，股价被摊低了。
+     * <p/>
+     * DR：当股票名称前出现DR字样时，表示当天是这只股票的除息、除权日。D是Dividend(利息)的缩写，
+     * R是Right(权利)的缩写。有些上市公司分配时不仅派息而且送转红股或配股，所以出现同时除息又除权的现象。
+     * <p/>
+     * S：未按期完成股改的股票。每日最大涨跌幅度5%。
+     * ST：连续两年年报亏损、或因其他重大违规被特别处理的股票。每日最大涨跌幅度5%。
+     * ST：被特别处理后年报继续亏损，有退市风险的股票。每日最大涨跌幅度5%。
+     *
+     * @param
+     * @return
+     */
+    public static boolean isDrName(String stockCode, Database db) {
         ResultSet rs = null;
-        String sql = "select stockName from StockName_a where stockCode = '"+stockCode+"'";
+        String sql = "select stockName from StockName_a where stockCode = '" + stockCode + "'";
 
         try {
             rs = db.dynamicSQL(sql);
             if (rs.next()) {
                 String stockName = rs.getString(1);
-                if(stockName == null || stockName.length() < 2) return false;
+                if (stockName == null || stockName.length() < 2) return false;
 
 
                 if (stockName.matches("^XD.*|^XR.*|^DR.*")) {
@@ -1029,6 +1046,7 @@ public class MarketInformation {
         }
         return false;
     }
+
 
     public static boolean isDR(String dataSource, String stockCode, String prefix) {
         if (stockCode == null || prefix == null || prefix.isEmpty()) return false;
@@ -1143,8 +1161,81 @@ public class MarketInformation {
         return stockCode;
     }
 
+
+//    public static double getLowLimitRate(String stockCode, String tradeDate) {
+//        return 1d - get_High_Low_RateByCode(stockCode, tradeDate);
+//    }
+//
+//    public static double getHighLimitRate(String stockCode, String tradeDate) {
+//        return 1d + get_High_Low_RateByCode(stockCode, tradeDate);
+//    }
+//
+//
+//    public static double get_High_Low_RateByCode(String stockCode, String tradeDate) {
+//        String name = StockName.getStockName(stockCode);
+//        if (stockCode.startsWith("SZ30")) {
+//            if (tradeDate.length() > 0) {
+//                int d = NU.parseInt(tradeDate.replace("-", ""), 0);
+//                if (d >= 20200824) {//创业板 2020-08-24 开始 20% 涨跌幅
+//                    return 0.2d;
+//                }
+//            }
+//        }
+//        if (name.startsWith("*") || name.startsWith("S")) {
+//            return 0.05d;
+//        }
+//
+//        if (stockCode.startsWith("SH68")) return 0.2d;
+//
+//        return 0.1d;
+//    }
+
+    //////
+
+    public static String stockCodeToWind(String stockCode) {
+        if (stockCode.startsWith("S")) {
+            return stockCode.substring(2) + "." + stockCode.substring(0, 2);
+        }
+        return stockCode;
+    }
+
+
+    public static String toStdStockCode(String stockCode) {
+        return stockCodeMap(toStdStockCode_(stockCode));
+    }
+
+
+    private static String toStdStockCode_(String stockCode) {
+
+        if (stockCode.indexOf('.') == 6) {
+            return stockCode.substring(7) + stockCode.substring(0, 6);
+        } else if (stockCode.startsWith("SH") || stockCode.startsWith("SZ")) {// 标准代码格式
+            return stockCode;
+        } else if (stockCode.endsWith("SH")) {
+            return "SH" + stockCode.replace("SH", "");
+        } else if (stockCode.endsWith("SZ")) {
+            return "SZ" + stockCode.replace("SZ", "");
+        } else if (stockCode.startsWith("60") || stockCode.startsWith("68") || stockCode.startsWith("204") || stockCode.startsWith("51") || stockCode.startsWith("73") || stockCode.startsWith("78")) {
+            return "SH" + stockCode;       //上海A股
+        } else if (stockCode.startsWith("003") || stockCode.startsWith("002") || stockCode.startsWith("001") || stockCode.startsWith("000") || stockCode.startsWith("30") || stockCode.startsWith("399")) {
+            return "SZ" + stockCode;     //深圳A
+        } else if (stockCode.startsWith("900") || stockCode.startsWith("93") || stockCode.startsWith("999")) {
+            return "SH" + stockCode;  //3—上海B股
+        } else if (stockCode.startsWith("200")) {
+            return "SZ" + stockCode;  //4—深圳B股
+        }
+
+        return stockCode;
+    }
+
+
+    public static String toSecurityCode(String stockCode) {
+        return stockCode.replaceAll("SH|SZ|\\.", "");
+    }
+
+
     public static void main(String[] args) {
-        System.out.println(getPrefixMeaning("SZ002336", "00010000000000000000"));
+        System.out.println(isMarketSZA("510300"));
 
     }
 }

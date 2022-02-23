@@ -1,5 +1,7 @@
 package szhzz.PinYin;
 
+import szhzz.STOCK.MarketInformation;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Administrator
@@ -19,9 +21,9 @@ public class StockRegulate {
         if (!isStockCode(code)) return null;
 
         if (code.length() == 6) {
-            if (code.startsWith("60") || code.startsWith("68") || code.startsWith("68") || code.startsWith("1A")) {
+            if (MarketInformation.isMarketSHA(code)) {
                 return "SH" + code;
-            } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399")) {
+            } else if (MarketInformation.isMarketSZA(code)) {
                 return "SZ" + code;
             } else {
                 return null;
@@ -33,9 +35,9 @@ public class StockRegulate {
     }
 
     public static String stockMarket(String code) {
-        if (code.startsWith("60") || code.startsWith("68") || code.startsWith("1A") || code.startsWith("2040")|| code.startsWith("510")) {
+        if (MarketInformation.isMarketSHA(code)) {
             return "SH";
-        } else if (code.startsWith("00") || code.startsWith("30") || code.startsWith("399") || code.startsWith("1318")) {
+        } else if (MarketInformation.isMarketSZA(code)) {
             return "SZ";
         }
         return "";
@@ -56,32 +58,6 @@ public class StockRegulate {
         String c = code.replace("Ｂ", "B");
         c = c.replace("Ａ", "A");
         return c.replaceAll("[*| ]", "");
-    }
-
-    /**
-     * N：当股票名称前出现了N字，表示这只股是当日新上市的股票，字母N是英语New(新)的缩写。
-     * 看到带有N字头的股票时，投资者除了知道它是新股，
-     * 还应认识到这只股票的股价当日在市场上是不受涨跌幅限制的，
-     * 涨幅可以高于10％，跌幅也可深于10％。这样就较容易控制风险和把握投资机会。
-     * <p/>
-     * XD：当股票名称前出现XD字样时，表示当日是这只股票的除息日，XD是英语Exclud(除去)Dividend(利息)的简写。
-     * 在除息日的当天，股价的基准价比前一个交易日的收盘价要低，因为从中扣除了利息这一部分的差价。
-     * <p/>
-     * XR：当股票名称前出现XR的字样时，表明当日是这只股票的除权日。XR是英语Exclud(除去)Right(权利)的简写。
-     * 在除权日当天，股价也比前一交易日的收盘价要低，原因由于股数的扩大，股价被摊低了。
-     * <p/>
-     * DR：当股票名称前出现DR字样时，表示当天是这只股票的除息、除权日。D是Dividend(利息)的缩写，
-     * R是Right(权利)的缩写。有些上市公司分配时不仅派息而且送转红股或配股，所以出现同时除息又除权的现象。
-     * <p/>
-     * S：未按期完成股改的股票。每日最大涨跌幅度5%。
-     * ST：连续两年年报亏损、或因其他重大违规被特别处理的股票。每日最大涨跌幅度5%。
-     * ST：被特别处理后年报继续亏损，有退市风险的股票。每日最大涨跌幅度5%。
-     *
-     * @param stockName
-     * @return
-     */
-    public static boolean isXDR(String stockName) {
-        return (stockName.startsWith("XD") || stockName.startsWith("XR") || stockName.startsWith("DR"));
     }
 
 
