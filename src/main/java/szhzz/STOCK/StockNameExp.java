@@ -36,7 +36,7 @@ public class StockNameExp {
     private static ArrayList<String> tradeAble = null;
     private static ArrayList<String> auditCode = null;
 
-    private StockNameExp() {
+    StockNameExp() {
         retrieve(null);
     }
 

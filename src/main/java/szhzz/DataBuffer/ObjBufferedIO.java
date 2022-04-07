@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class ObjBufferedIO implements Runnable {
     public static final int INITIAL_DEFAULT_CAPACITY = 10;
     private static DawLogger logger = DawLogger.getLogger(ObjBufferedIO.class);
-    long totalCount = 0;
+    long totalDelete = 0;
     long lostCount = 0;
     long startMmSecond = 0;
     boolean isBuffered = false;
@@ -32,6 +32,7 @@ public class ObjBufferedIO implements Runnable {
     private String speedTestID = "";
     private boolean logError = false;
     private String bufferName = null;
+    private int maxBuffered = 0;
 
     public void close() {
         isBuffered = false;
@@ -125,6 +126,7 @@ public class ObjBufferedIO implements Runnable {
                                 "请加大缓存或超时. reader is " + dataReader.getClass()));
                     }
                 }
+                maxBuffered = Math.max(maxBuffered, queue.size());
             } catch (InterruptedException e) {
                 logger.error(e);
                 success = false;
@@ -143,31 +145,24 @@ public class ObjBufferedIO implements Runnable {
 
         startMmSecond = System.currentTimeMillis();
         Thread.currentThread().setName(getBufferName());
+        long deleted = 0;
+
         while (isBuffered) {
             try {
                 //TODO  TBD
                 while (autoDropIfFull && queue.size() > waringSize) { //除非已经设置，否则不会删除老数据
                     queue.take();  //just dequeue
-                    if (++totalCount > waringSize) {
+                    totalDelete++;
+                    if (++deleted > waringSize) {
                         if (logError) {
-                            logger.error(new Exception(dataReader.getClass() + " 缓存溢出(2), 删除 " + totalCount + " rows 记录"));
-                            AppManager.logit(dataReader.getClass() + " 缓存溢出 删除 " + totalCount + " rows, 记录");
+                            logger.error(new Exception(dataReader.getClass() + " 缓存溢出(2), 删除 " + totalDelete + " rows 记录"));
+                            AppManager.logit(dataReader.getClass() + " 缓存溢出 删除 " + totalDelete + " rows, 记录");
                         }
-                        totalCount = 0;
+                        deleted = 0;
                     }
                 }
                 Object data = queue.poll(3000);  //不能用 take , 否则无法退出
                 if (data != null) {
-                    //TODO debug 之后 mark it
-//                    if(data instanceof ExchangeData){
-//                        ExchangeData d= (ExchangeData) data;
-//                        d.setDbgMsg(dataReader.getClass().getName());
-//                        d.setHandledCount();
-//                        if(d.getHandledCount() > 1){
-//                            AppManager.logit(" 多级缓存("+d.getHandledCount()+") " + d.getDbgMsg());
-//                        }
-//                    }
-
                     write(data);
                 }
             } catch (Exception e) {
@@ -236,5 +231,13 @@ public class ObjBufferedIO implements Runnable {
         if (this.bufferName == null) {
             this.bufferName = bufferName;
         }
+    }
+
+    public int getMaxBuffered() {
+        return maxBuffered;
+    }
+
+    public long getDrope() {
+        return totalDelete + lostCount;
     }
 }

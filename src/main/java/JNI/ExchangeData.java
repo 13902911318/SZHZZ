@@ -304,6 +304,7 @@ public class ExchangeData implements Serializable {
         return table.get(1).indexOf(label);
     }
 
+    //不含头尾标识符
     public String toString() {
         if (table == null) return "";
         StringBuilder sb = new StringBuilder();

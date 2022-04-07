@@ -95,7 +95,7 @@ public class AlarmClock implements DawCountdown {
 
                 while(var2.hasNext()) {
                     Object obj = var2.next();
-                    if (obj.toString().equals(o) && alarmPool.remove(obj)) {
+                    if (((TimerEvent)obj).getCaseName().equals(o) && alarmPool.remove(obj)) {
                         this.logIt(o + " Removed");
                     }
                 }

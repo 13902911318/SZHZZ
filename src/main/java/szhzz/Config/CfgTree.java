@@ -1,7 +1,9 @@
 package szhzz.Config;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.Vector;
 
 
@@ -53,7 +55,10 @@ public class CfgTree extends CfgProvider {
 
     public void createTree(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode level1 = null;
-        for (String cfgId : allCfgs.keySet()) {
+        LinkedList<String> keys = new LinkedList<>(allCfgs.keySet());
+        Collections.sort(keys);
+
+        for (String cfgId : keys) {
             level1 = createTree(cfgId);
             top.add(level1);
         }
@@ -65,6 +70,7 @@ public class CfgTree extends CfgProvider {
         Config cfg = getCfg(cfgID);
         if (cfg != null) {
             LinkedList<String> cfgIDs = getSubCfgIDs(cfg);
+//            Collections.sort(cfgIDs);
             for (String id : cfgIDs) {
                 DefaultMutableTreeNode child = createTree(id);
                 node.add(child);

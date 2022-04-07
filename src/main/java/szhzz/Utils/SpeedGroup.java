@@ -10,23 +10,25 @@ import java.util.LinkedList;
  * 用于测试程序段占用时间的通用工具
  */
 public class SpeedGroup {
+    private static final long n2s = 1000000000;
+
     private HashMap<String, SpeedTest> summary = new HashMap<>();
     private LinkedList<String> index = new LinkedList<>();
     private static int no = 0;
     private long countTo = 0;
     private long interval = 0;
     private String title = "SpeedGroup" + (++no);
+    private boolean onCount = false;
+    private long lastTime = System.nanoTime();
+
 
     private SpeedGroup() {
         title = this.getClass().getSimpleName() + (++no);
     }
 
-    private boolean onCount = false;
-    private long lastTime = System.currentTimeMillis();
-
-    public SpeedGroup(long countTo, long interval) {
+    public SpeedGroup(long countTo, long interval /*seconds*/) {
         this.countTo = countTo;
-        this.interval = interval;
+        this.interval = interval * 1000000; //this.interval Nano
     }
 
     public void startTimer(String ID) {
@@ -50,8 +52,9 @@ public class SpeedGroup {
     public void showSummery() {
         if (!onCount) return;
 
-        if ((System.currentTimeMillis() - lastTime) < interval) return;
-        lastTime = System.currentTimeMillis();
+        long sum = System.nanoTime() - lastTime;
+        if (sum < interval) return;
+        lastTime = System.nanoTime();
 
         long total = 0L;
 
@@ -61,16 +64,15 @@ public class SpeedGroup {
         if (total == 0d) return;
 
         StringBuffer sb = new StringBuffer();
-        sb.append("Summary: Total timer (" + FT.format(total/1000000000) + ")\n============================\n");
+        sb.append("Summary: Total timer (" + FT.format(total/n2s) + ")\n============================\n");
         sb.append(title+"\n");
-        long sum = 0;
+
         for (String id : index) {
             long t = summary.get(id).getSummaryTime();
-            sum += t;
-            sb.append(id + "\t" + FT.format00(t/1000000000d) + "min\t" + FT.format00(100d * t / total) + "%\n");
+            sb.append(id + "\t" + FT.format00(t/n2s) + "s\t" + FT.format00(100d * t / sum) + "%\n");
         }
         sb.append("-----------------------------\n");
-        sb.append("TOTAL:\t" + FT.format00(sum/1000000000d) + "min\n");
+        sb.append("TOTAL:\t" + FT.format00(sum/n2s) + "s\n");
         sb.append("============================\n");
         AppManager.logit("\n" + sb.toString());
 
