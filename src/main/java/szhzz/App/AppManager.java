@@ -266,7 +266,7 @@ public class AppManager implements DataConsumer {
                 staticExecutor.setMinimumPoolSize(5);
                 staticExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                staticExecutor.setKeepAliveTime(60*1000); //1min
+                staticExecutor.setKeepAliveTime(60 * 1000); //1min
             }
             //setStopProcess(false);
             staticExecutor.execute(new RunCell(r, isManaged));
@@ -277,7 +277,7 @@ public class AppManager implements DataConsumer {
                 dynamicExecutor.setMinimumPoolSize(3);
                 dynamicExecutor.waitWhenBlocked();
 //                executor.runWhenBlocked();
-                dynamicExecutor.setKeepAliveTime(60*1000);
+                dynamicExecutor.setKeepAliveTime(60 * 1000);
             }
 //            setStopProcess(false);
             dynamicExecutor.execute(new RunCell(r, isManaged));
@@ -1048,9 +1048,11 @@ public class AppManager implements DataConsumer {
 //                    if (stopButton != null) {
 //                        stopButton.setEnabled(true);
 //                    }
-                    setIndeterminate(true);
                     if (staticExecutor != null)
                         while ((staticExecutor.getPoolSize()) > 0) {
+                            if (Busy != null && !Busy.isBusy()) {
+                                setIndeterminate(true);
+                            }
                             if (threadLabel != null) {
                                 threadLabel.setText("S=" + (staticExecutor == null ? "0" : staticExecutor.getPoolSize()) +
                                         (" D=" + (dynamicExecutor == null ? "0" : dynamicExecutor.getPoolSize())));

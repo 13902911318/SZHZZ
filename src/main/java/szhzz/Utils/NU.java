@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 public class NU {
 
 
-
     public static boolean isDouble(Object o) {
         return (o != null && o.toString().contains("."));
     }
@@ -22,6 +21,7 @@ public class NU {
             }
             return (Double) o;
         }
+        if(!isNumber(o))return defaultValue;
 
         try {
             return Double.parseDouble(o.toString());
@@ -44,6 +44,7 @@ public class NU {
         if (o instanceof Long) {
             return (Long) o;
         }
+        if(!isNumber(o))return defaultValue;
 
         try {
             return Long.parseLong(o.toString());
@@ -67,20 +68,24 @@ public class NU {
 
     public static boolean isNumber(Object o) {
         if (o == null) return false;
-        try {
-            double a = Double.parseDouble(o.toString());
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return o.toString().matches("-?\\d+(\\.\\d+)?");
     }
 
-    public static int compare(Number v1, Number v2, int scale){
+    public static double round(double v1, int scale) {
+        return BigDecimal.valueOf(v1).setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static float round(float v1, int scale) {
+        return BigDecimal.valueOf(v1).setScale(scale, BigDecimal.ROUND_HALF_UP).floatValue();
+    }
+
+    public static int compare(Number v1, Number v2, int scale) {
         double v1_ = Double.parseDouble(v1.toString());
-        double v2_ = Double.parseDouble(v2.toString());;
+        double v2_ = Double.parseDouble(v2.toString());
+        ;
         BigDecimal b1 = BigDecimal.valueOf(v1_).setScale(scale, BigDecimal.ROUND_HALF_UP);
         BigDecimal b2 = BigDecimal.valueOf(v2_).setScale(scale, BigDecimal.ROUND_HALF_UP);
-        return  b1.compareTo(b2);
+        return b1.compareTo(b2);
     }
 
 }

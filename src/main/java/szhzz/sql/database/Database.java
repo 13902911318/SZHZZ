@@ -630,6 +630,27 @@ public class Database {
         return 0;
     }
 
+    public boolean hasView(String vName) {
+        ResultSet rs = null;
+        String sql = "SELECT TABLE_NAME FROM information_schema.VIEWS " +
+                " where TABLE_NAME = '" + vName + "'";
+        try {
+            rs = dynamicSQL(sql);
+            if (rs.next()) {
+                String name = null;
+                name = rs.getString(1);
+                return (name.equalsIgnoreCase(vName));
+            }
+        } catch (DBException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResultSet(rs);
+        }
+        return false;
+    }
+
     public boolean hasTable(String tName) {
         String schma = null;
         String table = tName;
@@ -642,7 +663,7 @@ public class Database {
         }
         String sql = "SELECT TABLE_NAME FROM information_schema.`TABLES` " +
                 " where TABLE_NAME = '" + table + "'";
-        if(schma!=null){
+        if (schma != null) {
             sql += " and TABLE_SCHEMA = '" + schma + "'";
         }
         try {
@@ -848,14 +869,14 @@ public class Database {
         boolean success = false;
 
         String sqls = Utilities.File2String(file);
-            StringTokenizer tok = new StringTokenizer(sqls, ";");
-            while (tok.hasMoreTokens()) {
-                String sql = tok.nextToken();
-                if (sql.trim().length() > 5) {
-                    executeUpdate(sql);
-                }
+        StringTokenizer tok = new StringTokenizer(sqls, ";");
+        while (tok.hasMoreTokens()) {
+            String sql = tok.nextToken();
+            if (sql.trim().length() > 5) {
+                executeUpdate(sql);
             }
-            success = true;
+        }
+        success = true;
         return success;
     }
 

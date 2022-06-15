@@ -56,7 +56,7 @@ public class CfgTree extends CfgProvider {
     public void createTree(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode level1 = null;
         LinkedList<String> keys = new LinkedList<>(allCfgs.keySet());
-        Collections.sort(keys);
+//        Collections.sort(keys);
 
         for (String cfgId : keys) {
             level1 = createTree(cfgId);

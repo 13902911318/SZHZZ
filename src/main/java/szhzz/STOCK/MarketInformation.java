@@ -489,7 +489,7 @@ public class MarketInformation {
     ///////////////////////////// New Add 2020-09-14
     private static final Pattern managedStock = Pattern.compile("^SZ00[0-9]{4}|^SZ30[0-9]{4}|^SH60[0-9]{4}|^SH68[0-9]{4}");
     private static final Pattern managedETF = Pattern.compile("^SH51[0-9]{4}|^SZ159[0-9]{3}");
-    private static final Pattern managedIndex = Pattern.compile("^SZ399[0-9]{3}|^SH1A[0-9]{4}|^SH00[0-9]{4}|^SH1B[0-9]{4}|^88.*");
+    private static final Pattern managedIndex = Pattern.compile("^SZ399[0-9]{3}|^SZ395[0-9]{3}|^SH1A[0-9]{4}|^SH00[0-9]{4}|^SH1B[0-9]{4}|^88.*");
     private static final Pattern managedRevert = Pattern.compile("^SZ131[0-9]{3}|^SH204[0-9]{3}");
 
 
@@ -687,6 +687,9 @@ public class MarketInformation {
                     ///< 第 0 位：S=启动（开市前），O=开盘集合竞价， T=连续,B=休市
                     ///<          C=收盘集合竞价,E=已闭市,H=临时停牌,A=盘后交易,V=波动性中断;
                     ///< 第 1 位：0=正常状态,1=全天停牌"
+                    if (status.charAt(0) == 'E') {
+                        return true;
+                    }
                     if (status.length() > 1 && status.charAt(1) == '1') {
                         return true;
                     }
@@ -1236,7 +1239,7 @@ public class MarketInformation {
 
 
     public static void main(String[] args) {
-        System.out.println(isManaged("SH204001"));
+        System.out.println(isMarketA("SZ395004"));
 
     }
 }

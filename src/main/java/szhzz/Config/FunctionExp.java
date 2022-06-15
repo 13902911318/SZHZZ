@@ -4,16 +4,16 @@ package szhzz.Config;
  * Created by Administrator on 2015/5/21.
  */
 public class FunctionExp {
-    private String funName = null;
-    String[] args = null;
-    private String express = "";
+    protected String funName = null;
+    protected String[] args = null;
+    protected String express = "";
 
 
     public FunctionExp(String exp) {
         decode(exp);
     }
 
-    private void decode(String exp) {
+     protected void decode(String exp) {
         if (exp != null) {
             express = exp.replace(" ", "");
             if (express.contains("(")) {
