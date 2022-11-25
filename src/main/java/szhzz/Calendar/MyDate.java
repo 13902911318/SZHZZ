@@ -127,7 +127,7 @@ public class MyDate implements Serializable {
     //    Calendar c = GregorianCalendar.getInstance(); // current date
     DateTime in = new DateTime();
     private boolean readOnly = false;
-
+    private static boolean alarmExp = false;
     private static ClareBuffer clareBuffer = new ClareBuffer() {
         @Override
         public void clare() {
@@ -1019,15 +1019,19 @@ public class MyDate implements Serializable {
         initCalendar();
         if (this.compareDays(minTradeDay) < 0) return true;
         if (this.compareDays(maxTradeDay) > 0) {
-            String message = this.getDate() + " 超出系统日历";
-            logger.error(new Exception(message));
-
-            int confirm = JOptionPane.showConfirmDialog(null,
-                    message + "退出程序(System.Exit!, 检查log,并手工更新日历) ?", "确认退出程序", JOptionPane.YES_NO_OPTION);
-
-            if (confirm == JOptionPane.YES_OPTION) {
-                System.exit(1);
+            if(!alarmExp) {
+                String message = this.getDate() + " 超出系统日历";
+                AppManager.MessageBox(message, 30, null);
             }
+            alarmExp = true;
+//            logger.error(new Exception(message));
+//
+//            int confirm = JOptionPane.showConfirmDialog(null,
+//                    message + "退出程序(System.Exit!, 检查log,并手工更新日历) ?", "确认退出程序", JOptionPane.YES_NO_OPTION);
+//
+//            if (confirm == JOptionPane.YES_OPTION) {
+//                System.exit(1);
+//            }
             return true;
         }
         return (stockCalendar.contains(this.getDate()));

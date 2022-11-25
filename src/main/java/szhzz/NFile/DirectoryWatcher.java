@@ -44,6 +44,7 @@ public class DirectoryWatcher extends Observable implements Runnable {
     private Kind<?> lastKind = null;
     private int tryCount = 0;
     private int version = 3;
+    private boolean multyTrigger = true;
 
     public void autoRecoverPath(int seconds) {
         if (seconds > 0) {
@@ -163,7 +164,7 @@ public class DirectoryWatcher extends Observable implements Runnable {
         setChanged();
         //    主动通知各个观察者目标对象状态的变更
         //    这里采用的是观察者模式的“推”方式
-        if (kind == lastKind && fileName.equals(lastFileName)) return;
+        if (!multyTrigger && kind == lastKind && fileName.equals(lastFileName)) return;
         lastKind = kind;
         lastFileName = fileName;
 

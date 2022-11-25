@@ -71,7 +71,7 @@ public class AlarmClock implements DawCountdown {
 
     public synchronized Object setAlarm(MyDate timer, Runnable requestor, boolean loop, int priority) {
         return setAlarm(timer.getHour(), timer.getMinute(), timer.getSecond(),
-                timer.getMillisOfSecond(),requestor, loop, priority);
+                timer.getMillisOfSecond(), requestor, loop, priority);
     }
 
     public synchronized Object setAlarm(int hour, int minute, int seconds, Runnable requestor, boolean loop, int priority) {
@@ -91,18 +91,29 @@ public class AlarmClock implements DawCountdown {
     public synchronized void removeAlarm(Object o) {
         try {
             if (o instanceof String) {
-                Iterator var2 = alarmPool.iterator();
-
-                while(var2.hasNext()) {
-                    Object obj = var2.next();
-                    if (obj.toString().equals(o) && alarmPool.remove(obj)) {
+                Vector<TimerEvent> tbd = new Vector<>();
+                for (Object obj : alarmPool) {
+                    if (((TimerEvent) obj).getCaseName().equals(o) ) {
+                        tbd.add((TimerEvent) obj);
                         this.logIt(o + " Removed");
                     }
                 }
+                alarmPool.removeAll(tbd);
+
+                //导致 ConcurrentModificationException
+//                Iterator var2 = alarmPool.iterator();
+//
+//                while(var2.hasNext()) {
+//                    Object obj = var2.next();
+//                    if (((TimerEvent)obj).getCaseName().equals(o) && alarmPool.remove(obj)) {
+//                        this.logIt(o + " Removed");
+//                        break;
+//                    }
+//                }
             } else if (alarmPool.remove(o)) {
                 this.logIt(o + " Removed");
             }
-        }finally {
+        } finally {
             timeup();
         }
     }
@@ -290,13 +301,13 @@ public class AlarmClock implements DawCountdown {
                     long t = peekJob.getLeftMSeconds();
                     if (t <= 0) {
                         execJobs.add(peekJob);
-                    }else{
+                    } else {
                         break;
                     }
                 }
                 alarmPool.removeAll(execJobs);
             }
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
         }
 

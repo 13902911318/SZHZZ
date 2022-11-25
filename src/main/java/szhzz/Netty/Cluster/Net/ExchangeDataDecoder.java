@@ -41,7 +41,14 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
             if (data != null) {
 //                System.out.println("数据序列错误");
 //                logger.info("ID=" + data.getSerialNo(), new Exception("数据序列错误!") );
-                logger.error(msg + "<-错误的信息头 ID=" + data.getSerialNo() + "\n" + data.encode());
+                if (data.isSameCharset()) {
+                    data.setErrorCode(10240);
+                    data.setMessage("错误的信息头,尝试恢复");
+                    out.add(data);
+                    logger.info(msg + "<-错误的信息头 ID=" + data.getSerialNo() + "\n" + data.toString());
+                } else {
+                    logger.error(data.toString(), new Exception("中文编码错误!"));
+                }
             }
             data = new NettyExchangeData();
         } else if (NettyExchangeData.isEndOfDate(msg)) {
