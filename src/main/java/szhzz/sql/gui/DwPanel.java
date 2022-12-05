@@ -1,6 +1,7 @@
 package szhzz.sql.gui;
 
 
+import org.apache.commons.io.FileUtils;
 import szhzz.Java_infor.Light;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.Database;
@@ -13,6 +14,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Vector;
 
 /**
@@ -362,6 +364,10 @@ public class DwPanel extends JPanel implements DwPanel_interface {
     }
 
     public String saveAs(String colSeperator, String fileName, boolean append) throws IOException {
+        return saveAs(colSeperator, fileName, append, Charset.forName("UTF8"));
+    }
+
+    public String saveAs(String colSeperator, String fileName, boolean append, Charset cs) throws IOException {
         String selectedFile = null;
         if (colSeperator == null) {
             colSeperator = "\t";
@@ -387,9 +393,7 @@ public class DwPanel extends JPanel implements DwPanel_interface {
             } else if (stateString != null) {
                 sb.append(stateString.toString());
             }
-
-
-            Utilities.String2File(sb.toString(), selectedFile, append);
+            String2File(sb.toString(), selectedFile, false,  cs);
         }
         return selectedFile;
     }
@@ -402,7 +406,6 @@ public class DwPanel extends JPanel implements DwPanel_interface {
             fileName = "Untitled" + File.separator + "txt";
             JFileChooser chooser = new JFileChooser(new File(fileName));
             chooser.showSaveDialog(this);
-            // Get the selected file
             File f = chooser.getSelectedFile();
             if (f != null) selectedFile = f.getAbsolutePath();
         } else {
@@ -410,7 +413,7 @@ public class DwPanel extends JPanel implements DwPanel_interface {
         }
 
         if (selectedFile != null) {
-            StringBuilder sb = new StringBuilder(dataWindow1.getCsvReport(title));
+            StringBuilder sb = new StringBuilder(dataWindow1.getCsvReport(title, ","));
 
             sb.append("\r\n");
             sb.append("\r\n");
@@ -420,8 +423,7 @@ public class DwPanel extends JPanel implements DwPanel_interface {
                 sb.append(stateString.toString());
             }
 
-
-            Utilities.String2File(sb.toString(), selectedFile, append);
+            String2File(sb.toString(), selectedFile, false,  Charset.forName("GB2312"));
         }
         return selectedFile;
     }
@@ -449,5 +451,10 @@ public class DwPanel extends JPanel implements DwPanel_interface {
     public String saveAs(String colSeperator, String fileName) throws IOException {
         return saveAs(colSeperator, fileName, false);
     }
+
+    private static void String2File(String s, String fileName, boolean ab_append, Charset cs) throws IOException {
+        FileUtils.writeStringToFile(new File(fileName), s, cs, ab_append);
+    }
+
 }
 

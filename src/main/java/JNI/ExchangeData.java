@@ -173,7 +173,7 @@ public class ExchangeData implements Serializable {
 
 
     public Long getErrorCode() {
-        return NU.parseLong(getValue(0, colErrCode), -1L);
+        return NU.parseLong(getValue(0, colErrCode), 0L);
     }
 
     public Long getEventType() {

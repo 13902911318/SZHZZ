@@ -1,6 +1,5 @@
 package szhzz.App;
 
-import com.sun.deploy.panel.ControlPanel;
 import szhzz.Netty.Cluster.ClusterStation;
 import szhzz.StatusInspect.StatusView;
 import szhzz.sql.database.DbConnectionsView;
@@ -22,6 +21,7 @@ public class DialogManager {
     protected ArrayList<JDialog> dialogs = new ArrayList<>();
     protected TaskView taskView = null;
     private static boolean statusViewSilent = false;
+    private static boolean statusViewNotPopup = false;
     private static boolean clusterStationSilent = false;
 
     private BeQuit autoQuit = new BeQuit() {
@@ -48,6 +48,9 @@ public class DialogManager {
 
     public static void setStatusViewSilent(boolean statusViewSilent) {
         DialogManager.statusViewSilent = statusViewSilent;
+    }
+    public static void setStatusViewNotPopup(boolean statusViewNotPopup) {
+        DialogManager.statusViewNotPopup = statusViewNotPopup;
     }
 
     public static void setClusterStationSilent(boolean clusterStationSilent) {
@@ -87,23 +90,23 @@ public class DialogManager {
         openStatuesView(false);
     }
     public void openStatuesView(boolean force) {
-        if(!force && statusViewSilent) return;
+        if(!force && statusViewNotPopup) return;
 
         if (statusView == null) {
-            statusView = new StatusView();
+            statusView = new StatusView(frame);
             dialogs.add(statusView);
 
             statusView.pack();
             statusView.setTitle(frame.getTitle());
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
 
+            }
         }
         statusView.setVisible(true);
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-
-        }
         statusView.loadPref();
+        statusView.setAlwaysOnTop(force);
     }
 
     public StatusView getStatuesView() {

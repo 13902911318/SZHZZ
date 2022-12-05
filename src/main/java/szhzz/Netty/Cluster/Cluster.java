@@ -276,7 +276,7 @@ public class Cluster {
             ss.closeDate = StationPropertyWrap.getCloseDate(data);
             ss.errorCode = StationPropertyWrap.getAppErrorCode(data);
             ss.tradeProxy = StationPropertyWrap.tradeProxy(data);
-
+            ss.internetIP = StationPropertyWrap.getInternetIP(data);
             ss.group = data.getGroup();
             ss.cpuID = data.getCpuID();
             ss.appClass = data.getAppClassName();

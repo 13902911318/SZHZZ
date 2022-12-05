@@ -1,7 +1,10 @@
 package szhzz.Utils;
 
+import szhzz.App.AppManager;
+
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class TimeOutMessageBox extends JDialog {
     private JPanel contentPane;
@@ -9,6 +12,7 @@ public class TimeOutMessageBox extends JDialog {
     private JButton buttonCancel;
     private JLabel promptLable;
     private JLabel TimeLeft;
+    private JLabel wavFileLabel;
     Timer countDown;
     int step = 60;
     private static int X = 0;
@@ -18,11 +22,15 @@ public class TimeOutMessageBox extends JDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
+        setModalityType(ModalityType.MODELESS);
 
         X += 50;
         Y += 50;
+        if(X > 500) X = 50;
+        if(Y > 500) Y = 50;
         this.setLocation(X, Y);
 
+        wavFileLabel.setVisible(false);
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
@@ -56,6 +64,7 @@ public class TimeOutMessageBox extends JDialog {
         if(countDown!=null){
             countDown.stop();
         }
+        wavFileLabel.setVisible(false);
         dispose();
     }
 
@@ -64,6 +73,7 @@ public class TimeOutMessageBox extends JDialog {
         if(countDown!=null){
             countDown.stop();
         }
+        wavFileLabel.setVisible(false);
         dispose();
     }
 
@@ -78,6 +88,19 @@ public class TimeOutMessageBox extends JDialog {
 
     public void showMessage(String msg) {
         showMessage(msg, 0) ;
+    }
+
+    public void showMessage(String msg, int seconds, String wavFile) {
+        wavFileLabel.setVisible(false);
+        if (wavFile == null || !new File(wavFile).exists()) {
+            wavFile = AppManager.getApp().getCfg().getProperty("AlertSound", "/resources/AlertSound/alarm.wav");
+            if(!new File(wavFile).exists()){
+                wavFileLabel.setText("Sound file not exit:" + wavFile);
+                wavFileLabel.setVisible(true);
+            }
+            Utilities.playSound(wavFile);
+        }
+        showMessage(msg,  seconds);
     }
 
     public void showMessage(String msg, int seconds) {

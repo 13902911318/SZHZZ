@@ -108,7 +108,6 @@ public class ConnectionManager {
      * @param param 对应连接池的名称
      * @param param 连接池的配置参数，具体请见类ConnectionParam
      * @return DataSource    如果绑定成功后返回连接池对象
-     * @throws NameAlreadyBoundException 一定名字name已经绑定则抛出该异常
      * @throws ClassNotFoundException    无法找到连接池的配置中的驱动程序类
      * @throws IllegalAccessException    连接池配置中的驱动程序类有误
      * @throws InstantiationException    无法实例化驱动程序类

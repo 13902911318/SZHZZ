@@ -29,7 +29,7 @@ public class DawIdleTimer {
      * unles we want clock stop for a long time, do not use this method
      */
     public void stopTimer() {
-        if (clookHandle != null) {
+        if (clookHandle != null && clock != null) {
             clock.cancel(clookHandle);
             clookHandle = null;
         }

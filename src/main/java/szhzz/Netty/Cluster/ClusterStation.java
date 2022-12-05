@@ -2,6 +2,7 @@ package szhzz.Netty.Cluster;
 
 
 import szhzz.App.DialogManager;
+import szhzz.Utils.Internet;
 import szhzz.sql.database.DBException;
 import szhzz.sql.database.DataStore;
 import szhzz.sql.gui.DataWindow;
@@ -219,6 +220,13 @@ public class ClusterStation extends JDialog {
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
+        ds.setColName("InterNet", col);
+        ds.setColTypeName("String", col);
+        ds.setColLength(col, 10);
+        ds.setDefaltValues(col, "");
+        dw.addCellRenderer(col, numberRenderer);
+
+        col++;
         ds.setColName("级别", col);
         ds.setColTypeName("Integer", col);
         ds.setColLength(col, 10);
@@ -285,8 +293,8 @@ public class ClusterStation extends JDialog {
         } catch (DBException e) {
             logger.error(e);
         }
-        dw.setSortingStatus(3, 1);
-        dw.setSortingStatus(2, -1);
+        dw.setSortingStatus(4, 1);
+        dw.setSortingStatus(3, -1);
 
         loadPref();
     }
@@ -318,6 +326,7 @@ public class ClusterStation extends JDialog {
         ds.setValueAt(Cluster.getInstance().isOffLine(), row, "离线");
         ds.setValueAt(AppManager.getApp().canRemoteShutdown(), row, "远程关机");
         ds.setValueAt(BusinessRuse.getInstance().getErrorCode(), row, "错误");
+        ds.setValueAt(Internet.getIp(), row, "InterNet");
 
         ds.setValueAt(MyDate.getToday().getDateTime(), row, "最近更新");
 
@@ -341,6 +350,8 @@ public class ClusterStation extends JDialog {
         ds.setValueAt(ss.offline, row, "离线");
         ds.setValueAt(ss.canShutdown, row, "远程关机");
         ds.setValueAt(ss.errorCode, row, "错误");
+        ds.setValueAt(ss.internetIP, row, "InterNet");
+
         //dumDate.setDateTime(ss.lastUpdate);
 
         if (ss.connected) {

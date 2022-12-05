@@ -24,4 +24,5 @@ public class ClusterProperty {
     String cpuID = "";
     String appClass = "";
     String tradeProxy = null;
+    String internetIP = "";
 }

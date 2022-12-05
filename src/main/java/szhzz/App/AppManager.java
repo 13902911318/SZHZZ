@@ -230,6 +230,19 @@ public class AppManager implements DataConsumer {
         });
     }
 
+    public static void MessageBox(final String string, int seconds, String wavFile) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+
+                TimeOutMessageBox dialog = new TimeOutMessageBox();
+                dialog.showMessage(string, seconds, wavFile);
+                dialog.pack();
+                dialog.setVisible(true);
+
+            }
+        });
+    }
+
     public static void MessageBox(final String string, int seconds) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -1373,6 +1386,7 @@ public class AppManager implements DataConsumer {
             }
         }
     }
+
 
     public static String getCompileTime() {
         ClassLoader cl = AppManager.getApp().getClass().getClassLoader();

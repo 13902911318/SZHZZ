@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * DataWindow.
  * <p/>
- * TODO TBD
+ *
  * DataWindow 是 ToProxy 的一种可视化界面，衍生于JTable
  * 建立 DataWindow 时应提供一个有效的 Database 作为参数
  * DataWindow(Database db)。然后可以用 retrive(String szhzz.sql)
@@ -271,7 +271,9 @@ public class DataWindow extends JTable {
         for (int r = 0; r < model.getRowCount(); r++) {
             for (int i = 0; i < model.getColumnCount(); i++) {
                 if (i > 0) sb.append(rowSeperator);
-                sb.append(model.getValueAt(r, i));
+                Object o =  model.getValueAt(r, i);
+                if(o == null) o = "";
+                sb.append(o.toString());
             }
             sb.append('\n');
         }
@@ -1365,6 +1367,7 @@ public class DataWindow extends JTable {
                     for (int col = 0; col < thisWin.getColumnCount(); col++) {
                         if (sb.length() > 0) sb.append("\t");
                         Object v = thisWin.getColumnName(col);
+                        if(v == null) v = "";
                         sb.append(v);
                         isCopy = true;
                     }
@@ -1375,6 +1378,7 @@ public class DataWindow extends JTable {
                         for (int col = 0; col < thisWin.getColumnCount(); col++) {
                             if (sbRow.length() > 0) sbRow.append("\t");
                             Object v = thisWin.getValueAt(row, col);
+                            if(v == null) v = "";
                             sbRow.append(v);
                         }
                         sb.append(sbRow);

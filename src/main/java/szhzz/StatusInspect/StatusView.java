@@ -21,7 +21,8 @@ public class StatusView extends JDialog {
     private DataWindow dw = null;
     private String colWidth = null;
 
-    public StatusView() {
+    public StatusView(Frame frame) {
+        super(frame);
         setContentPane(contentPane);
         setModalityType(ModalityType.MODELESS);
         setAlwaysOnTop(false);
@@ -59,7 +60,7 @@ public class StatusView extends JDialog {
     }
 
     public static void main(String[] args) {
-        StatusView dialog = new StatusView();
+        StatusView dialog = new StatusView(null);
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
@@ -73,11 +74,13 @@ public class StatusView extends JDialog {
     private void onOK() {
         savePref();
         dispose();
+        setAlwaysOnTop(false);
     }
 
     private void onCancel() {
         savePref();
         dispose();
+        setAlwaysOnTop(false);
     }
 
     public void loadPref() {
@@ -93,14 +96,14 @@ public class StatusView extends JDialog {
         );
 
         String[] colWidth = appCfg.getProperty("StatusViewColWidth", "").split("\t");
-        if(dw.getColumnCount() ==0){
+        if (dw.getColumnCount() == 0) {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
 
             }
         }
-        if(dw.getColumnCount() > 0) {
+        if (dw.getColumnCount() > 0) {
             for (int c = 0; c < colWidth.length; c++) {
                 dw.setColumnWidth(c, NU.parseLong(colWidth[c], (long) dw.getColumnWidth(c)).intValue());
             }

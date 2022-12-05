@@ -4,8 +4,8 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 import szhzz.App.AppManager;
 import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.Cluster;
-import szhzz.StatusInspect.StatusInspector;
 import szhzz.Utils.HardwareIDs;
+import szhzz.Utils.Internet;
 import szhzz.Utils.NU;
 
 /**
@@ -74,7 +74,6 @@ public class StationPropertyWrap {
         eData.appendRow();
         eData.appendRow();
         eData.addData(Cluster.getInstance().getLocalLevel());
-
         eData.addData(BusinessRuse.getInstance().getCloseDate());  // Col = 1
         eData.addData(BusinessRuse.getInstance().getErrorCode());       // Col = 2
         eData.addData(AppManager.getApp().canRemoteShutdown());      // Col = 3
@@ -82,6 +81,7 @@ public class StationPropertyWrap {
         eData.addData((AppManager.getApp().isDebug() ? 1 : 0));         // Col = 5
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
+        eData.addData(Internet.getIp());            // Col = 8
 //        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
 
@@ -140,6 +140,10 @@ public class StationPropertyWrap {
         return data.getExtData(1).toString();
     }
 
+    public static String getInternetIP(NettyExchangeData data) {
+        if (data == null) return "";
+        return data.getDataValue(0, 8, "").toString();
+    }
 
     public static boolean canRemoteShutdown(NettyExchangeData data) {
         if (data == null) return false;
