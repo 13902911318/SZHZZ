@@ -86,6 +86,13 @@ public class NettyClient {
         addHost(host);
     }
 
+    public void replaceHost(String oldHost, String newHost) {
+        int index = host.indexOf(oldHost);
+        if(index < 0 || index > host.size()) {
+            index = 0;
+        }
+        host.add(index, newHost);
+    }
 
     public void setHost(String[] host, int port, int hostIndex) {
         setHost(host, port);

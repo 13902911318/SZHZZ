@@ -213,7 +213,7 @@ public class ClusterStation extends JDialog {
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
-        ds.setColName("类型", col);
+        ds.setColName("IP", col);
         ds.setColTypeName("String", col);
         ds.setColLength(col, 10);
         ds.setDefaltValues(col, "");
@@ -316,7 +316,7 @@ public class ClusterStation extends JDialog {
             row = ds.appendRow();
             ds.setValueAt(stationName_, row, "名称");
         }
-        ds.setValueAt("本地", row, "类型");
+        ds.setValueAt(AppManager.getApp().getIP(null), row, "IP");
         ds.setValueAt(Cluster.getInstance().getLocalLevel(), row, "级别");
         ds.setValueAt(true, row, "已连接");
         ds.setValueAt(BusinessRuse.getInstance().getCloseDate(), row, "收盘日期");
@@ -340,7 +340,7 @@ public class ClusterStation extends JDialog {
             row = ds.appendRow();
             ds.setValueAt(stationName, row, "名称");
         }
-        ds.setValueAt(ss.type + " " + ss.ipAddress, row, "类型");
+        ds.setValueAt(ss.ipAddress, row, "IP");
         ds.setValueAt(ss.connected, row, "已连接");
         ds.setValueAt(ss.closeDate, row, "收盘日期");
         ds.setValueAt(ss.level, row, "级别");

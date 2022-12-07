@@ -205,7 +205,6 @@ public class ClusterClients {
                 client = new NettyClient(address, port);
                 client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
-
                 clients.put(computerName, client);
                 App.logit(computerName + " " + client.getHost() + " to be connect");
             } catch (Exception e) {
@@ -214,6 +213,12 @@ public class ClusterClients {
         }
         client.start();
         return client;
+    }
+
+    public void replaceHost(String computerName, String oldHost, String newHost){
+        NettyClient client = clients.get(computerName);
+        if(client == null) return;
+        client.replaceHost(oldHost, newHost);
     }
 
     public void closeClient(String computerName) {

@@ -229,6 +229,7 @@ public class Cluster {
         }
     }
 
+
     //显示界面的管理程序
     public void setClusterStationUI(ClusterStation clusterStationUI) {
         this.clusterStationUI = clusterStationUI;
@@ -262,7 +263,7 @@ public class Cluster {
             if (ss == null) {
                 ss = new ClusterProperty();
                 ss.stationName = stationName;
-                ss.type = "Remote";
+//                ss.type = "Remote";
                 nodes.put(stationName, ss);
             }
             ss.connected = true;
@@ -277,6 +278,7 @@ public class Cluster {
             ss.errorCode = StationPropertyWrap.getAppErrorCode(data);
             ss.tradeProxy = StationPropertyWrap.tradeProxy(data);
             ss.internetIP = StationPropertyWrap.getInternetIP(data);
+            ss.vpnIP = StationPropertyWrap.getVpnIP(data);
             ss.group = data.getGroup();
             ss.cpuID = data.getCpuID();
             ss.appClass = data.getAppClassName();
@@ -302,7 +304,7 @@ public class Cluster {
         if (ss == null) {
             ss = new ClusterProperty();
             ss.stationName = stationName;
-            ss.type = "Remote";
+//            ss.type = "Remote";
             nodes.put(stationName, ss);
         }
         ss.level = 0;

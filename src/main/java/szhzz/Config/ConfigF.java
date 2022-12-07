@@ -35,14 +35,14 @@ public class ConfigF extends Config {
 
     @Override
     public void load(String file) {
-        if(file.contains("\\\\")){
-            logger.error(new Exception("Error path format :" + file));
-            file = file.replace("\\\\", "\\");
-        }
-
-        configFileName = file;
+//        if(file.contains("\\\\")){
+//            logger.error(new Exception("Error path format :" + file));
+//            file = file.replace("\\\\", "\\");
+//        }
+        File f = new File(file);
+        configFileName = f.getAbsolutePath();
         try {
-            configID = new File(file).getName();
+            configID = f.getName();
             configID = configID.substring(0, configID.lastIndexOf("."));
         } catch (Exception ignored) {
 

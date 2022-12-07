@@ -639,8 +639,8 @@ public abstract class Config {
         Config c = null;
         if (children != null) {
             c = children.get(sectionName);
-        }
-        return c == null ? new ConfigF() : c;
+            }
+        return c == null ? newChild(sectionName) : c;
     }
 
     public void loadDataVal(BufferedReader in) {
