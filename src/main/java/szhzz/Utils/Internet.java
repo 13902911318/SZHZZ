@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 public class Internet {
     private static DawLogger logger = DawLogger.getLogger(Internet.class);
     private static String vpnName = null;
+    private static final String rexp = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
+    private static final Pattern pat = Pattern.compile(rexp);
 
     public static void main(String[] args) {
 //        getIp();
@@ -121,4 +123,10 @@ public class Internet {
 
         return vpnIP;
     }
+
+    public static boolean isIpAddress(String ip) {
+        if(ip == null || ip.length() == 0) return false;
+        return pat.matcher(ip).matches();
+    }
+
 }

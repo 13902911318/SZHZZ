@@ -40,6 +40,9 @@ public class ConfigF extends Config {
 //            file = file.replace("\\\\", "\\");
 //        }
         File f = new File(file);
+        if(!f.exists()){
+            logger.error(new Exception("Error file no exits :" + f.getAbsolutePath()));
+        }
         configFileName = f.getAbsolutePath();
         try {
             configID = f.getName();

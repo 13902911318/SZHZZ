@@ -198,6 +198,7 @@ public class ClusterClients {
     }
 
 
+
     public NettyClient registerClient(String computerName, String[] address, int port) {
         NettyClient client = clients.get(computerName);
         if (client == null) {
@@ -210,15 +211,12 @@ public class ClusterClients {
             } catch (Exception e) {
                 logger.error(e);
             }
+        }else{
+            client.disconnectFromServer();
+            client.setHost(address, port);
         }
         client.start();
         return client;
-    }
-
-    public void replaceHost(String computerName, String oldHost, String newHost){
-        NettyClient client = clients.get(computerName);
-        if(client == null) return;
-        client.replaceHost(oldHost, newHost);
     }
 
     public void closeClient(String computerName) {

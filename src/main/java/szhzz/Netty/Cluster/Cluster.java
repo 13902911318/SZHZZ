@@ -58,7 +58,7 @@ public class Cluster {
     final HashMap<String, ClusterProperty> nodes = new HashMap<>();
     boolean cgfIsDirty = false;
     AppMessage msg = new AppMessage();
-    Hashtable<String,String> ipToName= new Hashtable<>();
+//    Hashtable<String,String> ipToName= new Hashtable<>();
 
     Cluster() {
         App = AppManager.getApp(); //Error!
@@ -163,16 +163,16 @@ public class Cluster {
         return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
-    private void addIpToName(String computer, Config cfg){
-        String[] ips = cfg.getProperty("IP", "").split(";");
-        for(String ip : ips){
-            ipToName.put(ip, computer);
-        }
-    }
-
-    public String getNameByIP(String ip){
-        return ipToName.get(ip);
-    }
+//    private void addIpToName(String computer, Config cfg){
+//        String[] ips = cfg.getProperty("IP", "").split(";");
+//        for(String ip : ips){
+//            ipToName.put(ip, computer);
+//        }
+//    }
+//
+//    public String getNameByIP(String ip){
+//        return ipToName.get(ip);
+//    }
 
     //移到ClusterExt
     public void startup(Config clusterCfg) {
@@ -194,7 +194,7 @@ public class Cluster {
 
             for (String computer : clusterCfg.getChildrenNames()) {
                 Config child = clusterCfg.getChild(computer);
-                addIpToName(computer, child);
+//                addIpToName(computer, child);
 
                 if (computer.equalsIgnoreCase(getHostName())) {
                     localLevel = child.getIntVal("Level", 0);
