@@ -58,7 +58,7 @@ public class Cluster {
     final HashMap<String, ClusterProperty> nodes = new HashMap<>();
     boolean cgfIsDirty = false;
     AppMessage msg = new AppMessage();
-//    Hashtable<String,String> ipToName= new Hashtable<>();
+    Hashtable<String,String> ipToName= new Hashtable<>();
 
     Cluster() {
         App = AppManager.getApp(); //Error!
@@ -163,16 +163,16 @@ public class Cluster {
         return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
-//    private void addIpToName(String computer, Config cfg){
-//        String[] ips = cfg.getProperty("IP", "").split(";");
-//        for(String ip : ips){
-//            ipToName.put(ip, computer);
-//        }
-//    }
-//
-//    public String getNameByIP(String ip){
-//        return ipToName.get(ip);
-//    }
+    private void addIpToName(String computer, Config cfg){
+        String[] ips = cfg.getProperty("IP", "").split(";");
+        for(String ip : ips){
+            ipToName.put(ip, computer);
+        }
+    }
+
+    public String getNameByIP(String ip){
+        return ipToName.get(ip);
+    }
 
     //移到ClusterExt
     public void startup(Config clusterCfg) {
@@ -194,7 +194,7 @@ public class Cluster {
 
             for (String computer : clusterCfg.getChildrenNames()) {
                 Config child = clusterCfg.getChild(computer);
-//                addIpToName(computer, child);
+                addIpToName(computer, child);
 
                 if (computer.equalsIgnoreCase(getHostName())) {
                     localLevel = child.getIntVal("Level", 0);
@@ -229,7 +229,6 @@ public class Cluster {
         }
     }
 
-
     //显示界面的管理程序
     public void setClusterStationUI(ClusterStation clusterStationUI) {
         this.clusterStationUI = clusterStationUI;
@@ -263,7 +262,7 @@ public class Cluster {
             if (ss == null) {
                 ss = new ClusterProperty();
                 ss.stationName = stationName;
-//                ss.type = "Remote";
+                ss.type = "Remote";
                 nodes.put(stationName, ss);
             }
             ss.connected = true;
@@ -278,7 +277,6 @@ public class Cluster {
             ss.errorCode = StationPropertyWrap.getAppErrorCode(data);
             ss.tradeProxy = StationPropertyWrap.tradeProxy(data);
             ss.internetIP = StationPropertyWrap.getInternetIP(data);
-            ss.vpnIP = StationPropertyWrap.getVpnIP(data);
             ss.group = data.getGroup();
             ss.cpuID = data.getCpuID();
             ss.appClass = data.getAppClassName();
@@ -304,7 +302,7 @@ public class Cluster {
         if (ss == null) {
             ss = new ClusterProperty();
             ss.stationName = stationName;
-//            ss.type = "Remote";
+            ss.type = "Remote";
             nodes.put(stationName, ss);
         }
         ss.level = 0;

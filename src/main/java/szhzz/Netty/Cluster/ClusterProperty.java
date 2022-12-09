@@ -6,7 +6,7 @@ package szhzz.Netty.Cluster;
  */
 public class ClusterProperty {
     String stationName = "NoNamed";
-//    String type = "本地";
+    String type = "本地";
     boolean connected = false;
     boolean onTrade = false;
     boolean isGate = false;
@@ -25,5 +25,4 @@ public class ClusterProperty {
     String appClass = "";
     String tradeProxy = null;
     String internetIP = "";
-    String vpnIP = "";
 }
