@@ -105,6 +105,9 @@ public class ClusterServer {
 //
 //        }
 //        return exDate;
+        if(data.isByPass()){
+            int a = 0;
+        }
         return BusinessRuse.getInstance().answer(data);
     }
 

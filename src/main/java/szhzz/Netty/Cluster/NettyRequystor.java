@@ -60,7 +60,7 @@ public class NettyRequystor {
                 }
             }
         }
-        if (isConnected()) {
+        if (isConnected() || hasByPassChannel()) {
             return ClusterClients.getInstance().query(this);
         }
         return false;
@@ -106,9 +106,13 @@ public class NettyRequystor {
     }
 
     public boolean isConnected() {
-        return ClusterClients.getInstance().isConnect(stationName);
+        return ClusterClients.getInstance().isConnect(stationName) ;
     }
 
+    public boolean hasByPassChannel() {
+        //ServerHandler.hasByPassChannal()
+        return ClusterClients.getInstance().hasByPassChannel(stationName) ;
+    }
 //    public String getIpAddress() {
 //        return ipAddress;
 //    }

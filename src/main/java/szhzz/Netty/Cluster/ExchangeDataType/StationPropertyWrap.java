@@ -61,7 +61,9 @@ public class StationPropertyWrap {
         if (extender != null) {
             return extender.getStationProperty(data);
         }
-
+        if(data.isByPass()){
+            int a = 0;
+        }
         NettyExchangeData eData = new NettyExchangeData();
 
         eData.setErrorCode(Cluster.getInstance().isOnTrade() ? 1 : 0);
@@ -84,7 +86,7 @@ public class StationPropertyWrap {
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
         eData.addData(Internet.getIp());            // Col = 8
         eData.addData(Internet.getVpnIp(vpnInterfaceName));            // Col = 9
-//        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
+//      eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
 
         return eData;

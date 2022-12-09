@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster;
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
+import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Utils.DawLogger;
 
 import java.util.HashMap;
@@ -133,6 +134,11 @@ public class ClusterClients {
         }
     }
 
+
+    public boolean hasByPassChannel(String address) {
+        NettyClient client = clients.get(address);
+        return client != null && ServerHandler.hasByPassChannal(client.getHosts());
+    }
 
     public boolean isConnect(String address) {
         NettyClient client = clients.get(address);

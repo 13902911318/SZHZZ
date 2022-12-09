@@ -51,18 +51,28 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
 //            in(msg);
 //        }
 //    }
+
+    /**
+     * 标志 3
+     * @param ctx           the {@link ChannelHandlerContext} which this {@link SimpleChannelInboundHandler}
+     *                      belongs to
+     * @param msg           the message to handle
+     * @throws Exception
+     */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
+     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         // NettyExchangeData  msg
         //TimeUnit.SECONDS.sleep(2);
-        if (msg.isByPass()) {// 这些信息本来就应该有服务器处理
+        if (msg.isByPass()) {// 这些信息本来就应该由服务器处理
             logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
+            //标志 4
                 ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
                 if (exDates != null && exDates.size() > 0) {
                     for (NettyExchangeData exDate : exDates) {
                         if (exDate != null) {
                             logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
 //                        if(ctx.channel().isWritable())
+                            //标志 5
                             ctx.writeAndFlush(exDate.encode());
                         }
                     }

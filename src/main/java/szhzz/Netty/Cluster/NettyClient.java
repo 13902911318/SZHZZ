@@ -227,7 +227,7 @@ public class NettyClient {
     }
 
     public boolean isConnected() {
-        return connected;
+        return connected ;
     }
 
     public void sayBye() {
@@ -244,6 +244,8 @@ public class NettyClient {
     }
 
     /**
+     * 标志 1
+     *
      * @param msg
      * @return requID 回执号!
      */

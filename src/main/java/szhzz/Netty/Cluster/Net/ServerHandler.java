@@ -10,6 +10,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.Cluster;
+import szhzz.Netty.Cluster.ClusterClients;
 import szhzz.Netty.Cluster.ClusterServer;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
@@ -35,7 +36,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         clusterServer = ClusterServer.getInstance();
     }
 
-    public static boolean hasConnection(){
+    public static boolean hasConnection() {
         if (Cluster.getInstance().isOffLine()) return false;
         return channels.size() > 0;
     }
@@ -52,7 +53,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         for (Channel channel : channels) {
             if (channel.isWritable()) {
                 channel.writeAndFlush(msg.encode());
-            }else{
+            } else {
                 logger.debug("!channel.isWritable() ");
             }
         }
@@ -66,16 +67,26 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
             for (String address : host) {
                 if (channel_.remoteAddress().toString().contains(address)) {
                     if (channel_.isWritable()) {
-                        channel =  channel_;
+                        channel = channel_;
                         break;
                     }
                 }
             }
-            if(channel == null) continue;
+            if (channel == null) continue;
             channel.writeAndFlush(msg.encode());
         }
     }
 
+    public static boolean hasByPassChannal(LinkedList<String> host) {
+        return getBypassChannel(host) != null;
+    }
+
+    /**
+     * 标志 2
+     * @param msg
+     * @param host
+     * @return
+     */
     public static int bypassSendTo(NettyExchangeData msg, LinkedList<String> host) {
         Channel channel = getBypassChannel(host);
         if (channel != null) {
@@ -127,14 +138,27 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
     }
 
 
-
     ///////////////////////////////////////////////
+
+    /**
+     *
+     * @param ctx           the {@link ChannelHandlerContext} which this {@link SimpleChannelInboundHandler}
+     *                      belongs to
+     * @param msg           the message to handle
+     * @throws Exception
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         if (AppManager.isQuitApp()) return;
+        //标志 6
+        if(msg.isByPass()){
+            ClusterClients.getInstance().callBack(msg);
+            return;
+        }
+
         ArrayList<NettyExchangeData> exDates = answer(msg);
-        if(exDates!= null && exDates.size() > 0){
-            for(NettyExchangeData exDate : exDates){
+        if (exDates != null && exDates.size() > 0) {
+            for (NettyExchangeData exDate : exDates) {
                 if (exDate != null) {
                     ctx.writeAndFlush(exDate.encode());
                 }
