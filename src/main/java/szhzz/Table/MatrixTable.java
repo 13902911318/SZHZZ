@@ -196,8 +196,11 @@ public class MatrixTable {
     public String get(int row, String col) {
         return get(row, getColumnNo(col));
     }
+    public String get(int row, String col, String def) {
+        return get(row, getColumnNo(col),def);
+    }
 
-    public String get(int row, int col) {
+    public String get(int row, int col, String def) {
         String val = null;
         LinkedList<String> dataRow = getRow(row);
         if (dataRow != null && col >= 0 && col < dataRow.size())
@@ -207,7 +210,13 @@ public class MatrixTable {
                 val = val.trim();
             }
         }
+        if (val == null) return def;
+
         return val;
+    }
+
+    public String get(int row, int col) {
+        return get(row, col, null);
     }
 
     public String[] getHeader() {
@@ -483,7 +492,7 @@ public class MatrixTable {
                     }
                 }
             } else {
-                if(noTrim){
+                if (noTrim) {
                     String e[] = l.split(delimiter);
 
                     if (filter != null && !filter.accept(e)) continue;
@@ -492,7 +501,7 @@ public class MatrixTable {
                     for (String anE : e) {
                         row.add(anE);
                     }
-                }else if (l.trim().length() > 0) {
+                } else if (l.trim().length() > 0) {
                     String e[] = l.split(delimiter);
 
                     if (filter != null && !filter.accept(e)) continue;
