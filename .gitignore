@@ -1,3 +1,5 @@
 
 .idea/
 szhzz.iml
+/target/
+/src/main/resources/
