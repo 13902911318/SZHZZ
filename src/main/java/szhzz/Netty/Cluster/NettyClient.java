@@ -11,11 +11,13 @@ import szhzz.App.BeQuit;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Netty.Cluster.Net.ClientInitializer;
+import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -29,7 +31,7 @@ public class NettyClient {
     private static AppManager App = AppManager.getApp();
     private static long requID = 0l;
     private final Object locker = new Object();
-    private ArrayList<String> host = new ArrayList<>();
+    private LinkedList<String> host = new LinkedList<>();
     private int hostIndex = 0;
     protected int port;
     private Channel channel = null;
@@ -72,7 +74,7 @@ public class NettyClient {
         setHost(host, port);
     }
 
-    public ArrayList<String> getHosts() {
+    public LinkedList<String> getHosts() {
         return host;
     }
 
@@ -248,10 +250,10 @@ public class NettyClient {
     public long send(NettyExchangeData msg) {
         if (!isConnected()) {
             //尝试经由服务器端发送
-//            msg.setByPass();
-//            return ServerHandler.bypassSendTo(msg, host);
-            logger.debug("连接已断开");
-            return -1;
+            msg.setByPass();
+            return ServerHandler.bypassSendTo(msg, host);
+//            logger.debug("连接已断开");
+//            return -1;
         }
         if (!channel.isWritable()) {
             logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
