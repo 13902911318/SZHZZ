@@ -227,13 +227,6 @@ public class ClusterStation extends JDialog {
         dw.addCellRenderer(col, numberRenderer);
 
         col++;
-        ds.setColName("InterNet", col);
-        ds.setColTypeName("String", col);
-        ds.setColLength(col, 10);
-        ds.setDefaltValues(col, "");
-        dw.addCellRenderer(col, numberRenderer);
-
-        col++;
         ds.setColName("级别", col);
         ds.setColTypeName("Integer", col);
         ds.setColLength(col, 10);

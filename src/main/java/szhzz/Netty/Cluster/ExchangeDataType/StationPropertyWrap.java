@@ -15,6 +15,7 @@ public class StationPropertyWrap {
     private static NettyExchangeData closeOthersMsg = null;
     private static NettyExchangeData queryLevel = null;
     private static StationPropertyWrap extender = null;
+    private static String vpnInterfaceName = "OrayBoxVPN Virtual Ethernet Adapter";
 
     public static NettyExchangeData getStationLevelQuery() {
         if (queryLevel == null) {
@@ -82,6 +83,7 @@ public class StationPropertyWrap {
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
         eData.addData(Internet.getIp());            // Col = 8
+        eData.addData(Internet.getVpnIp(vpnInterfaceName));            // Col = 9
 //        eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
 
@@ -144,6 +146,10 @@ public class StationPropertyWrap {
         if (data == null) return "";
         return data.getDataValue(0, 8, "").toString();
     }
+    public static String getVpnIP(NettyExchangeData data) {
+        if (data == null) return "";
+        return data.getDataValue(0, 9, "").toString();
+    }
 
     public static boolean canRemoteShutdown(NettyExchangeData data) {
         if (data == null) return false;
@@ -158,6 +164,10 @@ public class StationPropertyWrap {
 
     public static void setExtender(StationPropertyWrap extender) {
         StationPropertyWrap.extender = extender;
+    }
+
+    public static void setVpnInterfaceName(String vpnInterfaceName) {
+        StationPropertyWrap.vpnInterfaceName = vpnInterfaceName;
     }
 }
 

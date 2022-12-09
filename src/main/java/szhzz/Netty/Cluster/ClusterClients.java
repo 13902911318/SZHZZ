@@ -198,6 +198,7 @@ public class ClusterClients {
     }
 
 
+
     public NettyClient registerClient(String computerName, String[] address, int port) {
         NettyClient client = clients.get(computerName);
         if (client == null) {
@@ -205,12 +206,14 @@ public class ClusterClients {
                 client = new NettyClient(address, port);
                 client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
-
                 clients.put(computerName, client);
                 App.logit(computerName + " " + client.getHost() + " to be connect");
             } catch (Exception e) {
                 logger.error(e);
             }
+        }else{
+            client.disconnectFromServer();
+            client.setHost(address, port);
         }
         client.start();
         return client;

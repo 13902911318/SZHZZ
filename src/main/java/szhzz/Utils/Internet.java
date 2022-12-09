@@ -1,14 +1,14 @@
 package szhzz.Utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import szhzz.App.AppManager;
-import szhzz.Calendar.MyDate;
+import szhzz.Config.Config;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
+import java.util.Enumeration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -20,48 +20,113 @@ import java.net.URL;
  */
 public class Internet {
     private static DawLogger logger = DawLogger.getLogger(Internet.class);
+    private static String vpnName = null;
+    private static final String rexp = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
+    private static final Pattern pat = Pattern.compile(rexp);
 
     public static void main(String[] args) {
-        getIp();
+//        getIp();
+        getVpnIp("OrayBoxVPN Virtual Ethernet Adapter");
     }
+
     static long lastRead = 0;
-    static String toIp = "";
+    static String publicIp = "";
+
     /**
      * This method is used to get all ip addresses from the network interfaces.
      * network interfaces: eth0, wlan0, l0, vmnet1, vmnet8
      */
     public static String getIp() {
-        String ip = "http://pv.sohu.com/cityjson?ie=utf-8";
-        String inputLine = "";
-        String read = "";
-        if(toIp.equals("") || System.currentTimeMillis() - lastRead < 10000 * 60) // 10分钟
-            return toIp;
 
-        lastRead = System.currentTimeMillis();
-        try {
-            String toIp_ = "?";
-            URL url = new URL(ip);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF8"));
-            while ((read = in.readLine()) != null) {
-                inputLine += read;
-//                AppManager.logit("Read URL:" + read);
-            }
-            String objJson = inputLine.substring(inputLine.indexOf("=") + 1, inputLine.length() - 1);
+        if (!publicIp.equals("")) //||
+            return publicIp;
 
-//            AppManager.logit("parseObject...");
-            JSONObject jsonObj = JSON.parseObject(objJson);
-//            AppManager.logit("JSONObject?");
-//            AppManager.logit("JSONObject=" + jsonObj.toString());
-            toIp_ = jsonObj.getString("cip");
-//            AppManager.logit("!! cip=" + toIp);
-            if(!toIp.equals(toIp_)){
-                toIp = toIp_;
-                AppManager.logit(objJson);
-            }
-        } catch (Exception ignored) {
-            //logger.error(ignored);
-        }
-        return toIp;
+        publicIp = getIp2();
+        return publicIp;
     }
+
+    public static String getIp2() {
+        String ip = "";
+        String chinaz = "https://ip.chinaz.com/";
+        StringBuilder inputLine = new StringBuilder();
+        String read = "";
+        URL url = null;
+        HttpURLConnection urlConnection = null;
+        BufferedReader in = null;
+        try {
+            url = new URL(chinaz);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+            while ((read = in.readLine()) != null) {
+                inputLine.append(read + "\n");
+            }
+            //System.out.println(inputLine.toString());
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    logger.error(e);
+                }
+            }
+        }
+
+
+        Pattern p = Pattern.compile("<dd class=\"fz24\">(.*?)</dd>");
+        Matcher m = p.matcher(inputLine.toString());
+        if (m.find()) {
+            String ipstr = m.group(1);
+            ip = ipstr;
+//            System.out.println(ipstr);
+        }
+        return ip;
+
+    }
+
+    public static String getVpnIp() {
+        if(vpnName == null) {
+            Config cfg = AppManager.getApp().getCfg();
+            if (cfg == null) return null;
+            vpnName = cfg.getProperty("VpnName", "OrayBoxVPN Virtual Ethernet Adapter");
+        }
+        return getVpnIp(vpnName) ;
+    }
+
+    public static String getVpnIp(String VpnName) {
+        String vpnIP = null;
+        Enumeration<NetworkInterface> en = null;
+        Enumeration<InetAddress> addresses;
+
+        try {
+            en = NetworkInterface.getNetworkInterfaces();
+            while (en.hasMoreElements()) {
+                NetworkInterface networkinterface = en.nextElement();
+                String name = networkinterface.getDisplayName();
+                if (VpnName.equals(name)) {
+                    addresses = networkinterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        if(vpnIP == null) {
+                            vpnIP = addresses.nextElement().getHostAddress();
+                        }else{
+                            vpnIP += ";" + addresses.nextElement().getHostAddress();
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (SocketException e) {
+            logger.error(e);
+        }
+
+        return vpnIP;
+    }
+
+    public static boolean isIpAddress(String ip) {
+        if(ip == null || ip.length() == 0) return false;
+        return pat.matcher(ip).matches();
+    }
+
 }
