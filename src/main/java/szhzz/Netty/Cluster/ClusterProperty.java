@@ -26,4 +26,5 @@ public class ClusterProperty {
     String tradeProxy = null;
     String internetIP = "";
     String vpnIP = "";
+    boolean bypass = false;
 }

@@ -269,6 +269,7 @@ public class Cluster {
 //                ss.type = "Remote";
                 nodes.put(stationName, ss);
             }
+            ss.bypass = data.isByPass();
             ss.connected = true;
             ss.onTrade = data.getErrorCode() == 1;
             ss.lastUpdate = data.getTimeStamp();

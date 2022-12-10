@@ -357,8 +357,11 @@ public class ClusterStation extends JDialog {
         if (ss.connected) {
 //            String timeString = (MyDate.getToday().getSecond() - dumDate.getSecond()) + "." +
 //                    (MyDate.getToday().getMillisOfSecond() - dumDate.getMillisOfSecond());
-
-            ds.setValueAt(ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新");
+            if(ss.bypass){
+                ds.setValueAt(ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新(B)");
+            }else{
+                ds.setValueAt(ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新");
+            }
         }
         stationViewPanel.setStatus(Cluster.getInstance().getStatusMessage());
         dw.repaint(100);
