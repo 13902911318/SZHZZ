@@ -106,7 +106,7 @@ public class ClusterServer {
 //        }
 //        return exDate;
         if(data.isByPass()){
-            int a = 0;
+            StationPropertyWrap.addRouter(data,AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".answer" );
         }
         return BusinessRuse.getInstance().answer(data);
     }
