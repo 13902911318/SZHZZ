@@ -16,13 +16,13 @@ import szhzz.Utils.NU;
 public class StationPropertyWrap {
     private static DawLogger logger = DawLogger.getLogger(StationPropertyWrap.class);
     private static NettyExchangeData closeOthersMsg = null;
-    private static NettyExchangeData queryLevel = null;
+//    private static NettyExchangeData queryLevel = null;
     private static StationPropertyWrap extender = null;
     private static String vpnInterfaceName = "OrayBoxVPN Virtual Ethernet Adapter";
 
     public static NettyExchangeData getStationLevelQuery() {
-        if (queryLevel == null) {
-            queryLevel = new NettyExchangeData();
+//        if (queryLevel == null) {
+        NettyExchangeData  queryLevel = new NettyExchangeData();
 
             queryLevel.setErrorCode(0);
             queryLevel.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
@@ -31,7 +31,7 @@ public class StationPropertyWrap {
             queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);
             queryLevel.setASC_II();
             queryLevel.setExtData(AppManager.getHostName(), 1 );
-        }
+//        }
         return queryLevel;
     }
 
