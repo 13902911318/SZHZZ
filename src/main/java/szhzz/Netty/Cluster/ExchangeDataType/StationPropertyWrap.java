@@ -101,15 +101,6 @@ public class StationPropertyWrap {
         eData.addData(Internet.getVpnIp(vpnInterfaceName));            // Col = 9
 //      eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
-        if (data.isByPass()) {
-            logger.info("标志 4 ID=" + data.getRequestID() + " " +
-                    AppManager.getHostName() + "@" +
-                    Internet.getIp() + "->" +
-                    data.getHostName() + "@" + data.getIpAddress());
-            StationPropertyWrap.addRouter(data,AppManager.getHostName() + ".StationPropertyWrap.answer.getStationProperty" );
-            eData.setByPass();
-        }
-
         return eData;
     }
 

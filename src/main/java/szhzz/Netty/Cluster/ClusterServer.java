@@ -7,6 +7,7 @@ import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Netty.Cluster.Net.ServerInitializer;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.Internet;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -96,17 +97,14 @@ public class ClusterServer {
      */
     public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
         if (Cluster.getInstance() == null || Cluster.getInstance().isOffLine()) return null;
-//        NettyExchangeData exDate = null;
-//        switch (data.getNettyType()) {
-//            case QueryServerLevel:
-//                exDate = StationPropertyWrap.getStationProperty(data);
-//                break;
-//            default:
-//
-//        }
-//        return exDate;
-        if(data.isByPass()){
-            StationPropertyWrap.addRouter(data,AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".answer" );
+
+        if (data.isByPass()) {
+            logger.info("标志 4 ID=" + data.getRequestID() + " " +
+                    AppManager.getHostName() + "@" +
+                    Internet.getIp() + "->" +
+                    data.getHostName() + "@" + data.getIpAddress());
+
+            StationPropertyWrap.addRouter(data,"4. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".answer" );
         }
         return BusinessRuse.getInstance().answer(data);
     }

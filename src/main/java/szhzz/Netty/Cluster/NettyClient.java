@@ -10,6 +10,7 @@ import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.Config.Config;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
+import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ClientInitializer;
 import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Timer.CircleTimer;
@@ -256,6 +257,8 @@ public class NettyClient {
             msg.setRequestID(++requID);
             logger.info("标志 1 ID=" + msg.getRequestID() + " " +
                     AppManager.getHostName() + "->" + msg.getIpAddress());
+            StationPropertyWrap.addRouter(msg, "1. "+AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
+
             return ServerHandler.bypassSendTo(msg, host);
 //            logger.debug("连接已断开");
 //            return -1;
