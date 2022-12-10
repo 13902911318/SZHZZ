@@ -4,6 +4,7 @@ import szhzz.App.AppManager;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
+import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Utils.DawLogger;
 
 
@@ -25,7 +26,7 @@ public class NettyRequystor {
     private long requestID = 0L; //new SynchronizedLong(0) 确保当前仅有1个未完成的查询
     private long funID = 0L;
     private BLOCK onBlock = BLOCK.ON_BLOCK_DROP_PRE;
-    private NettyExchangeData queryData = null;
+//    private NettyExchangeData queryData = null;
 
 
     private String stationName = null;
@@ -77,14 +78,13 @@ public class NettyRequystor {
     }
 
     public NettyExchangeData getQueryData() {
-        this.queryData.setIpAddress(getIpAddress());
-        return queryData;
+        return StationPropertyWrap.getStationLevelQuery();
     }
 
 
-    public void setQueryData(NettyExchangeData queryData) {
-        this.queryData = queryData;
-    }
+//    public void setQueryData(NettyExchangeData queryData) {
+//        this.queryData = queryData;
+//    }
 
     public String getStationName() {
         return stationName;

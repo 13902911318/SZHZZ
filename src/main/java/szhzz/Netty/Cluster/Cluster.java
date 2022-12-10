@@ -217,7 +217,7 @@ public class Cluster {
 
                     NettyRequystor remote = new NettyRequystor(computer);
                     remote.setReader(BusinessRuse.getInstance(), 5);
-                    remote.setQueryData(StationPropertyWrap.getStationLevelQuery());
+//                    remote.setQueryData(StationPropertyWrap.getStationLevelQuery());
                     remoteClients.add(remote);
                 }
             }
