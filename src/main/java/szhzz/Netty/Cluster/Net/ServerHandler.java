@@ -83,6 +83,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
 
     /**
      * 标志 2
+     *
      * @param msg
      * @param host
      * @return
@@ -91,11 +92,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         Channel channel = getBypassChannel(host);
         if (channel != null) {
             channel.writeAndFlush(msg.encode());
-            logger.info("标志2 " + msg.getHostName() + "@" + msg.getIpAddress());
+            logger.info("标志 2 " + msg.getRequestID() + " " +
+                    AppManager.getHostName() + "->" + msg.getIpAddress());
             logger.info("经由服务器端发送数据成功: 发往" + host.get(0) + " 请求类型=" + msg.getNettyType().name());
             return 1;
         }
-        logger.info("标志2 " + msg.getHostName() + "@" + msg.getIpAddress());
+
         logger.info("经由服务器端发送数据失败 " + msg.getNettyType().name());
         return -1;
     }
@@ -143,18 +145,18 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
     ///////////////////////////////////////////////
 
     /**
-     *
-     * @param ctx           the {@link ChannelHandlerContext} which this {@link SimpleChannelInboundHandler}
-     *                      belongs to
-     * @param msg           the message to handle
+     * @param ctx the {@link ChannelHandlerContext} which this {@link SimpleChannelInboundHandler}
+     *            belongs to
+     * @param msg the message to handle
      * @throws Exception
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         if (AppManager.isQuitApp()) return;
         //标志 6
-        if(msg.isByPass()){
-            logger.info("标志6 " + msg.getHostName() + "@" + msg.getIpAddress());
+        if (msg.isByPass()) {
+            logger.info("标志 6 ID=" + msg.getRequestID() + " " +
+                    msg.getIpAddress() + "<-" + msg.getHostName());
             ClusterClients.getInstance().callBack(msg);
             return;
         }

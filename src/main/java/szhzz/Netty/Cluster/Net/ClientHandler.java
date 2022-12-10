@@ -65,22 +65,27 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
         //TimeUnit.SECONDS.sleep(2);
 
         if (msg.isByPass()) {// 这些信息本来就应该由服务器处理
-            logger.info("标志3 " + msg.getHostName() + "@" + msg.getIpAddress());
+            logger.info("标志3 ID=" + msg.getRequestID() + " " +
+                    msg.getHostName() + "->" + msg.getIpAddress());
             logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
                 ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
                 if (exDates != null && exDates.size() > 0) {
                     for (NettyExchangeData exDate : exDates) {
                         if (exDate != null) {
                             logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
+
+                            exDate.setRequestID(msg.getRequestID());
+                            logger.info("标志 5 ID=" + exDate.getRequestID() + " " +
+                                    exDate.getIpAddress() + "<-" + exDate.getHostName());
 //                        if(ctx.channel().isWritable())
                             //标志 5
                             ctx.writeAndFlush(exDate.encode());
                         }
                     }
                 }
-            return;
+        }else{
+            in(msg);
         }
-        in(msg);
 
 //        if (dataBuffer != null) {
 //            dataBuffer.push(msg);

@@ -64,7 +64,7 @@ public class StationPropertyWrap {
         if (extender != null) {
             return extender.getStationProperty(data);
         }
-        if(data.isByPass()){
+        if (data.isByPass()) {
             int a = 0;
         }
         NettyExchangeData eData = new NettyExchangeData();
@@ -76,8 +76,9 @@ public class StationPropertyWrap {
         eData.setMessage("AnswerServerLevel");
         eData.setNettyType(ClusterProtocal.FUNCTION.AnswerServerLevel);
         eData.setASC_II();
-        if(data.isByPass()){
-            logger.info("标志4 " + data.getHostName() + "@" + data.getIpAddress());
+        if (data.isByPass()) {
+            logger.info("标志 4 ID=" + data.getRequestID() + " " +
+                    data.getHostName() + "->" + data.getIpAddress());
             eData.setByPass();
         }
 
@@ -155,6 +156,7 @@ public class StationPropertyWrap {
         if (data == null) return "";
         return data.getDataValue(0, 8, "").toString();
     }
+
     public static String getVpnIP(NettyExchangeData data) {
         if (data == null) return "";
         return data.getDataValue(0, 9, "").toString();

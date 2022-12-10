@@ -259,7 +259,8 @@ public class Cluster {
         stationName = stationName.toUpperCase();
         ClusterProperty ss = null;
         if(data.isByPass()){
-            logger.info("标志 8 (dataChanged)" + stationName + "@" + data.getIpAddress());
+            logger.info("标志 8 (dataChanged) ID=" + data.getRequestID() + " " +
+                     data.getIpAddress() + "<-" + stationName);
         }
         synchronized (nodes) {
             ss = nodes.get(stationName);

@@ -61,7 +61,7 @@ public class NettyRequystor {
             }
         }
         if (isConnected() ) {
-            logger.info("标志 -1 正常连接" + this.getStationName() + "@" + this.getIpAddress());
+            logger.info("标志 -1 正常连接" + this.getStationName() + "->" + this.getIpAddress());
             return ClusterClients.getInstance().query(this);
         }else if ( hasByPassChannel()) {
             return ClusterClients.getInstance().query(this);

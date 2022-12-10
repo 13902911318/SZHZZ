@@ -186,7 +186,8 @@ public class BusinessRuse implements DataConsumer {
     @Override
     public long in(Object obj) {
         if (onlyOne != null) {
-            logger.info("标志7 " + ((NettyExchangeData)obj).getHostName() + "@" + ((NettyExchangeData)obj).getIpAddress());
+            logger.info("标志 7 ID=" + ((NettyExchangeData)obj).getRequestID() + " " +
+                    ((NettyExchangeData)obj).getIpAddress() + "<-" + ((NettyExchangeData)obj).getHostName());
             return onlyOne.in(obj);
         }
 
