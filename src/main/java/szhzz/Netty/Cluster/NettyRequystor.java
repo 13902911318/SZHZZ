@@ -78,7 +78,9 @@ public class NettyRequystor {
     }
 
     public NettyExchangeData getQueryData() {
-        return StationPropertyWrap.getStationLevelQuery();
+        NettyExchangeData queryData = StationPropertyWrap.getStationLevelQuery();
+        queryData.setIpAddress(getIpAddress());
+        return queryData;
     }
 
 
