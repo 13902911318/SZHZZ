@@ -98,7 +98,7 @@ public class ClusterServer {
     public ArrayList<NettyExchangeData> answer(NettyExchangeData data) {
         if (Cluster.getInstance() == null || Cluster.getInstance().isOffLine()) return null;
 
-        if (data.isByPass()) {
+        if (data.isByPass() && StationPropertyWrap.isRouterDebug(data)) {
             logger.info("标志 4 ID=" + data.getRequestID() + " " +
                     AppManager.getHostName() + "@" +
                     Internet.getIp() + "->" +

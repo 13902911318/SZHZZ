@@ -255,10 +255,11 @@ public class NettyClient {
             //尝试经由服务器端发送
             msg.setByPass();
             msg.setRequestID(++requID);
-            logger.info("标志 1 ID=" + msg.getRequestID() + " " +
-                    AppManager.getHostName() + "->" + msg.getIpAddress());
-            StationPropertyWrap.addRouter(msg, "1. "+AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
-
+            if(StationPropertyWrap.isRouterDebug(msg)) {
+//            logger.info("标志 1 ID=" + msg.getRequestID() + " " +
+//                    AppManager.getHostName() + "->" + msg.getIpAddress());
+                StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
+            }
             return ServerHandler.bypassSendTo(msg, host);
 //            logger.debug("连接已断开");
 //            return -1;

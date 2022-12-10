@@ -163,9 +163,9 @@ public class ClusterClients {
         NettyRequystor requestor = null;
         long id = 0;
 
-        if(data.isByPass()) {
-            logger.info("标志 7 ID=" + data.getRequestID() + " " +
-                    data.getIpAddress() + "<-" + data.getHostName());
+        if(data.isByPass() && StationPropertyWrap.isRouterDebug(data)) {
+//            logger.info("标志 7 ID=" + data.getRequestID() + " " +
+//                    data.getIpAddress() + "<-" + data.getHostName());
             StationPropertyWrap.addRouter(data, "(7) " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".callBack");
         }
 

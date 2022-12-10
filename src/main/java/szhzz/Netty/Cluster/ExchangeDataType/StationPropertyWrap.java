@@ -16,31 +16,38 @@ import szhzz.Utils.NU;
 public class StationPropertyWrap {
     private static DawLogger logger = DawLogger.getLogger(StationPropertyWrap.class);
     private static NettyExchangeData closeOthersMsg = null;
-//    private static NettyExchangeData queryLevel = null;
+    //    private static NettyExchangeData queryLevel = null;
     private static StationPropertyWrap extender = null;
     private static String vpnInterfaceName = "OrayBoxVPN Virtual Ethernet Adapter";
 
     public static NettyExchangeData getStationLevelQuery() {
 //        if (queryLevel == null) {
-        NettyExchangeData  queryLevel = new NettyExchangeData();
+        NettyExchangeData queryLevel = new NettyExchangeData();
 
-            queryLevel.setErrorCode(0);
-            queryLevel.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
-            queryLevel.setRequestID(0);
-            queryLevel.setMessage("QueryServerLevel");
-            queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);
-            queryLevel.setASC_II();
-            queryLevel.setExtData(AppManager.getHostName(), 1 );
+        queryLevel.setErrorCode(0);
+        queryLevel.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
+        queryLevel.setRequestID(0);
+        queryLevel.setMessage("QueryServerLevel");
+        queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);
+        queryLevel.setASC_II();
+
+        if(Cluster.isRouterDebug()){
+            queryLevel.setExtData(AppManager.getHostName(), 1); //Router message
+        }
 //        }
         return queryLevel;
     }
 
-    public static void addRouter(NettyExchangeData e, String r){
-        e.setExtData(e.getExtData(1) + "+" + r, 1 );
+    public static void addRouter(NettyExchangeData e, String r) {
+        e.setExtData(e.getExtData(1) + "+" + r, 1);
     }
 
-    public static String getRouter(NettyExchangeData e){
-        return e.getExtData(1) ;
+    public static boolean isRouterDebug(NettyExchangeData e) {
+        return !getRouter(e).isEmpty();
+    }
+
+    public static String getRouter(NettyExchangeData e) {
+        return e.getExtData(1);
     }
 
     public static NettyExchangeData getCloseOthersMsg() {
@@ -51,7 +58,7 @@ public class StationPropertyWrap {
             closeOthersMsg.setErrorCode(0);
             closeOthersMsg.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
             closeOthersMsg.setRequestID(0);
-//            closeOthersMsg.setFunID(ClusterProtocal.FUNCTION.CloseOthers.ordinal());  // colFunID
+
             closeOthersMsg.setMessage("CloseOthers");
             closeOthersMsg.setNettyType(ClusterProtocal.FUNCTION.CloseOthers);
             closeOthersMsg.setASC_II();

@@ -63,8 +63,10 @@ public class NettyRequystor {
             }
         }
         if (isConnected() ) {
-            logger.info("标志 -1 正常连接" + AppManager.getHostName()+ "->" +
-                    this.getStationName() + "@" + this.getIpAddress());
+            if(Cluster.isRouterDebug()){
+                logger.info("标志 -1 正常连接" + AppManager.getHostName()+ "->" +
+                        this.getStationName() + "@" + this.getIpAddress());
+            }
             return ClusterClients.getInstance().query(this);
         }else if ( hasByPassChannel()) {
             return ClusterClients.getInstance().query(this);

@@ -92,10 +92,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
     public static int bypassSendTo(NettyExchangeData msg, LinkedList<String> host) {
         Channel channel = getBypassChannel(host);
         if (channel != null) {
-            StationPropertyWrap.addRouter(msg, "2. " + AppManager.getHostName() + ".ServerHandler.bypassSendTo" );
-            channel.writeAndFlush(msg.encode());
-            logger.info("标志 2 ID=" + msg.getRequestID() + " " +
-                    AppManager.getHostName() + "->" + msg.getIpAddress());
+            if(StationPropertyWrap.isRouterDebug(msg)) {
+                StationPropertyWrap.addRouter(msg, "2. " + AppManager.getHostName() + ".ServerHandler.bypassSendTo");
+                channel.writeAndFlush(msg.encode());
+                logger.info("标志 2 ID=" + msg.getRequestID() + " " +
+                        AppManager.getHostName() + "->" + msg.getIpAddress());
+            }
             logger.info("经由服务器端发送数据成功: 发往" + host.get(0) + " 请求类型=" + msg.getNettyType().name());
             return 1;
         }
@@ -157,9 +159,11 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         if (AppManager.isQuitApp()) return;
         //标志 6
         if (msg.isByPass()) {
-            StationPropertyWrap.addRouter(msg,"6. "+AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".channelRead0" );
-            logger.info("标志 6 ID=" + msg.getRequestID() + "  " +
-                    msg.getIpAddress() + "<-" + msg.getHostName());
+            if(StationPropertyWrap.isRouterDebug(msg)) {
+                StationPropertyWrap.addRouter(msg, "6. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".channelRead0");
+                logger.info("标志 6 ID=" + msg.getRequestID() + "  " +
+                        msg.getIpAddress() + "<-" + msg.getHostName());
+            }
             ClusterClients.getInstance().callBack(msg);
             return;
         }

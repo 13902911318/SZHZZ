@@ -67,9 +67,11 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
         //TimeUnit.SECONDS.sleep(2);
 
         if (msg.isByPass()) {// 这些信息本来就应该由服务器处理
-            StationPropertyWrap.addRouter(msg,"3. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".channelRead0" );
-            logger.info("标志 3 ID=" + msg.getRequestID() + " " +
-                    msg.getHostName() + "->" + msg.getIpAddress());
+            if(StationPropertyWrap.isRouterDebug(msg)){
+                StationPropertyWrap.addRouter(msg,"3. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".channelRead0" );
+                logger.info("标志 3 ID=" + msg.getRequestID() + " " +
+                        msg.getHostName() + "->" + msg.getIpAddress());
+            }
             logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
                 ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
                 if (exDates != null && exDates.size() > 0) {
@@ -77,14 +79,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
                         if (exDate != null) {
                             exDate.setByPass();
                             logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
-
-                            StationPropertyWrap.addRouter(exDate, StationPropertyWrap.getRouter(msg)); //just copy router String
-//                            exDate.setRequestID(msg.getRequestID());
-
-                            logger.info("标志 5 ID=" + exDate.getRequestID() + " " +
-                                    msg.getIpAddress() + "<-" + AppManager.getHostName());
-
-                            StationPropertyWrap.addRouter(exDate,"5. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".writeAndFlush" );
+                            if(StationPropertyWrap.isRouterDebug(msg)){
+                                StationPropertyWrap.addRouter(exDate, StationPropertyWrap.getRouter(msg)); //just copy router String
+                                logger.info("标志 5 ID=" + exDate.getRequestID() + " " +
+                                        msg.getIpAddress() + "<-" + AppManager.getHostName());
+                                StationPropertyWrap.addRouter(exDate,"5. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".writeAndFlush" );
+                            }
                             ctx.writeAndFlush(exDate.encode());
                         }
                     }

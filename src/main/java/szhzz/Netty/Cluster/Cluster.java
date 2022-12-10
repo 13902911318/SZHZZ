@@ -50,7 +50,18 @@ public class Cluster {
     static String macID = null;
     boolean definedGate = false;
 //    static String proxy = "";
+    static Boolean routerDebug = null;
 
+    public static boolean isRouterDebug(){
+        if(routerDebug == null){
+            if(AppManager.getApp().getCfg() != null) {
+                routerDebug = AppManager.getApp().getCfg().getBooleanVal("RouterDebug", false);
+            }else{
+                routerDebug = false;
+            }
+        }
+        return routerDebug;
+    }
     static AppManager App = AppManager.getApp(); //Error!
     boolean forceTakeover = false;
     int localLevel = 0;
@@ -258,11 +269,11 @@ public class Cluster {
         String stationName = data.getHostName(); //serverName
         stationName = stationName.toUpperCase();
         ClusterProperty ss = null;
-        if(data.isByPass()){
-            logger.info("标志 8 (dataChanged) ID=" + data.getRequestID() + " " +
-                     data.getIpAddress() + "<-" + stationName);
-            StationPropertyWrap.addRouter(data,"(8) "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".dataChanged" );
-            logger.info("Router:" + StationPropertyWrap.getRouter(data));
+        if(data.isByPass() && StationPropertyWrap.isRouterDebug(data)){
+//                logger.info("标志 8 (dataChanged) ID=" + data.getRequestID() + " " +
+//                        data.getIpAddress() + "<-" + stationName);
+                StationPropertyWrap.addRouter(data, "(8) " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".dataChanged");
+                logger.info("Router:" + StationPropertyWrap.getRouter(data));
         }
         synchronized (nodes) {
             ss = nodes.get(stationName);
