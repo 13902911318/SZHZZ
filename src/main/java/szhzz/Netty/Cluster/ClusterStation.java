@@ -358,7 +358,7 @@ public class ClusterStation extends JDialog {
 //            String timeString = (MyDate.getToday().getSecond() - dumDate.getSecond()) + "." +
 //                    (MyDate.getToday().getMillisOfSecond() - dumDate.getMillisOfSecond());
             if(ss.bypass){
-                ds.setValueAt(ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新(B)");
+                ds.setValueAt("(B)"+ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新");
             }else{
                 ds.setValueAt(ss.lastUpdate + " (" + ss.timeLap + " Ms)", row, "最近更新");
             }
