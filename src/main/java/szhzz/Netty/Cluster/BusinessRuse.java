@@ -99,6 +99,7 @@ public class BusinessRuse implements DataConsumer {
             case QueryServerLevel:
                 NettyExchangeData exDate = StationPropertyWrap.getStationProperty(data);
                 if (exDate != null) {
+                    StationPropertyWrap.addRouter(exDate, StationPropertyWrap.getRouter(data));
                     eDatas = new ArrayList<>();
                     eDatas.add(exDate);
                 }
