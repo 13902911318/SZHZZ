@@ -60,7 +60,10 @@ public class NettyRequystor {
                 }
             }
         }
-        if (isConnected() || hasByPassChannel()) {
+        if (isConnected() ) {
+            logger.info("标志 -1 " + this.getStationName() + "@" + this.getIpAddress());
+            return ClusterClients.getInstance().query(this);
+        }else if ( hasByPassChannel()) {
             return ClusterClients.getInstance().query(this);
         }
         return false;
@@ -112,9 +115,9 @@ public class NettyRequystor {
     public boolean hasByPassChannel() {
         //ServerHandler.hasByPassChannal()
         if(ClusterClients.getInstance().hasByPassChannel(stationName) ){
-            logger.info("标志0 可旁路" );
+            logger.info("标志 0 可旁路" );
         }else{
-            logger.info("标志0 不可旁路" );
+            logger.info("标志 0 不可旁路" );
         }
         return ClusterClients.getInstance().hasByPassChannel(stationName) ;
     }
