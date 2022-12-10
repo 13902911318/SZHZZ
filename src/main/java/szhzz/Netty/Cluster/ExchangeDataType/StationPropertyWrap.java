@@ -76,11 +76,7 @@ public class StationPropertyWrap {
         eData.setMessage("AnswerServerLevel");
         eData.setNettyType(ClusterProtocal.FUNCTION.AnswerServerLevel);
         eData.setASC_II();
-        if (data.isByPass()) {
-            logger.info("标志 4 ID=" + data.getRequestID() + " " +
-                    data.getHostName() + "->" + data.getIpAddress());
-            eData.setByPass();
-        }
+        eData.setRequestID(data.getRequestID());
 
         eData.appendRow();
         eData.appendRow();
@@ -96,6 +92,13 @@ public class StationPropertyWrap {
         eData.addData(Internet.getVpnIp(vpnInterfaceName));            // Col = 9
 //      eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 
+        if (data.isByPass()) {
+            logger.info("标志 4 ID=" + data.getRequestID() + " " +
+                    AppManager.getHostName() + "@" +
+                    Internet.getIp() + "->" +
+                    data.getHostName() + "@" + data.getIpAddress());
+            eData.setByPass();
+        }
 
         return eData;
     }

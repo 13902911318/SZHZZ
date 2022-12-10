@@ -1,5 +1,6 @@
 package szhzz.Netty.Cluster;
 
+import szhzz.App.AppManager;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
@@ -61,7 +62,8 @@ public class NettyRequystor {
             }
         }
         if (isConnected() ) {
-            logger.info("标志 -1 正常连接" + this.getStationName() + "->" + this.getIpAddress());
+            logger.info("标志 -1 正常连接" + AppManager.getHostName()+ "->" +
+                    this.getStationName() + "@" + this.getIpAddress());
             return ClusterClients.getInstance().query(this);
         }else if ( hasByPassChannel()) {
             return ClusterClients.getInstance().query(this);
@@ -115,11 +117,12 @@ public class NettyRequystor {
     public boolean hasByPassChannel() {
         //ServerHandler.hasByPassChannal()
         if(ClusterClients.getInstance().hasByPassChannel(stationName) ){
-            logger.info("标志 0 可旁路" );
+            logger.info("标志 0 可旁路->" + stationName );
+            return true;
         }else{
-            logger.info("标志 0 不可旁路" );
+            logger.info("标志 0 不可旁路->" + stationName);
+            return false;
         }
-        return ClusterClients.getInstance().hasByPassChannel(stationName) ;
     }
 //    public String getIpAddress() {
 //        return ipAddress;
