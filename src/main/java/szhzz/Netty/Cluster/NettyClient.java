@@ -253,7 +253,7 @@ public class NettyClient {
         if (!isConnected()) {
             //尝试经由服务器端发送
             msg.setByPass();
-            msg.setRequestID(AppManager.getHostName()+ (++requID));
+            msg.setRequestID(++requID);
             logger.info("标志 1 ID=" + msg.getRequestID() + " " +
                     AppManager.getHostName() + "->" + msg.getIpAddress());
             return ServerHandler.bypassSendTo(msg, host);
@@ -267,7 +267,7 @@ public class NettyClient {
 //        NettyExchangeData d = ((NettyExchangeData) msg);
         synchronized (locker) {
 //            d.setRequestID(++requID);
-            msg.setRequestID(AppManager.getHostName()+ (++requID));
+            msg.setRequestID(++requID);
             channel.writeAndFlush(msg.encode());
 //            return requID;
             return 1;

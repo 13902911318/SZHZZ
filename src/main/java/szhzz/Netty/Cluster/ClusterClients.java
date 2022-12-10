@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster;
 import szhzz.App.AppManager;
 import szhzz.App.BeQuit;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
+import szhzz.Netty.Cluster.ExchangeDataType.StationPropertyWrap;
 import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Utils.DawLogger;
 
@@ -86,6 +87,7 @@ public class ClusterClients {
         long w_RequestID = 0;
         NettyExchangeData obj = requestor.getQueryData();
         if (obj != null) {
+            StationPropertyWrap.addRouter(obj, AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".query");
             synchronized (requests) {
                 w_RequestID = client.send(obj);
                 if (w_RequestID > 0) {

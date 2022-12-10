@@ -261,6 +261,7 @@ public class Cluster {
         if(data.isByPass()){
             logger.info("标志 8 (dataChanged) ID=" + data.getRequestID() + " " +
                      data.getIpAddress() + "<-" + stationName);
+            StationPropertyWrap.addRouter(data,AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".dataChanged" );
         }
         synchronized (nodes) {
             ss = nodes.get(stationName);

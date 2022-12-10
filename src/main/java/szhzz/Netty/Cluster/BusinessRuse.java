@@ -188,6 +188,7 @@ public class BusinessRuse implements DataConsumer {
         if (onlyOne != null) {
             logger.info("标志 7 ID=" + ((NettyExchangeData)obj).getRequestID() + " " +
                     ((NettyExchangeData)obj).getIpAddress() + "<-" + ((NettyExchangeData)obj).getHostName());
+            StationPropertyWrap.addRouter(((NettyExchangeData)obj),AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".in" );
             return onlyOne.in(obj);
         }
 

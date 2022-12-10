@@ -30,8 +30,17 @@ public class StationPropertyWrap {
             queryLevel.setMessage("QueryServerLevel");
             queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);
             queryLevel.setASC_II();
+            queryLevel.setExtData(AppManager.getHostName(), 1 );
         }
         return queryLevel;
+    }
+
+    public static void addRouter(NettyExchangeData e, String r){
+        e.setExtData(e.getExtData(1) + "+" + r, 1 );
+    }
+
+    public static String getRouter(NettyExchangeData e){
+        return e.getExtData(1) ;
     }
 
     public static NettyExchangeData getCloseOthersMsg() {
