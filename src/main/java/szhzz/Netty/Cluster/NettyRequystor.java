@@ -1,5 +1,6 @@
 package szhzz.Netty.Cluster;
 
+import szhzz.App.AppManager;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
