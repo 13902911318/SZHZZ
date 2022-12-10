@@ -106,6 +106,7 @@ public class StationPropertyWrap {
                     AppManager.getHostName() + "@" +
                     Internet.getIp() + "->" +
                     data.getHostName() + "@" + data.getIpAddress());
+            StationPropertyWrap.addRouter(data,AppManager.getHostName() + ".StationPropertyWrap.answer.getStationProperty" );
             eData.setByPass();
         }
 
