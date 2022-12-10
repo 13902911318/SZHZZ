@@ -115,11 +115,13 @@ public class NettyRequystor {
     public boolean hasByPassChannel() {
         //ServerHandler.hasByPassChannal()
         if(ClusterClients.getInstance().hasByPassChannel(stationName) ){
-            logger.info("标志 0 可旁路" );
+            logger.info("标志 0 可旁路 ->" + stationName);
+            return true;
         }else{
-            logger.info("标志 0 不可旁路" );
+            logger.info("标志 0 不可旁路 ->" + stationName );
+            return false;
         }
-        return ClusterClients.getInstance().hasByPassChannel(stationName) ;
+
     }
 //    public String getIpAddress() {
 //        return ipAddress;
