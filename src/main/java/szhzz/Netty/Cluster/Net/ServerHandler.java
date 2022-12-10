@@ -92,7 +92,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         Channel channel = getBypassChannel(host);
         if (channel != null) {
             channel.writeAndFlush(msg.encode());
-            logger.info("标志 2 " + msg.getRequestID() + " " +
+            logger.info("标志 2 ID=" + msg.getRequestID() + " " +
                     AppManager.getHostName() + "->" + msg.getIpAddress());
             logger.info("经由服务器端发送数据成功: 发往" + host.get(0) + " 请求类型=" + msg.getNettyType().name());
             return 1;
@@ -155,7 +155,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         if (AppManager.isQuitApp()) return;
         //标志 6
         if (msg.isByPass()) {
-            logger.info("标志 6 ID=" + msg.getRequestID() + " " +
+            logger.info("标志 6 ID=" + msg.getRequestID() + "  " +
                     msg.getIpAddress() + "<-" + msg.getHostName());
             ClusterClients.getInstance().callBack(msg);
             return;

@@ -3,6 +3,7 @@ package szhzz.Netty.Cluster.Net;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import szhzz.App.AppManager;
 import szhzz.DataBuffer.DataConsumer;
 import szhzz.DataBuffer.ObjBufferedIO;
 import szhzz.Netty.Cluster.BusinessRuse;
@@ -74,9 +75,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
                         if (exDate != null) {
                             logger.info("经由服务器端回答数据成功 " + exDate.getNettyType().name());
 
-                            exDate.setRequestID(msg.getRequestID());
+//                            exDate.setRequestID(msg.getRequestID());
                             logger.info("标志 5 ID=" + exDate.getRequestID() + " " +
-                                    exDate.getIpAddress() + "<-" + exDate.getHostName());
+                                    msg.getIpAddress() + "<-" + AppManager.getHostName());
 //                        if(ctx.channel().isWritable())
                             //标志 5
                             ctx.writeAndFlush(exDate.encode());
