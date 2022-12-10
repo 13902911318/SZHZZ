@@ -63,9 +63,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
      protected void channelRead0(ChannelHandlerContext ctx, NettyExchangeData msg) throws Exception {
         // NettyExchangeData  msg
         //TimeUnit.SECONDS.sleep(2);
+
         if (msg.isByPass()) {// 这些信息本来就应该由服务器处理
+            logger.info("标志3 " + msg.getHostName() + "@" + msg.getIpAddress());
             logger.info("经由服务器端接收数据成功: 来自" + msg.getHostName() + " 请求类型=" + msg.getNettyType().name());
-            //标志 4
                 ArrayList<NettyExchangeData> exDates = ClusterServer.getInstance().answer(msg);
                 if (exDates != null && exDates.size() > 0) {
                     for (NettyExchangeData exDate : exDates) {

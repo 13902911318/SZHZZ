@@ -639,7 +639,7 @@ public abstract class Config {
         Config c = null;
         if (children != null) {
             c = children.get(sectionName);
-            }
+        }
         return c == null ? newChild(sectionName) : c;
     }
 
@@ -658,7 +658,7 @@ public abstract class Config {
                     String name = trim.replace("[", "").replace("]", "").toUpperCase();
                     trim = cfg.loadChild(in);
 
-                    if(!name.startsWith("*")) {//不使用的单元
+                    if (!name.startsWith("*")) {//不使用的单元
                         children.put(name, cfg);
                         childrenIndex.add(name);
                     }

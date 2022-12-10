@@ -74,6 +74,7 @@ public class BusinessRuse implements DataConsumer {
 
     public void push(Object obj) {
         try {
+
             if (Cluster.getInstance().isOffLine()) return;
             if (dataBuffer != null) {
                 dataBuffer.push(obj);
@@ -177,9 +178,15 @@ public class BusinessRuse implements DataConsumer {
 //        broadcast(data);
 //    }
 
+    /**
+     * 标志7
+     * @param obj
+     * @return
+     */
     @Override
     public long in(Object obj) {
         if (onlyOne != null) {
+            logger.info("标志7 " + ((NettyExchangeData)obj).getHostName() + "@" + ((NettyExchangeData)obj).getIpAddress());
             return onlyOne.in(obj);
         }
 

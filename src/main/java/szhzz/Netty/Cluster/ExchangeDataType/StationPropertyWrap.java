@@ -4,6 +4,8 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 import szhzz.App.AppManager;
 import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.Cluster;
+import szhzz.Netty.Cluster.Net.ServerHandler;
+import szhzz.Utils.DawLogger;
 import szhzz.Utils.HardwareIDs;
 import szhzz.Utils.Internet;
 import szhzz.Utils.NU;
@@ -12,6 +14,7 @@ import szhzz.Utils.NU;
  * Created by Administrator on 2015/7/6.
  */
 public class StationPropertyWrap {
+    private static DawLogger logger = DawLogger.getLogger(StationPropertyWrap.class);
     private static NettyExchangeData closeOthersMsg = null;
     private static NettyExchangeData queryLevel = null;
     private static StationPropertyWrap extender = null;
@@ -73,6 +76,10 @@ public class StationPropertyWrap {
         eData.setMessage("AnswerServerLevel");
         eData.setNettyType(ClusterProtocal.FUNCTION.AnswerServerLevel);
         eData.setASC_II();
+        if(data.isByPass()){
+            logger.info("标志4 " + data.getHostName() + "@" + data.getIpAddress());
+            eData.setByPass();
+        }
 
         eData.appendRow();
         eData.appendRow();
