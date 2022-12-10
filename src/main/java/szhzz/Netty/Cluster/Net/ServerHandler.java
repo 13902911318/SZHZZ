@@ -94,10 +94,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         if (channel != null) {
             if(StationPropertyWrap.isRouterDebug(msg)) {
                 StationPropertyWrap.addRouter(msg, "2. " + AppManager.getHostName() + ".ServerHandler.bypassSendTo");
-                channel.writeAndFlush(msg.encode());
                 logger.info("标志 2 ID=" + msg.getRequestID() + " " +
                         AppManager.getHostName() + "->" + msg.getIpAddress());
             }
+            channel.writeAndFlush(msg.encode());
             logger.info("经由服务器端发送数据成功: 发往" + host.get(0) + " 请求类型=" + msg.getNettyType().name());
             return 1;
         }
