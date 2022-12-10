@@ -84,7 +84,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<NettyExchangeData
                             logger.info("标志 5 ID=" + exDate.getRequestID() + " " +
                                     msg.getIpAddress() + "<-" + AppManager.getHostName());
 
-                            StationPropertyWrap.addRouter(msg,"5. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".writeAndFlush" );
+                            StationPropertyWrap.addRouter(exDate,"5. "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".writeAndFlush" );
                             ctx.writeAndFlush(exDate.encode());
                         }
                     }

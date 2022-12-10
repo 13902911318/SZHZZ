@@ -97,7 +97,6 @@ public class BusinessRuse implements DataConsumer {
         ArrayList<NettyExchangeData> eDatas = null;
         switch (data.getNettyType()) {
             case QueryServerLevel:
-                StationPropertyWrap.addRouter(data, AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".answer");
                 NettyExchangeData exDate = StationPropertyWrap.getStationProperty(data);
                 if (exDate != null) {
                     eDatas = new ArrayList<>();
@@ -187,9 +186,6 @@ public class BusinessRuse implements DataConsumer {
     @Override
     public long in(Object obj) {
         if (onlyOne != null) {
-            logger.info("标志 7 ID=" + ((NettyExchangeData)obj).getRequestID() + " " +
-                    ((NettyExchangeData)obj).getIpAddress() + "<-" + ((NettyExchangeData)obj).getHostName());
-            StationPropertyWrap.addRouter(((NettyExchangeData)obj),"(7) "+ AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".callBack" );
             return onlyOne.in(obj);
         }
 
