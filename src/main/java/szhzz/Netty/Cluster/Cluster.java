@@ -258,6 +258,9 @@ public class Cluster {
         String stationName = data.getHostName(); //serverName
         stationName = stationName.toUpperCase();
         ClusterProperty ss = null;
+        if(data.isByPass()){
+            logger.info("标志 8 (dataChanged)" + stationName + "@" + data.getIpAddress());
+        }
         synchronized (nodes) {
             ss = nodes.get(stationName);
             if (ss == null) {
@@ -300,6 +303,7 @@ public class Cluster {
      */
     public void dataChanged(NettyRequystor requystor) {
         String stationName = requystor.getStationName(); //serverName
+
         ClusterProperty ss = nodes.get(stationName);
         if (ss == null) {
             ss = new ClusterProperty();
