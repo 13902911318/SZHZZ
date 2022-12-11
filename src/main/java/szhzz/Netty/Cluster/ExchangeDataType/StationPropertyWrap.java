@@ -87,11 +87,11 @@ public class StationPropertyWrap {
         eData.setErrorCode(Cluster.getInstance().isOnTrade() ? 1 : 0);
         eData.setEvenType(ClusterProtocal.EVENT.Cluster.ordinal());
         eData.setIpAddress(data.getIpAddress()); //数据进入本站的时候设置了 data.getIpAddress()
-        eData.setRequestID(data.getRequestID().intValue());
+        eData.setRequestID(data.getRequestID());
         eData.setMessage("AnswerServerLevel");
         eData.setNettyType(ClusterProtocal.FUNCTION.AnswerServerLevel);
         eData.setASC_II();
-        eData.setRequestID(data.getRequestID());
+//        eData.setRequestID(data.getRequestID());
 
         eData.appendRow();
         eData.appendRow();

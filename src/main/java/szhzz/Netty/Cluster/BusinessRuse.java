@@ -110,9 +110,6 @@ public class BusinessRuse implements DataConsumer {
     }
 
     public void broadcast(NettyExchangeData data) {
-//        if (!Cluster.getInstance().isOffLine()) {
-//            ClusterServer.getInstance().broadcast(data);
-//        }
         if (ServerHandler.hasConnection()) {
             ServerHandler.broadcast(data);
         } else {

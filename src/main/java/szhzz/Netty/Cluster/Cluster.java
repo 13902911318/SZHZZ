@@ -13,6 +13,7 @@ import szhzz.StatusInspect.StatusData;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.HardwareIDs;
+import szhzz.Utils.Internet;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -46,11 +47,17 @@ public class Cluster {
     int defaultPort = 7521;
     int group = 0;
     boolean offLine = false;
+
     Config clusterCfg = null;
     static String macID = null;
     boolean definedGate = false;
 //    static String proxy = "";
     static Boolean routerDebug = null;
+
+    HashMap<String, String> location = new HashMap<>();
+    String localName = "";
+    static final String noLocation = "No defined";
+    private String clusterName = "Cluster";
 
     public static boolean isRouterDebug(){
         if(routerDebug == null){
@@ -185,44 +192,72 @@ public class Cluster {
 //        return ipToName.get(ip);
 //    }
 
-    //移到ClusterExt
+    /**
+     *
+     * @param clusterCfg
+     */
     public void startup(Config clusterCfg) {
+        if(connectionListener != null){
+            reStart(clusterCfg);
+            return;
+        }
+
         if (clusterCfg != null && clusterServer == null) {
             this.clusterCfg = clusterCfg;
 
-            Config cfg_ = CfgProvider.getInstance("Schedule").getCfg("System");
-            //移除
-            autoStartTrade = cfg_.getBooleanVal("自动接管交易", autoStartTrade);
-            forceTakeover = cfg_.getBooleanVal("强制接管交易", false);
-            setOffLine(cfg_.getBooleanVal("离线", false));
+            int port = clusterCfg.getIntVal(clusterName, defaultPort);
+            ClusterClients.getInstance().setTimer(clusterCfg.getIntVal("Timer", 10 * 1000));
+            ClusterClients.getInstance().setConnectionTimeout(clusterCfg.getIntVal("ConnectionTimeout", 10 * 1000));
 
-            ClusterClients.getInstance().setConnectionTimeout(clusterCfg.getIntVal("ConnectionTimeout", 1000));
-
-            if (clusterCfg.getChildrenNames() == null || clusterCfg.getChildrenNames().size() == 0) {
-                AppManager.MessageBox("请定义 " + clusterCfg.getConfigUrl() + " 集群节点设置文件");
-            }
-            int port = clusterCfg.getIntVal("Cluster", defaultPort);
+            AppManager.logit("开启集群监测, Timer=" + clusterCfg.getIntVal("Timer", 10 * 1000));
+//            String localNet = "";
+            if (clusterCfg.getChildrenNames() == null) return;
 
             for (String computer : clusterCfg.getChildrenNames()) {
                 Config child = clusterCfg.getChild(computer);
-//                addIpToName(computer, child);
+                //Abandon
+                if (child.getIntVal("Level", 0) <= 0) {
+                    logger.info(computer + " Level=0, not managed");
+                    continue;
+                }
 
                 if (computer.equalsIgnoreCase(getHostName())) {
-                    localLevel = child.getIntVal("Level", 0);
+                    localName = child.getProperty("Location", noLocation);
+                    String mainIP = child.getProperty("IP", "").split(";")[0];
+                    if(!Internet.setMainIp(mainIP)){
+                        AppManager.MessageBox("请在 Group.ini 中设置正确的本机 IP", 15);
+                    }
+                    int localLevel = child.getIntVal("Level", 0);
                     group = child.getIntVal("Group", 0);
 
-                    definedLevel = localLevel;
-                    if (clusterServer == null) {
-                        clusterServer = ClusterServer.getInstance();
-                        clusterServer.setServerName(computer);
-                        clusterServer.setPort(port);
-                        clusterServer.setLocalLevel(localLevel);
-                        clusterServer.startServer();
-//                        setProxy(child.getProperty("Proxy", ""));
+                    clusterServer = ClusterServer.getInstance();
+                    clusterServer.setServerName(computer);
+                    clusterServer.setPort(port); //ips[0],
+                    clusterServer.setLocalLevel(localLevel);
+                    clusterServer.startServer();
+                    break;
+                }
+                location.put(child.getProperty("IP", ""),child.getProperty("Location", noLocation));
+            }
+
+
+            for (String computer : clusterCfg.getChildrenNames()) {
+                Config child = clusterCfg.getChild(computer);
+                //Abandon
+                if (child.getIntVal("Level", 0) <= 0) {
+                    continue;
+                }
+                if (!computer.equalsIgnoreCase(getHostName())) {
+                    String ipString = "";
+                    if (isSameLocation(child.getProperty("Location",noLocation))) {
+                        ipString += child.getProperty("IP", "");
+//                        ipString += ";" + child.getProperty("VPN", "");
+                    } else {
+                        ipString += child.getProperty("VPN", "");
+//                        ipString += ";" + child.getProperty("IP", "");
                     }
-                } else if (child.getIntVal("Level", 0) > 0) {
-                    ClusterClients.getInstance().registerClient(computer,
-                            child.getProperty("IP", "").split(";"), port);
+
+                    ClusterClients.getInstance().registerClient(computer, ipString.split(";"), port);
 
                     AppManager.logit("启动客户端 " + computer + " " + port);
 
@@ -232,11 +267,11 @@ public class Cluster {
                     remoteClients.add(remote);
                 }
             }
-        }
 
-        if (connectionListener == null) {
-            connectionListener = new ConnectionListener();
-            connectionListener.setCircleTime(10 * 1000);
+            if (connectionListener == null) {
+                connectionListener = new ConnectionListener();
+                connectionListener.setCircleTime(10 * 1000);
+            }
         }
     }
 
@@ -352,9 +387,9 @@ public class Cluster {
         return localLevel;
     }
 
-    public boolean isAutoStartTrade() {
-        return autoStartTrade;
-    }
+//    public boolean isAutoStartTrade() {
+//        return autoStartTrade;
+//    }
 
     public void setAutoStartTrade(boolean autoStartTrade) {
         this.autoStartTrade = autoStartTrade;
@@ -373,16 +408,9 @@ public class Cluster {
         return forceTakeover;
     }
 
-
-//    public static String getTradeProxyHost() {
-//        return getProxy();
-//    }
-
-//    public static boolean connectToProxy() {
-//        Config cfg = CfgProvider.getInstance("系统策略").getCfg("System");
-//        return !isProxy() && cfg.getBooleanVal("使用交易代理", false);
-//        return getProxy().length() > 0;
-//    }
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
 
 
     class ConnectionListener extends CircleTimer {
@@ -454,197 +482,9 @@ public class Cluster {
 
     //////////////////////////////////////////
     void checkStatus() {
-//        if (isOffLine()) return;
-//        if (forceTakeover) {
-//            statusMessage = "用户指定本站为集群主机";
-//            App.logit(statusMessage);
-//            localLevel = 11;
-//
-//            ClusterServer.getInstance().setLocalLevel(localLevel);
-//        } else if (!autoStartTrade) {
-//            statusMessage = "用户关闭集群节点";
-//            App.logit(statusMessage);
-//
-//            localLevel = -1 * definedLevel; //降级并知会本节点的原级别和健康不良
-//
-//            ClusterServer.getInstance().setLocalLevel(localLevel);
-//            turnOffTrade_OnRequest(null);
-////            if (isKeepConnectToBroker()) {
-////                turnOffTrade();
-////            }
-//            return;
-//        } else if (!StatusInspector.getInstance().checkRelate("集群节点", true)) {
-//            statusMessage = StatusInspector.getInstance().getErrorMsg() + ",关闭集群节点";
-//            App.logit(statusMessage);
-//
-//            localLevel = -1 * definedLevel;  //降级并知会本节点的原级别和健康不良
-//            ClusterServer.getInstance().setLocalLevel(localLevel);
-//
-//            if (isOnTrade()) {
-//                turnOffTrade_OnRequest(this);
-//            }
-//            return;
-//        } else {
-//            localLevel = definedLevel;
-//        }
-//
-//        ClusterServer.getInstance().setLocalLevel(localLevel);
-//
-//        int maxLevel = 0;
-//        boolean remoteIsOn = false;
-//        boolean takeOver = false;
-//        int onlineSiblings = 0;
-//        String gateHosts = null;
-//        int proxyLevel = 0;
-//
-//        synchronized (nodes) {
-//            for (ClusterProperty ss : nodes.values()) {
-//                if (ss.offline) {
-//                    continue;
-//                }
-//
-//                if (!isGroupMenber(ss.group)) { //ss.group > 0 &&
-//                    continue;
-//                }
-//
-//                //远程在交易中
-//                if (ss.onTrade) {
-//                    remoteIsOn = true;
-////                    if (ss.level > localLevel) { //远程级别高于本机且已打开交易,关闭本地交易
-////                        if (isKeepConnectToBroker()) {
-////                            turnOffTrade();
-////                            return;
-////                        }
-////                    } else {
-////                        //远程级别低于本机,本地已经打开交易, 关闭所有远程
-////                        if (isKeepConnectToBroker()) {
-////                            clusterServer.broadcast();
-////                            return;
-////                        }
-////                    }
-//                }
-//                //在线？
-//                if (ss.connected) {
-//                    onlineSiblings++;
-//                }
-//                //较高权限的节点健康不良
-//                if (Math.abs(ss.level) > localLevel && ss.level < 0) {
-//                    takeOver = true;
-//                }
-//                //求远程最大 level
-//                maxLevel = Math.max(maxLevel, ss.level);
-////                if (!"".equals(ss.tradeProxy)) {
-////                    if(proxyLevel < ss.level){
-////                        proxyLevel = ss.level;
-////                        gateHosts = ss.stationName.toUpperCase();
-////                    }
-////                }
-//            }
-//        }
-////        setTradeProxyHost(gateHosts);
-//
-//
-//        // 本站成集群中具有最高权限的节点
-//        // 接手进行交易
-//        if (maxLevel < localLevel)
-//
-//        {
-//            App.logit("本站为集群中具有最高权限" + localLevel + "的节点");
-//            //关闭其他站点
-//            if (remoteIsOn) {
-//                statusMessage = "正在请求关闭其他站点";
-//                App.logit(statusMessage);
-//                clusterServer.closeOtheNodes();
-//                checkRemote();
-//            } else {
-//                // 只有本机在线
-//                // 不能肯定高级别节点不在交易中(例如VPN网络故障)
-//                // 执行买入委托时减小每次交易量,以减少可能的重复买入
-//                // 低级别节点不参与早盘竞价
-//                if (localLevel < 5 && (!takeOver || onlineSiblings == 0)) { //
-//                    App.logit("localLevel < 9 && (!takeOver || onlineSiblings == 0)");
-//                    if (MyDate.IS_AFTER_TIME(9, 30, 0)) {
-//                        if (!isOnTrade()) {
-//                            App.logit("MyDate.IS_AFTER_TIME(9,29,30)");
-//
-//                            if (!cgfIsDirty) {
-//                                DialogManager.getInstance().openWindow("ClusterStation");
-//
-//                                App.logit("set cgfIsDirty");
-//                                App.sendMail("本机具有最高权限(疑似网络故障),启动底级别交易", null);
-//                                cgfIsDirty = true;
-//                                Config systemCfg = CfgProvider.getInstance("系统策略").getCfg("System");
-//                                systemCfg.setProperty("每笔委托金额上限", "500000");// 50 万
-//                                systemCfg.setProperty("挂单比例", "0.3");//
-//                                systemCfg.setProperty("集合竞价买入单笔上限", "1000000");// 100 万
-//                                systemCfg.setReloadProtect(true);
-//                                msg.sendMessage(MessageCode.ConfigChanged, systemCfg);
-//                            }
-//                            App.logit("cgfIsDirty=" + cgfIsDirty);
-//
-//                            this.turnOnTrade_ThisNode(this);
-//                        }
-//                    } else {
-//                        statusMessage = "低级别节点不参与早盘竞价,9:30 后开盘";
-//                        App.logit(statusMessage);
-//
-//                    }
-//                } else if (!isOnTrade()) {
-//                    //如果确认集群通信良好，远程站点都没在交易中,而本机具有最高权限,启动交易
-//                    App.logit("本机具有最高权限,启动交易");
-//                    App.sendMail("本机具有最高权限,启动交易", null);
-//                    DialogManager.getInstance().openWindow("ClusterStation");
-//
-//
-//                    if (cgfIsDirty) {
-//                        App.logit("cgfIsDirty");
-//                        Config systemCfg = CfgProvider.getInstance("系统策略").getCfg("System");
-//                        systemCfg.setReloadProtect(false);
-//                        systemCfg.reLoad();
-//                        msg.sendMessage(MessageCode.ConfigChanged, systemCfg);
-//                        cgfIsDirty = false;
-//                    }
-//                    App.logit("cgfIsDirty=" + cgfIsDirty);
-//
-//                    App.logit("turnOnTrade()");
-//                    turnOnTrade_ThisNode(this);
-//                } else {
-//                    statusMessage = "本站设为备用";
-//                }
-//            }
-//        } else{
-//            statusMessage = "本站设为备用";
-//        }
     }
 
-    /**
-     * 本站权衡集群状态后，接管主站权
-     *
-     * @param
-     */
-//    public void turnOnTrade_ThisNode(Object caller) {
-//        if (initMarketDataServer == null) {
-//            initMarketDataServer = App.getCfg().getProperty("行情服务器", "招商证券");
-//        }
-//        OrderConfigListView.getInstance().startAllTrade(caller, true);
-//        reportStatus();
-//
-//    }
-//
-//    /**
-//     * 远端要求关闭
-//     *
-//     * @param caller From BusinessRuse
-//     */
-//    public void turnOffTrade_OnRequest(Object caller) {
-//        // 一旦远程请求关闭本地,本地需核实远程都已经关闭方可再次打开
-//        connectionListener.resetCheckCount();
-//        OrderConfigListView.getInstance().startAllTrade(caller, false);
-//        reportStatus();
-//    }
-//
     public boolean isOnTrade() {
-        //return OrderConfigListView.isOnTrade();
         return false;
     }
 
@@ -654,23 +494,6 @@ public class Cluster {
      * @param data
      */
     public void handDown(NettyExchangeData data) {
-//        if (data != null) return; //TODO 合规限制 暂停此类交易 Order and Cancel
-//
-//        NettyRequystor node = getNextNode();
-//        if (node != null) {
-//            if (ClusterClients.getInstance().tell(node.getStationName(), data) < 0) {
-//                String msg = "[HANDDOWN](" + data.getMessage() + ") " +
-//                        "委托下级工作站(" + node.getStationName() + ")失败, " +
-//                        "链式委托终止于(1): " + getHostName() + "\n" + data.toString();
-//                BusinessRuse.getInstance().broadcastInformation(msg);
-//                App.logit(msg);
-//            }
-//        } else {
-//            String msg = "[HANDDOWN](" + data.getMessage() + ") " +
-//                    "没有下级工作站,链式委托终止于: " + getHostName() + "\n" + data.toString();
-//            BusinessRuse.getInstance().broadcastInformation(msg);
-//            App.logit(msg);
-//        }
     }
 
     void reportStatus() {
@@ -696,9 +519,6 @@ public class Cluster {
     }
 
     public String getStatusMessage() {
-//        if (isOnTrade()) {
-//            return ">:本站为主交易站";
-//        }
         return ">:" + statusMessage;
     }
 
@@ -735,6 +555,39 @@ public class Cluster {
      */
     public void leavTradeServer() {
 
+    }
+
+    boolean isSameLocation(String location){
+        return !location.equals(noLocation) && location.equals(localName);
+    }
+
+    void reStart(Config clusterCfg) {
+        this.clusterCfg = clusterCfg;
+        if (clusterCfg.getChildrenNames() == null) return;
+
+        int port = clusterCfg.getIntVal("ControlCenter", defaultPort);
+
+        AppManager.logit("重启集群监测, Timer=" + clusterCfg.getIntVal("Timer", 10 * 1000));
+
+        for (String computer : clusterCfg.getChildrenNames()) {
+            Config child = clusterCfg.getChild(computer);
+            if (child.getIntVal("Level", 0) <= 0) {
+                continue;
+            }
+
+            if (!computer.equalsIgnoreCase(getHostName())) {
+                String ipString;
+                if (isSameLocation(child.getProperty("Location",noLocation))) {
+                    ipString = child.getProperty("IP", "");
+                } else {
+                    ipString = child.getProperty("VPN", "");
+                }
+
+                ClusterClients.getInstance().registerClient(computer, ipString.split(";"), port);
+
+                AppManager.logit("启动客户端 " + computer + " " + port);
+            }
+        }
     }
 }
 
