@@ -4,7 +4,6 @@ package szhzz.Netty.Cluster.ExchangeDataType;
 import szhzz.App.AppManager;
 import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.Cluster;
-import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.HardwareIDs;
 import szhzz.Utils.Internet;
@@ -104,7 +103,7 @@ public class StationPropertyWrap {
         eData.addData((AppManager.getApp().isDebug() ? 1 : 0));         // Col = 5
         eData.addData(Cluster.getInstance().isOffLine());      // Col = 6
         eData.addData(HardwareIDs.getMACAddress());            // Col = 7
-        eData.addData(Internet.getIp());            // Col = 8
+        eData.addData(Internet.getPublicIp());            // Col = 8
         eData.addData(Internet.getVpnIp(vpnInterfaceName));            // Col = 9
 //      eData.addData(Cluster.getTradeProxyHost());    // Col = 8  isProxy()
 

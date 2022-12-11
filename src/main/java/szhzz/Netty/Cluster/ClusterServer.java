@@ -101,7 +101,7 @@ public class ClusterServer {
         if (data.isByPass() && StationPropertyWrap.isRouterDebug(data)) {
             logger.info("标志 4 ID=" + data.getRequestID() + " " +
                     AppManager.getHostName() + "@" +
-                    Internet.getIp() + "->" +
+                    Internet.getPublicIp() + "->" +
                     data.getHostName() + "@" + data.getIpAddress());
 
             StationPropertyWrap.addRouter(data,"4. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".answer" );

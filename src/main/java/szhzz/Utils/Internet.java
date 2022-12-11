@@ -23,6 +23,7 @@ public class Internet {
     private static String vpnName = null;
     private static final String rexp = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
     private static final Pattern pat = Pattern.compile(rexp);
+    private static String mainIP = "127.0.0.1";
 
     public static void main(String[] args) {
 //        getIp();
@@ -36,16 +37,16 @@ public class Internet {
      * This method is used to get all ip addresses from the network interfaces.
      * network interfaces: eth0, wlan0, l0, vmnet1, vmnet8
      */
-    public static String getIp() {
+    public static String getPublicIp() {
 
         if (!publicIp.equals("")) //||
             return publicIp;
 
-        publicIp = getIp2();
+        publicIp = getPublicIp2();
         return publicIp;
     }
 
-    public static String getIp2() {
+    public static String getPublicIp2() {
         String ip = "";
         String chinaz = "https://ip.chinaz.com/";
         StringBuilder inputLine = new StringBuilder();
@@ -87,12 +88,12 @@ public class Internet {
     }
 
     public static String getVpnIp() {
-        if(vpnName == null) {
+        if (vpnName == null) {
             Config cfg = AppManager.getApp().getCfg();
             if (cfg == null) return null;
             vpnName = cfg.getProperty("VpnName", "OrayBoxVPN Virtual Ethernet Adapter");
         }
-        return getVpnIp(vpnName) ;
+        return getVpnIp(vpnName);
     }
 
     public static String getVpnIp(String VpnName) {
@@ -108,9 +109,9 @@ public class Internet {
                 if (VpnName.equals(name)) {
                     addresses = networkinterface.getInetAddresses();
                     while (addresses.hasMoreElements()) {
-                        if(vpnIP == null) {
+                        if (vpnIP == null) {
                             vpnIP = addresses.nextElement().getHostAddress();
-                        }else{
+                        } else {
                             vpnIP += ";" + addresses.nextElement().getHostAddress();
                         }
                     }
@@ -125,8 +126,36 @@ public class Internet {
     }
 
     public static boolean isIpAddress(String ip) {
-        if(ip == null || ip.length() == 0) return false;
+        if (ip == null || ip.length() == 0) return false;
         return pat.matcher(ip).matches();
     }
 
+    public static boolean setMainIp(String IP) {
+        if (isIpAddress(IP)) {
+            Enumeration<NetworkInterface> en = null;
+            Enumeration<InetAddress> addresses;
+            try {
+                en = NetworkInterface.getNetworkInterfaces();
+                while (en.hasMoreElements()) {
+                    NetworkInterface networkinterface = en.nextElement();
+//                    String name = networkinterface.getDisplayName();
+                        addresses = networkinterface.getInetAddresses();
+                        while (addresses.hasMoreElements()) {
+                            String debug = addresses.nextElement().getHostAddress();
+                            if (IP.equals(debug)) {
+                                mainIP = IP;
+                                return true;
+                            }
+                        }
+                }
+            } catch (SocketException e) {
+                logger.error(e);
+            }
+        }
+        return false;
+    }
+
+    public static String getMainIp() {
+        return mainIP;
+    }
 }

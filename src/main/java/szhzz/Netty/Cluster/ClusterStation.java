@@ -11,7 +11,6 @@ import szhzz.App.AppManager;
 import szhzz.Calendar.MyDate;
 import szhzz.Config.CfgProvider;
 import szhzz.Config.Config;
-import szhzz.StatusInspect.StatusInspector;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.CaptureScreen;
 import szhzz.Utils.DawLogger;
@@ -326,7 +325,7 @@ public class ClusterStation extends JDialog {
         ds.setValueAt(Cluster.getInstance().isOffLine(), row, "离线");
         ds.setValueAt(AppManager.getApp().canRemoteShutdown(), row, "远程关机");
         ds.setValueAt(BusinessRuse.getInstance().getErrorCode(), row, "错误");
-        ds.setValueAt(Internet.getIp(), row, "InterNet");
+        ds.setValueAt(Internet.getPublicIp(), row, "InterNet");
 
         ds.setValueAt(MyDate.getToday().getDateTime(), row, "最近更新");
 

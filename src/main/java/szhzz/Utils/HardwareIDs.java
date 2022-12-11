@@ -79,11 +79,15 @@ public class HardwareIDs {
 
 
     public static String getIP(String signature) {
+        String address = null;
+        BufferedReader br = null;
+
+        address = Internet.getMainIp();
+        if(!address.equals("127.0.0.1")) return address;
+
         if (signature == null) {
             return HardwareIDs.getIP();
         }
-        String address = null;
-        BufferedReader br = null;
         try {
             Process p = Runtime.getRuntime().exec("ipconfig /all");
             br = new BufferedReader(new InputStreamReader(p.getInputStream(), "GB2312"));//
