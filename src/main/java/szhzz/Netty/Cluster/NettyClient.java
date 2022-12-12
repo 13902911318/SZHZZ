@@ -35,6 +35,7 @@ public class NettyClient {
     private static long requID = 0l;
     private final Object locker = new Object();
     private LinkedList<String> hosts = new LinkedList<>();
+    private LinkedList<String> IPs = null;
     private int hostIndex = 0;
 //    protected int port;
     private Channel channel = null;
@@ -87,6 +88,7 @@ public class NettyClient {
 
     public void setHosts(String[] hosts) {
         this.hosts.clear();
+        IPs = null;
         addHost(hosts);
     }
 
@@ -100,6 +102,7 @@ public class NettyClient {
         Collections.addAll(this.hosts, host);
         hostIndex = 0;
         retry = this.hosts.size();
+        IPs = null;
     }
 
     public void connected() {
@@ -145,6 +148,16 @@ public class NettyClient {
     String getIp(){
         String address = hosts.get(hostIndex);
         return address.substring(0, address.indexOf(":"));
+    }
+
+    LinkedList<String> getIps(){
+        if(IPs == null){
+            IPs = new LinkedList<>();
+            for(String address : hosts){
+                IPs.add(address.substring(0, address.indexOf(":")));
+            }
+        }
+        return IPs;
     }
 
     int getPort(){
