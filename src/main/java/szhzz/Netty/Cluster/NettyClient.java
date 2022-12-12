@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static szhzz.Netty.Cluster.ExchangeDataType.ClusterProtocal.isCluster;
+
 /**
  * Created by HuangFang on 2015/3/15.
  * 9:24
@@ -250,17 +252,40 @@ public class NettyClient {
      * @param msg
      * @return requID 回执号!
      */
-    public long send(NettyExchangeData msg) {
+    public long send_old(NettyExchangeData msg) {
         if (!isConnected()) {
             //尝试经由服务器端发送
-            msg.setByPass();
-            msg.setRequestID(++requID);
-            if(StationPropertyWrap.isRouterDebug(msg)) {
+//            msg.setByPass();
+//            return ServerHandler.bypassSendTo(msg, host);
+            logger.debug("连接已断开");
+            return -1;
+        }
+        if (!channel.isWritable()) {
+            logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
+            return -1;
+        }
+//        NettyExchangeData d = ((NettyExchangeData) msg);
+        synchronized (locker) {
+//            d.setRequestID(++requID);
+            channel.writeAndFlush(msg.encode());
+//            return requID;
+            return 1;
+        }
+    }
+
+    public long send(NettyExchangeData msg) {
+        if (!isConnected() ) {
+            //尝试经由服务器端发送
+            if(isCluster(msg)) {
+                msg.setByPass();
+//                msg.setRequestID(++requID);
+                if (StationPropertyWrap.isRouterDebug(msg)) {
 //            logger.info("标志 1 ID=" + msg.getRequestID() + " " +
 //                    AppManager.getHostName() + "->" + msg.getIpAddress());
-                StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
+                    StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
+                }
+                return ServerHandler.bypassSendTo(msg, host);
             }
-            return ServerHandler.bypassSendTo(msg, host);
 //            logger.debug("连接已断开");
 //            return -1;
         }
@@ -271,7 +296,7 @@ public class NettyClient {
 //        NettyExchangeData d = ((NettyExchangeData) msg);
         synchronized (locker) {
 //            d.setRequestID(++requID);
-            msg.setRequestID(++requID);
+//            msg.setRequestID(++requID);
             channel.writeAndFlush(msg.encode());
 //            return requID;
             return 1;
