@@ -51,7 +51,7 @@ public class Cluster {
     Config clusterCfg = null;
     static String macID = null;
     boolean definedGate = false;
-//    static String proxy = "";
+    //    static String proxy = "";
     static Boolean routerDebug = null;
 
     HashMap<String, String> location = new HashMap<>();
@@ -59,16 +59,17 @@ public class Cluster {
     static final String noLocation = "No defined";
     private String clusterName = "Cluster";
 
-    public static boolean isRouterDebug(){
-        if(routerDebug == null){
-            if(AppManager.getApp().getCfg() != null) {
+    public static boolean isRouterDebug() {
+        if (routerDebug == null) {
+            if (AppManager.getApp().getCfg() != null) {
                 routerDebug = AppManager.getApp().getCfg().getBooleanVal("RouterDebug", false);
-            }else{
+            } else {
                 routerDebug = false;
             }
         }
         return routerDebug;
     }
+
     static AppManager App = AppManager.getApp(); //Error!
     boolean forceTakeover = false;
     int localLevel = 0;
@@ -178,6 +179,7 @@ public class Cluster {
 //    }
 
     public static Config getConfig() {
+        if(onlyOne!=null && onlyOne.clusterCfg != null) return onlyOne.clusterCfg;
         return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
@@ -193,11 +195,10 @@ public class Cluster {
 //    }
 
     /**
-     *
      * @param clusterCfg
      */
     public void startup(Config clusterCfg) {
-        if(connectionListener != null){
+        if (connectionListener != null) {
             reStart(clusterCfg);
             return;
         }
@@ -224,7 +225,7 @@ public class Cluster {
                 if (computer.equalsIgnoreCase(getHostName())) {
                     localName = child.getProperty("Location", noLocation);
                     String mainIP = child.getProperty("IP", "").split(";")[0];
-                    if(!Internet.setMainIp(mainIP)){
+                    if (!Internet.setMainIp(mainIP)) {
                         AppManager.MessageBox("请在 Group.ini 中设置正确的本机 IP", 15);
                     }
                     int localLevel = child.getIntVal("Level", 0);
@@ -237,7 +238,7 @@ public class Cluster {
                     clusterServer.startServer();
                     break;
                 }
-                location.put(child.getProperty("IP", ""),child.getProperty("Location", noLocation));
+                location.put(child.getProperty("IP", ""), child.getProperty("Location", noLocation));
             }
 
 
@@ -249,7 +250,7 @@ public class Cluster {
                 }
                 if (!computer.equalsIgnoreCase(getHostName())) {
                     String ipString = "";
-                    if (isSameLocation(child.getProperty("Location",noLocation))) {
+                    if (isSameLocation(child.getProperty("Location", noLocation))) {
                         ipString += child.getProperty("IP", "");
 //                        ipString += ";" + child.getProperty("VPN", "");
                     } else {
@@ -304,11 +305,11 @@ public class Cluster {
         String stationName = data.getHostName(); //serverName
         stationName = stationName.toUpperCase();
         ClusterProperty ss = null;
-        if(data.isByPass() && StationPropertyWrap.isRouterDebug(data)){
+        if (data.isByPass() && StationPropertyWrap.isRouterDebug(data)) {
 //                logger.info("标志 8 (dataChanged) ID=" + data.getRequestID() + " " +
 //                        data.getIpAddress() + "<-" + stationName);
-                StationPropertyWrap.addRouter(data, "(8) " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".dataChanged");
-                logger.info("Router:" + StationPropertyWrap.getRouter(data));
+            StationPropertyWrap.addRouter(data, "(8) " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".dataChanged");
+            logger.info("Router:" + StationPropertyWrap.getRouter(data));
         }
         synchronized (nodes) {
             ss = nodes.get(stationName);
@@ -546,7 +547,7 @@ public class Cluster {
     /**
      * 用于StockWind
      */
-    public void joinToTradeServer(){
+    public void joinToTradeServer() {
 
     }
 
@@ -557,7 +558,7 @@ public class Cluster {
 
     }
 
-    boolean isSameLocation(String location){
+    boolean isSameLocation(String location) {
         return !location.equals(noLocation) && location.equals(localName);
     }
 
@@ -577,7 +578,7 @@ public class Cluster {
 
             if (!computer.equalsIgnoreCase(getHostName())) {
                 String ipString;
-                if (isSameLocation(child.getProperty("Location",noLocation))) {
+                if (isSameLocation(child.getProperty("Location", noLocation))) {
                     ipString = child.getProperty("IP", "");
                 } else {
                     ipString = child.getProperty("VPN", "");
@@ -588,6 +589,23 @@ public class Cluster {
                 AppManager.logit("启动客户端 " + computer + " " + port);
             }
         }
+    }
+
+
+    public Config getChildCfg(String computerName) {
+        return getConfig().getChild(computerName);
+    }
+
+    public String NatIp(String computerName, String ip) {
+        if (isSameLocation(computerName)) return ip;
+        Config cfg = getChildCfg(computerName);
+        return cfg.getProperty("Public-IP", ip);
+    }
+
+    public int NatPort(String computerName, int port) {
+        if (isSameLocation(computerName)) return port;
+        Config cfg = getChildCfg(computerName);
+        return cfg.getIntVal(String.valueOf(port), port);
     }
 }
 
