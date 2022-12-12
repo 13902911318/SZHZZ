@@ -312,6 +312,7 @@ public class NettyClient {
                 int debug = ServerHandler.bypassSendTo(msg, hosts);
                 return 1; // 如果对方未开机，不是错误
             }
+            logger.info(new Exception("发送数据失败，[未连接]\n" + msg.toString()));
         }
         if (channel == null) {
             logger.info(new Exception("发送数据失败，[连接已断开]\n" + msg.toString()));
