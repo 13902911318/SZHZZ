@@ -32,7 +32,7 @@ public class ClusterServer {
     private NettyServer server = null;
 
     private String serverName = null;
-    private int localLevel = 0;
+//    private int localLevel = 0;
     private String inetHost = null;
     private ServerInitializer serverInitializer = null;
 
@@ -50,13 +50,13 @@ public class ClusterServer {
         App.setLog4J();
     }
 
-    public int getLocalLevel() {
-        return localLevel;
-    }
+//    public int getLocalLevel() {
+//        return localLevel;
+//    }
 
-    public void setLocalLevel(int localLevel) {
-        this.localLevel = localLevel;
-    }
+//    public void setLocalLevel(int localLevel) {
+//        this.localLevel = localLevel;
+//    }
 
     public String getServerName() {
         return serverName;

@@ -315,7 +315,7 @@ public class ClusterStation extends JDialog {
             row = ds.appendRow();
             ds.setValueAt(stationName_, row, "名称");
         }
-        ds.setValueAt(AppManager.getApp().getIP(null), row, "IP");
+        ds.setValueAt(Cluster.getInstance().getServerIP() + ":" + Cluster.getInstance().getServerPort(), row, "IP");
         ds.setValueAt(Cluster.getInstance().getLocalLevel(), row, "级别");
         ds.setValueAt(true, row, "已连接");
         ds.setValueAt(BusinessRuse.getInstance().getCloseDate(), row, "收盘日期");

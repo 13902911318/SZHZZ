@@ -211,21 +211,21 @@ public class ClusterClients {
 
 
 
-    public NettyClient registerClient(String computerName, String[] address, int port) {
+    public NettyClient registerClient(String computerName, String[] address) {
         NettyClient client = clients.get(computerName);
         if (client == null) {
             try {
-                client = new NettyClient(address, port);
+                client = new NettyClient(address);
                 client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
                 clients.put(computerName, client);
-                App.logit(computerName + " " + client.getHost() + " to be connect");
+                App.logit(computerName + " " + client.getHosts() + " to be connect");
             } catch (Exception e) {
                 logger.error(e);
             }
         }else{
             client.disconnectFromServer();
-            client.setHost(address, port);
+            client.setHosts(address);
         }
         client.start();
         return client;
@@ -235,7 +235,7 @@ public class ClusterClients {
         NettyClient client = clients.remove(computerName);
         if (client != null) {
             try {
-                App.logit(computerName + "  " + client.getHost() + " disconnect!");
+                App.logit(computerName + "  " + client.getHosts() + " disconnect!");
                 client.disconnectFromServer();
             } catch (Exception e) {
                 logger.error(e);
@@ -249,7 +249,7 @@ public class ClusterClients {
             NettyClient client = clients.get(computerName);
             if (client != null) {
                 try {
-                    App.logit(computerName + "  " + client.getHost() + " disconnect!");
+                    App.logit(computerName + "  " + client.getHosts() + " disconnect!");
                     client.disconnectFromServer();
                 } catch (Exception e) {
                     logger.error(e);
