@@ -276,7 +276,7 @@ public class NettyClient {
     public long send(NettyExchangeData msg) {
         if (!isConnected() ) {
             //尝试经由服务器端发送
-            if(isCluster(msg)) {
+            if(isCluster(msg.getEvent())) {
                 msg.setByPass();
 //                msg.setRequestID(++requID);
                 if (StationPropertyWrap.isRouterDebug(msg)) {
