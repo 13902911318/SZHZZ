@@ -260,7 +260,7 @@ public class NettyClient {
             logger.debug("连接已断开");
             return -1;
         }
-        if (!channel.isWritable()) {
+        if (channel == null || !channel.isWritable()) {
             logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
             return -1;
         }
