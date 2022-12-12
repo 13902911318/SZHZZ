@@ -230,7 +230,7 @@ public class NettyClient {
     }
 
     public boolean isConnected() {
-        return connected ;
+        return connected;
     }
 
     public void sayBye() {
@@ -274,9 +274,9 @@ public class NettyClient {
     }
 
     public long send(NettyExchangeData msg) {
-        if (!isConnected() && isCluster(msg)) {
+        if (!isConnected() ) {
             //尝试经由服务器端发送
-
+            if(isCluster(msg)) {
                 msg.setByPass();
 //                msg.setRequestID(++requID);
                 if (StationPropertyWrap.isRouterDebug(msg)) {
@@ -284,12 +284,14 @@ public class NettyClient {
 //                    AppManager.getHostName() + "->" + msg.getIpAddress());
                     StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
                 }
-                return ServerHandler.bypassSendTo(msg, host);
+                int debug = ServerHandler.bypassSendTo(msg, host);
+                return 1; // 如果对方未开机，不是错误
+            }
         }
         if (channel == null) {
             logger.info(new Exception("发送数据失败，[连接已断开]\n" + msg.toString()));
             return -1;
-        }else if (!channel.isWritable()) {
+        } else if (!channel.isWritable()) {
             logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
             return -1;
         }
@@ -359,7 +361,7 @@ public class NettyClient {
     }
 
     public void setHostIndex(int hostIndex) {
-        if(hostIndex >= host.size())hostIndex = 0;
+        if (hostIndex >= host.size()) hostIndex = 0;
         this.hostIndex = hostIndex;
     }
 }
