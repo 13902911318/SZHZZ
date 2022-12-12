@@ -24,7 +24,7 @@ public class StationPropertyWrap {
         NettyExchangeData queryLevel = new NettyExchangeData();
 
         queryLevel.setErrorCode(0);
-        queryLevel.setEvenType(ClusterProtocal.EVENT.Broadcast.ordinal());
+        queryLevel.setEvenType(ClusterProtocal.EVENT.Cluster.ordinal());
         queryLevel.setRequestID(0);
         queryLevel.setMessage("QueryServerLevel");
         queryLevel.setNettyType(ClusterProtocal.FUNCTION.QueryServerLevel);

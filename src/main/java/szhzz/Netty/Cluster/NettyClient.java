@@ -17,6 +17,7 @@ import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
 import szhzz.Utils.NU;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +38,7 @@ public class NettyClient {
     private LinkedList<String> hosts = new LinkedList<>();
     private LinkedList<String> IPs = null;
     private int hostIndex = 0;
-//    protected int port;
+    //    protected int port;
     private Channel channel = null;
     private EventLoopGroup group = null;
     private ChannelInitializer clientInitializer = null;
@@ -78,13 +79,18 @@ public class NettyClient {
         setHosts(host);
     }
 
+    public NettyClient(String[] host, int port) {
+        ArrayList<String> add = new ArrayList<>();
+        for (String h : host) {
+            add.add(h + ":" + port);
+        }
+        setHosts((String[]) add.toArray());
+    }
+
     public LinkedList<String> getHosts() {
         return hosts;
     }
 
-//    public int getPort() {
-//        return port;
-//    }
 
     public void setHosts(String[] hosts) {
         this.hosts.clear();
@@ -92,6 +98,13 @@ public class NettyClient {
         addHost(hosts);
     }
 
+    public void setHosts(String[] host, int port) {
+        ArrayList<String> add = new ArrayList<>();
+        for (String h : host) {
+            add.add(h + ":" + port);
+        }
+        setHosts((String[]) add.toArray());
+    }
 
 //    public void setHost(String[] host, int port, int hostIndex) {
 //        setHost(host, port);
@@ -145,25 +158,26 @@ public class NettyClient {
         }
     }
 
-    String getIp(){
+    public String getIp() {
         String address = hosts.get(hostIndex);
         return address.substring(0, address.indexOf(":"));
     }
 
-    LinkedList<String> getIps(){
-        if(IPs == null){
+    public int getPort() {
+        String address = hosts.get(hostIndex);
+        return NU.parseInt(address.substring(address.indexOf(":") + 1), -1);
+    }
+
+    LinkedList<String> getIps() {
+        if (IPs == null) {
             IPs = new LinkedList<>();
-            for(String address : hosts){
+            for (String address : hosts) {
                 IPs.add(address.substring(0, address.indexOf(":")));
             }
         }
         return IPs;
     }
 
-    int getPort(){
-        String address = hosts.get(hostIndex);
-        return NU.parseInt(address.substring(address.indexOf(":")+1), -1);
-    }
 
     protected void connectNio() {
         if (!lockOrSkip.compareAndSet(false, true)) return;
@@ -285,7 +299,7 @@ public class NettyClient {
             logger.debug("连接已断开");
             return -1;
         }
-        if (!channel.isWritable()) {
+        if (channel == null || !channel.isWritable()) {
             logger.info(new Exception("发送数据失败，[" + channel.remoteAddress() + "]\n" + msg.toString()));
             return -1;
         }
@@ -299,9 +313,9 @@ public class NettyClient {
     }
 
     public long send(NettyExchangeData msg) {
-        if (!isConnected() ) {
+        if (!isConnected()) {
             //尝试经由服务器端发送
-            if(isCluster(msg.getEvent())) {
+            if (isCluster(msg.getEvent())) {
                 msg.setByPass();
 //                msg.setRequestID(++requID);
                 if (StationPropertyWrap.isRouterDebug(msg)) {
@@ -309,7 +323,7 @@ public class NettyClient {
 //                    AppManager.getHostName() + "->" + msg.getIpAddress());
                     StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
                 }
-                int debug = ServerHandler.bypassSendTo(msg, hosts);
+                int debug = ServerHandler.bypassSendTo(msg, getIps());
                 return 1; // 如果对方未开机，不是错误
             }
             logger.info(new Exception("发送数据失败，[未连接]\n" + msg.toString()));

@@ -62,19 +62,16 @@ public class ClusterProtocal {
         MarketProxy;
     }
 
-    public static boolean isBroadcast(Object event) {
-        if (NU.parseInt(event, -1) < 0) return false;
-        return EVENT.values()[NU.parseInt(event, 0)] == Broadcast;
+    public static boolean isBroadcast(EVENT event) {
+        return event == Broadcast;
     }
 
-    public static boolean isCluster(Object event) {
-        if (NU.parseInt(event, -1) < 0) return false;
-        return EVENT.values()[NU.parseInt(event, -1)] == EVENT.Cluster;
+    public static boolean isCluster(EVENT event) {
+        return event == EVENT.Cluster;
     }
 
-    public static boolean isTradeProxy(Object event) {
-        if (NU.parseInt(event, -1) < 0) return false;
-        return EVENT.values()[NU.parseInt(event, -1)] == EVENT.TradeProxy;
+    public static boolean isTradeProxy(EVENT event) {
+        return event == EVENT.TradeProxy;
     }
 
     public static EVENT getEvent(Object event) {
