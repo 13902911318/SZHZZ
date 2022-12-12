@@ -110,6 +110,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         if (!Cluster.getInstance().isOffLine()) {
             for (Channel channel : channels) {
                 for (String address : host) {
+                    String debug = channel.remoteAddress().toString();
                     if (channel.remoteAddress().toString().contains(address)) {
                         if (channel.isWritable()) {
                             return channel;

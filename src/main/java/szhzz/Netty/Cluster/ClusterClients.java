@@ -138,7 +138,7 @@ public class ClusterClients {
 
     public boolean hasByPassChannel(String address) {
         NettyClient client = clients.get(address);
-        return client != null && ServerHandler.hasByPassChannal(client.getHosts());
+        return client != null && ServerHandler.hasByPassChannal(client.getIps());
     }
 
     public boolean isConnect(String address) {
@@ -219,7 +219,7 @@ public class ClusterClients {
                 client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
                 clients.put(computerName, client);
-                App.logit(computerName + " " + client.getHosts() + " to be connect");
+                App.logit(computerName + " " + client.getHost() + " to be connect");
             } catch (Exception e) {
                 logger.error(e);
             }
@@ -235,7 +235,7 @@ public class ClusterClients {
         NettyClient client = clients.remove(computerName);
         if (client != null) {
             try {
-                App.logit(computerName + "  " + client.getHosts() + " disconnect!");
+                App.logit(computerName + "  " + client.getHost() + " disconnect!");
                 client.disconnectFromServer();
             } catch (Exception e) {
                 logger.error(e);
@@ -249,7 +249,7 @@ public class ClusterClients {
             NettyClient client = clients.get(computerName);
             if (client != null) {
                 try {
-                    App.logit(computerName + "  " + client.getHosts() + " disconnect!");
+                    App.logit(computerName + "  " + client.getHost() + " disconnect!");
                     client.disconnectFromServer();
                 } catch (Exception e) {
                     logger.error(e);
