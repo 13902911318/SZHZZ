@@ -16,7 +16,6 @@ import szhzz.Utils.HardwareIDs;
 import szhzz.Utils.Internet;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Vector;
 
 
@@ -44,8 +43,8 @@ public class Cluster {
 
     String initMarketDataServer = null;
 
-    int defaultPort = 7521;
-    int group = 0;
+    private int serverPort = 7521;
+    private int group = 0;
     boolean offLine = false;
 
     Config clusterCfg = null;
@@ -58,7 +57,7 @@ public class Cluster {
     String localName = "";
     static final String noLocation = "No defined";
     private String clusterName = "Cluster";
-
+    private String serverIP;
     public static boolean isRouterDebug() {
         if (routerDebug == null) {
             if (AppManager.getApp().getCfg() != null) {
@@ -72,7 +71,7 @@ public class Cluster {
 
     static AppManager App = AppManager.getApp(); //Error!
     boolean forceTakeover = false;
-    int localLevel = 0;
+    private int localLevel = 0;
     boolean autoStartTrade = true;
     final HashMap<String, ClusterProperty> nodes = new HashMap<>();
     boolean cgfIsDirty = false;
@@ -206,7 +205,7 @@ public class Cluster {
         if (clusterCfg != null && clusterServer == null) {
             this.clusterCfg = clusterCfg;
 
-            int port = clusterCfg.getIntVal(clusterName, defaultPort);
+            serverPort = clusterCfg.getIntVal(clusterName, serverPort);
             ClusterClients.getInstance().setTimer(clusterCfg.getIntVal("Timer", 10 * 1000));
             ClusterClients.getInstance().setConnectionTimeout(clusterCfg.getIntVal("ConnectionTimeout", 10 * 1000));
 
@@ -224,17 +223,17 @@ public class Cluster {
 
                 if (computer.equalsIgnoreCase(getHostName())) {
                     localName = child.getProperty("Location", noLocation);
-                    String mainIP = child.getProperty("IP", "").split(";")[0];
-                    if (!Internet.setMainIp(mainIP)) {
+                    serverIP = child.getProperty("IP", "").split(";")[0];
+                    if (!Internet.setMainIp(serverIP)) {
                         AppManager.MessageBox("请在 Group.ini 中设置正确的本机 IP", 15);
                     }
-                    int localLevel = child.getIntVal("Level", 0);
-                    group = child.getIntVal("Group", 0);
+                    setLocalLevel(child.getIntVal("Level", 0));
+                    setGroup(child.getIntVal("Group", 0));
 
                     clusterServer = ClusterServer.getInstance();
                     clusterServer.setServerName(computer);
-                    clusterServer.setPort(port); //ips[0],
-                    clusterServer.setLocalLevel(localLevel);
+                    clusterServer.setPort(serverIP, serverPort); //ips[0],
+//                    clusterServer.setLocalLevel(getLocalLevel());
                     clusterServer.startServer();
                     break;
                 }
@@ -248,19 +247,25 @@ public class Cluster {
                 if (child.getIntVal("Level", 0) <= 0) {
                     continue;
                 }
+                String address = "";
                 if (!computer.equalsIgnoreCase(getHostName())) {
                     String ipString = "";
                     if (isSameLocation(child.getProperty("Location", noLocation))) {
-                        ipString += child.getProperty("IP", "");
+                        address = child.getProperty("IP", "") + ":" + serverPort;
 //                        ipString += ";" + child.getProperty("VPN", "");
                     } else {
-                        ipString += child.getProperty("VPN", "");
+                        ipString = NatIp(computer, child.getProperty("IP", ""));
+                        address = ipString + ":" + NatPort(computer, serverPort);
+                        ipString = child.getProperty("VPN");
+                        if(ipString != null){
+                            address += ";"+ ipString + ":" + serverPort;
+                        }
 //                        ipString += ";" + child.getProperty("IP", "");
                     }
 
-                    ClusterClients.getInstance().registerClient(computer, ipString.split(";"), port);
+                    ClusterClients.getInstance().registerClient(computer, address.split(";"));
 
-                    AppManager.logit("启动客户端 " + computer + " " + port);
+                    AppManager.logit("启动客户端 " + computer );
 
                     NettyRequystor remote = new NettyRequystor(computer);
                     remote.setReader(BusinessRuse.getInstance(), 5);
@@ -412,6 +417,24 @@ public class Cluster {
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
     }
+
+    public void setLocalLevel(int localLevel) {
+        this.localLevel = localLevel;
+    }
+
+    public void setGroup(int group) {
+        this.group = group;
+    }
+
+    public String getServerIP() {
+        return serverIP;
+    }
+
+
+    public int getServerPort() {
+        return serverPort;
+    }
+
 
 
     class ConnectionListener extends CircleTimer {
@@ -566,7 +589,7 @@ public class Cluster {
         this.clusterCfg = clusterCfg;
         if (clusterCfg.getChildrenNames() == null) return;
 
-        int port = clusterCfg.getIntVal("ControlCenter", defaultPort);
+        int port = clusterCfg.getIntVal("ControlCenter", serverPort);
 
         AppManager.logit("重启集群监测, Timer=" + clusterCfg.getIntVal("Timer", 10 * 1000));
 
@@ -577,15 +600,20 @@ public class Cluster {
             }
 
             if (!computer.equalsIgnoreCase(getHostName())) {
-                String ipString;
+                String address;
+                String ipString = "";
                 if (isSameLocation(child.getProperty("Location", noLocation))) {
-                    ipString = child.getProperty("IP", "");
+                    address = child.getProperty("IP", "") + ":" + serverPort;
+//                        ipString += ";" + child.getProperty("VPN", "");
                 } else {
-                    ipString = child.getProperty("VPN", "");
+                    ipString = NatIp(computer, child.getProperty("IP", ""));
+                    address = ipString + ":" + NatPort(computer, serverPort);
+                    ipString = child.getProperty("VPN");
+                    if(ipString != null){
+                        address += ";"+ ipString + ":" + serverPort;
+                    }
                 }
-
-                ClusterClients.getInstance().registerClient(computer, ipString.split(";"), port);
-
+                ClusterClients.getInstance().registerClient(computer, address.split(";"));
                 AppManager.logit("启动客户端 " + computer + " " + port);
             }
         }

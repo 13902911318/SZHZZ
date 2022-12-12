@@ -15,8 +15,8 @@ import szhzz.Netty.Cluster.Net.ClientInitializer;
 import szhzz.Netty.Cluster.Net.ServerHandler;
 import szhzz.Timer.CircleTimer;
 import szhzz.Utils.DawLogger;
+import szhzz.Utils.NU;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,9 +34,9 @@ public class NettyClient {
     private static AppManager App = AppManager.getApp();
     private static long requID = 0l;
     private final Object locker = new Object();
-    private LinkedList<String> host = new LinkedList<>();
+    private LinkedList<String> hosts = new LinkedList<>();
     private int hostIndex = 0;
-    protected int port;
+//    protected int port;
     private Channel channel = null;
     private EventLoopGroup group = null;
     private ChannelInitializer clientInitializer = null;
@@ -52,7 +52,7 @@ public class NettyClient {
 
     public static void main(String[] args) {
         App.setLog4J();
-        NettyClient client = new NettyClient(args, 7521);
+        NettyClient client = new NettyClient(args);
         client.start();
         NettyExchangeData data = new NettyExchangeData();
         data.appendRow();
@@ -73,51 +73,50 @@ public class NettyClient {
     }
 
 
-    public NettyClient(String[] host, int port) {
-        setHost(host, port);
+    public NettyClient(String[] host) {
+        setHosts(host);
     }
 
     public LinkedList<String> getHosts() {
-        return host;
+        return hosts;
     }
 
-    public int getPort() {
-        return port;
+//    public int getPort() {
+//        return port;
+//    }
+
+    public void setHosts(String[] hosts) {
+        this.hosts.clear();
+        addHost(hosts);
     }
 
-    public void setHost(String[] host, int port) {
-        this.port = port;
-        this.host.clear();
-        addHost(host);
-    }
 
-
-    public void setHost(String[] host, int port, int hostIndex) {
-        setHost(host, port);
-        this.hostIndex = hostIndex;
-    }
+//    public void setHost(String[] host, int port, int hostIndex) {
+//        setHost(host, port);
+//        this.hostIndex = hostIndex;
+//    }
 
     public void addHost(String[] host) {
-        Collections.addAll(this.host, host);
+        Collections.addAll(this.hosts, host);
         hostIndex = 0;
-        retry = this.host.size();
+        retry = this.hosts.size();
     }
 
     public void connected() {
         connected = true;
-        retry = Math.min(this.host.size() - hostIndex, 3);
+        retry = Math.min(this.hosts.size() - hostIndex, 3);
         if (inspector != null) {
             inspector.connected(channel);
         }
     }
 
     public void disConnected() {
-        if (host.size() > 1) {
+        if (hosts.size() > 1) {
             if (--retry == 0) {
-                if (++hostIndex >= host.size()) {
+                if (++hostIndex >= hosts.size()) {
                     hostIndex = 0;
                 }
-                retry = Math.min(this.host.size() - hostIndex, 3);
+                retry = Math.min(this.hosts.size() - hostIndex, 3);
             }
         }
         connected = false;
@@ -143,9 +142,21 @@ public class NettyClient {
         }
     }
 
+    String getIp(){
+        String address = hosts.get(hostIndex);
+        return address.substring(0, address.indexOf(":"));
+    }
+
+    int getPort(){
+        String address = hosts.get(hostIndex);
+        return NU.parseInt(address.substring(address.indexOf(":")+1), -1);
+    }
+
     protected void connectNio() {
         if (!lockOrSkip.compareAndSet(false, true)) return;
-        String ip = host.get(hostIndex);
+
+        String ip = getIp();
+        int port = getPort();
         try {
             if (clientInitializer == null) {
                 clientInitializer = ClientInitializer.getInstance();
@@ -186,7 +197,8 @@ public class NettyClient {
 
     protected void connectOio() {
         if (!lockOrSkip.compareAndSet(false, true)) return;
-        String ip = host.get(hostIndex);
+        String ip = getIp();
+        int port = getPort();
         try {
             if (clientInitializer == null) {
                 clientInitializer = ClientInitializer.getInstance();
@@ -222,11 +234,11 @@ public class NettyClient {
     }
 
     public String getHost() {
-        if (host.size() == 0) return "";
-        if (hostIndex >= host.size()) {
+        if (hosts.size() == 0) return "";
+        if (hostIndex >= hosts.size()) {
             hostIndex = 0;
         }
-        return host.get(hostIndex);
+        return hosts.get(hostIndex);
     }
 
     public boolean isConnected() {
@@ -276,7 +288,7 @@ public class NettyClient {
     public long send(NettyExchangeData msg) {
         if (!isConnected() ) {
             //尝试经由服务器端发送
-            if(isCluster(msg)) {
+            if(isCluster(msg.getEvent())) {
                 msg.setByPass();
 //                msg.setRequestID(++requID);
                 if (StationPropertyWrap.isRouterDebug(msg)) {
@@ -284,7 +296,7 @@ public class NettyClient {
 //                    AppManager.getHostName() + "->" + msg.getIpAddress());
                     StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
                 }
-                int debug = ServerHandler.bypassSendTo(msg, host);
+                int debug = ServerHandler.bypassSendTo(msg, hosts);
                 return 1; // 如果对方未开机，不是错误
             }
         }
@@ -361,7 +373,7 @@ public class NettyClient {
     }
 
     public void setHostIndex(int hostIndex) {
-        if (hostIndex >= host.size()) hostIndex = 0;
+        if (hostIndex >= hosts.size()) hostIndex = 0;
         this.hostIndex = hostIndex;
     }
 }
