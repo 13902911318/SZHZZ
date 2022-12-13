@@ -237,7 +237,7 @@ public class Cluster {
                     clusterServer.startServer();
                     break;
                 }
-                location.put(child.getProperty("IP", ""), child.getProperty("Location", noLocation));
+                location.put(child.getProperty("IP", ""), child.getProperty("P", noLocation));
             }
 
 

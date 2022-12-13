@@ -84,7 +84,7 @@ public class NettyClient {
         for (String h : host) {
             add.add(h + ":" + port);
         }
-        setHosts((String[]) add.toArray());
+        setHosts(add.toArray(new String[0]));
     }
 
     public LinkedList<String> getHosts() {
