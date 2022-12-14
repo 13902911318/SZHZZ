@@ -55,7 +55,7 @@ public class Cluster {
 
     HashMap<String, String> location = new HashMap<>();
     String localName = "";
-    static final String noLocation = "No defined";
+    static final String noDefined = "No defined";
     private String clusterName = "Cluster";
     private String serverIP;
     public static boolean isRouterDebug() {
@@ -222,7 +222,7 @@ public class Cluster {
                 }
 
                 if (computer.equalsIgnoreCase(getHostName())) {
-                    localName = child.getProperty("Location", noLocation);
+                    localName = child.getProperty("Public-IP", noDefined);
                     serverIP = child.getProperty("IP", "").split(";")[0];
                     if (!Internet.setMainIp(serverIP)) {
                         AppManager.MessageBox("请在 Group.ini 中设置正确的本机 IP", 15);
@@ -237,7 +237,7 @@ public class Cluster {
                     clusterServer.startServer();
                     break;
                 }
-                location.put(child.getProperty("IP", ""), child.getProperty("P", noLocation));
+                location.put(child.getProperty("IP", ""), child.getProperty("P", noDefined));
             }
 
 
@@ -250,7 +250,7 @@ public class Cluster {
                 String address = "";
                 if (!computer.equalsIgnoreCase(getHostName())) {
                     String ipString = "";
-                    if (isSameLocation(child.getProperty("Location", noLocation))) {
+                    if (isSameLocation(child.getProperty("Public-IP", noDefined))) {
                         address = child.getProperty("IP", "") + ":" + serverPort;
 //                        ipString += ";" + child.getProperty("VPN", "");
                     } else {
@@ -582,19 +582,17 @@ public class Cluster {
     }
 
     boolean isSameLocation(String location) {
-        return !location.equals(noLocation) && location.equals(localName);
+        return !location.equals(noDefined) && location.equals(localName);
     }
 
-    void reStart(Config clusterCfg) {
-        this.clusterCfg = clusterCfg;
-        if (clusterCfg.getChildrenNames() == null) return;
+    void reStart(Config groupCfg) {
+        this.clusterCfg = groupCfg;
+        if (groupCfg.getChildrenNames() == null) return;
 
-        int port = clusterCfg.getIntVal("ControlCenter", serverPort);
+        int port = groupCfg.getIntVal("ControlCenter", serverPort);
 
-        AppManager.logit("重启集群监测, Timer=" + clusterCfg.getIntVal("Timer", 10 * 1000));
-
-        for (String computer : clusterCfg.getChildrenNames()) {
-            Config child = clusterCfg.getChild(computer);
+        for (String computer : groupCfg.getChildrenNames()) {
+            Config child = groupCfg.getChild(computer);
             if (child.getIntVal("Level", 0) <= 0) {
                 continue;
             }
@@ -602,7 +600,7 @@ public class Cluster {
             if (!computer.equalsIgnoreCase(getHostName())) {
                 String address;
                 String ipString = "";
-                if (isSameLocation(child.getProperty("Location", noLocation))) {
+                if (isSameLocation(child.getProperty("Public-IP", noDefined))) {
                     address = child.getProperty("IP", "") + ":" + serverPort;
 //                        ipString += ";" + child.getProperty("VPN", "");
                 } else {
@@ -625,14 +623,16 @@ public class Cluster {
     }
 
     public String NatIp(String computerName, String ip) {
-        if (isSameLocation(computerName)) return ip;
         Config cfg = getChildCfg(computerName);
-        return cfg.getProperty("Public-IP", ip);
+        String publicIP = cfg.getProperty("Public-IP", ip);
+        if (isSameLocation(publicIP)) return ip;
+        return publicIP;
     }
 
     public int NatPort(String computerName, int port) {
-        if (isSameLocation(computerName)) return port;
         Config cfg = getChildCfg(computerName);
+        String publicIP = cfg.getProperty("Public-IP", noDefined);
+        if (isSameLocation(publicIP)) return port;
         return cfg.getIntVal(String.valueOf(port), port);
     }
 }
