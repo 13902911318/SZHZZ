@@ -22,7 +22,7 @@ public class DialogManager {
     protected TaskView taskView = null;
     private static boolean statusViewSilent = false;
     private static boolean statusViewNotPopup = false;
-    private static boolean clusterStationSilent = false;
+    static boolean clusterStationSilent = false;
 
     private BeQuit autoQuit = new BeQuit() {
 
@@ -78,6 +78,7 @@ public class DialogManager {
         if (clusterStation == null) {
             clusterStation = new ClusterStation(frame);
             clusterStation.setModalityType(Dialog.ModalityType.MODELESS);
+            //clusterStation.getStationViewPanel().addToolbarEvent(new ToolBarEvent());
 //            clusterStation.pack();
 //            clusterStation.loadPref();
             dialogs.add(clusterStation);
