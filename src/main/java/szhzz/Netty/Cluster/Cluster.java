@@ -58,6 +58,7 @@ public class Cluster {
     static final String noDefined = "No defined";
     private String clusterName = "Cluster";
     private String serverIP;
+
     public static boolean isRouterDebug() {
         if (routerDebug == null) {
             if (AppManager.getApp().getCfg() != null) {
@@ -178,7 +179,7 @@ public class Cluster {
 //    }
 
     public static Config getConfig() {
-        if(onlyOne!=null && onlyOne.clusterCfg != null) return onlyOne.clusterCfg;
+        if (onlyOne != null && onlyOne.clusterCfg != null) return onlyOne.clusterCfg;
         return SharedCfgProvider.getInstance("net").getCfg("Group");
     }
 
@@ -197,11 +198,6 @@ public class Cluster {
      * @param clusterCfg
      */
     public void startup(Config clusterCfg) {
-        if (connectionListener != null) {
-            reStart(clusterCfg);
-            return;
-        }
-
         if (clusterCfg != null && clusterServer == null) {
             this.clusterCfg = clusterCfg;
 
@@ -256,16 +252,16 @@ public class Cluster {
                     } else {
                         ipString = NatIp(computer, child.getProperty("IP", ""));
                         address = ipString + ":" + NatPort(computer, serverPort);
-                        ipString = child.getProperty("VPN");
-                        if(ipString != null){
-                            address += ";"+ ipString + ":" + serverPort;
+                        ipString = child.getProperty("VPN-IP");
+                        if (ipString != null) {
+                            address += ";" + ipString + ":" + serverPort;
                         }
 //                        ipString += ";" + child.getProperty("IP", "");
                     }
 
                     ClusterClients.getInstance().registerClient(computer, address.split(";"));
 
-                    AppManager.logit("启动客户端 " + computer );
+                    AppManager.logit("启动客户端 " + computer);
 
                     NettyRequystor remote = new NettyRequystor(computer);
                     remote.setReader(BusinessRuse.getInstance(), 5);
@@ -436,7 +432,6 @@ public class Cluster {
     }
 
 
-
     class ConnectionListener extends CircleTimer {
         void resetCheckCount() {
             checkCount = 0;
@@ -585,14 +580,12 @@ public class Cluster {
         return !location.equals(noDefined) && location.equals(localName);
     }
 
-    void reStart(Config groupCfg) {
-        this.clusterCfg = groupCfg;
-        if (groupCfg.getChildrenNames() == null) return;
+    public void reStart() {
+        if (clusterCfg == null || clusterCfg.getChildrenNames() == null) return;
+        if (connectionListener != null) return;
 
-        int port = groupCfg.getIntVal("ControlCenter", serverPort);
-
-        for (String computer : groupCfg.getChildrenNames()) {
-            Config child = groupCfg.getChild(computer);
+        for (String computer : clusterCfg.getChildrenNames()) {
+            Config child = clusterCfg.getChild(computer);
             if (child.getIntVal("Level", 0) <= 0) {
                 continue;
             }
@@ -604,15 +597,16 @@ public class Cluster {
                     address = child.getProperty("IP", "") + ":" + serverPort;
 //                        ipString += ";" + child.getProperty("VPN", "");
                 } else {
+                    // NAT address
                     ipString = NatIp(computer, child.getProperty("IP", ""));
                     address = ipString + ":" + NatPort(computer, serverPort);
-                    ipString = child.getProperty("VPN");
-                    if(ipString != null){
-                        address += ";"+ ipString + ":" + serverPort;
+                    ipString = child.getProperty("VPN-IP");
+                    if (ipString != null) {
+                        address += ";" + ipString + ":" + serverPort;
                     }
                 }
                 ClusterClients.getInstance().registerClient(computer, address.split(";"));
-                AppManager.logit("启动客户端 " + computer + " " + port);
+                AppManager.logit("启动客户端 " + computer + " " + serverPort);
             }
         }
     }
