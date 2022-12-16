@@ -36,7 +36,7 @@ public class Cluster {
     ConnectionListener connectionListener;
     ClusterStation clusterStationUI = null;
 
-    int definedLevel = 0;
+    private int defaultLevel = 0;
 
 
     //    Config localCfg = null;
@@ -115,7 +115,7 @@ public class Cluster {
         String nodeName = null;
         int levelIndex = -1;
         for (ClusterProperty s : nodes.values()) {
-            if (s.level < this.definedLevel) {
+            if (s.level < this.defaultLevel) {
                 if (levelIndex < s.level && s.connected) {// 找出小于本节点优先权的最大优先权节点
                     levelIndex = s.level;
                     nodeName = s.stationName;
@@ -224,6 +224,7 @@ public class Cluster {
                         AppManager.MessageBox("请在 Group.ini 中设置正确的本机 IP", 15);
                     }
                     setLocalLevel(child.getIntVal("Level", 0));
+                    setDefaultLevel(child.getIntVal("Level", 0));
                     setGroup(child.getIntVal("Group", 0));
 
                     clusterServer = ClusterServer.getInstance();
@@ -416,7 +417,6 @@ public class Cluster {
 
     public void setLocalLevel(int localLevel) {
         this.localLevel = localLevel;
-        definedLevel = localLevel;
     }
 
     public void setGroup(int group) {
@@ -432,6 +432,14 @@ public class Cluster {
         return serverPort;
     }
 
+    public int getDefaultLevel() {
+        return defaultLevel;
+    }
+
+    private void setDefaultLevel(int defaultLevel) {
+        this.defaultLevel = defaultLevel;
+    }
+
 
     class ConnectionListener extends CircleTimer {
         void resetCheckCount() {
@@ -442,7 +450,7 @@ public class Cluster {
 
         @Override
         public void execTask() {
-            if (definedLevel < 10) {
+            if (defaultLevel < 10) {
                 count = 6;
             }
             try {
