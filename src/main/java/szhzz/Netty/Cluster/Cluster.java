@@ -416,6 +416,7 @@ public class Cluster {
 
     public void setLocalLevel(int localLevel) {
         this.localLevel = localLevel;
+        definedLevel = localLevel;
     }
 
     public void setGroup(int group) {
