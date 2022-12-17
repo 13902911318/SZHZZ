@@ -23,6 +23,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
 
 
     protected void decode_(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
+        System.out.println(msg);
         if ("bye".equals(msg)) {
             ctx.writeAndFlush("bye\r\n").addListener(ChannelFutureListener.CLOSE);
             return;
