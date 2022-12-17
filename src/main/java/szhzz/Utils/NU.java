@@ -68,7 +68,7 @@ public class NU {
 
     public static boolean isNumber(Object o) {
         if (o == null) return false;
-        return o.toString().matches("-?\\d+(\\.\\d+)?");
+        return o.toString().trim().matches("-?\\d+(\\.\\d+)?");
     }
 
     public static double round(double v1, int scale) {

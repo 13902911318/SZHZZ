@@ -88,7 +88,7 @@ public class ClusterClients {
         NettyExchangeData obj = requestor.getQueryData();
         if (obj != null) {
             synchronized (requests) {
-                w_RequestID = client.send(obj);
+                w_RequestID = client.send(obj,requestor.getStationName());
                 if (w_RequestID > 0) {
 //                    requestor.setRequestID(w_RequestID);
 //                    requests.put(w_RequestID, requestor);
@@ -136,9 +136,9 @@ public class ClusterClients {
     }
 
 
-    public boolean hasByPassChannel(String address) {
-        NettyClient client = clients.get(address);
-        return client != null && ServerHandler.hasByPassChannal(client.getIps());
+    public boolean hasByPassChannel(String stationName) {
+//        NettyClient client = clients.get(address);
+        return ServerHandler.hasByPassChannal(stationName);
     }
 
     public boolean isConnect(String address) {

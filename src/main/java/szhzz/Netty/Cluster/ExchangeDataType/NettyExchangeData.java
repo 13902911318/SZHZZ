@@ -135,7 +135,7 @@ public class NettyExchangeData extends ExchangeData {
         setTitleCol(address, colIpAddress);
     }
 
-    private void setHostName(String name) {
+    public void setHostName(String name) {
         setTitleCol(name, colHostName);
     }
 

@@ -18,9 +18,11 @@ import szhzz.Utils.DawLogger;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 
 /**
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData> {
     private static DawLogger logger = DawLogger.getLogger(ServerHandler.class);
     static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    static final HashMap<String, Channel> namedChannels = new HashMap<>();
     ClusterServer clusterServer = null;
 
 
@@ -78,19 +81,24 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
         }
     }
 
-    public static boolean hasByPassChannal(LinkedList<String> host) {
-        return getBypassChannel(host) != null;
+    /**
+     *
+     * @param stationName
+     * @return
+     */
+    public static boolean hasByPassChannal(String stationName) {
+        return getBypassChannel(stationName) != null;
     }
 
     /**
      * 标志 2
      *
      * @param msg
-     * @param host
+     * @param distHostName
      * @return
      */
-    public static int bypassSendTo(NettyExchangeData msg, LinkedList<String> host) {
-        Channel channel = getBypassChannel(host);
+    public static int bypassSendTo(NettyExchangeData msg, String distHostName) {
+        Channel channel = getBypassChannel(distHostName);
         if (channel != null) {
             if(StationPropertyWrap.isRouterDebug(msg)) {
                 StationPropertyWrap.addRouter(msg, "2. " + AppManager.getHostName() + ".ServerHandler.bypassSendTo");
@@ -98,29 +106,30 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
                         AppManager.getHostName() + "->" + msg.getIpAddress());
             }
             channel.writeAndFlush(msg.encode());
-            logger.info("经由服务器端发送数据成功: 发往" + host.get(0) + " 请求类型=" + msg.getNettyType().name());
+            logger.info("经由服务器端发送数据成功: 发往" + distHostName + " 请求类型=" + msg.getNettyType().name());
             return 1;
         }
 
-        logger.info("经由服务器端发送数据失败 " + msg.getNettyType().name());
+        logger.info("经由服务器端发送数据失败: 发往" + distHostName + " 请求类型=" + msg.getNettyType().name());
         return -1;
     }
 
-    public static Channel getBypassChannel(LinkedList<String> host) {
-        if (!Cluster.getInstance().isOffLine()) {
-            for (Channel channel : channels) {
-                for (String address : host) {
-                    String debug = channel.remoteAddress().toString();
-                    if (channel.remoteAddress().toString().contains(address)) {
-                        if (channel.isWritable()) {
-                            return channel;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return null;
+    public static Channel getBypassChannel(String stationName) {
+        return namedChannels.get(stationName);
+
+//            for (Channel channel : channels) {
+//                for (String address : host) {
+//                    String debug = channel.remoteAddress().toString();
+//                    if (channel.remoteAddress().toString().contains(address)) {
+//                        if (channel.isWritable()) {
+//                            return channel;
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+        //return null;
     }
 
     public static void sayBye() {
@@ -176,6 +185,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
                     ctx.writeAndFlush(exDate.encode());
                 }
             }
+        }
+        String hostName = msg.getHostName();
+        if(!namedChannels.containsKey(hostName)){
+            namedChannels.put(hostName, ctx.channel());
         }
     }
 

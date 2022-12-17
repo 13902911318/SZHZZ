@@ -313,9 +313,12 @@ public class NettyClient {
     }
 
     public long send(NettyExchangeData msg) {
+        return send( msg, null) ;
+    }
+    public long send(NettyExchangeData msg, String remoteName) {
         if (!isConnected()) {
             //尝试经由服务器端发送
-            if (isCluster(msg.getEvent())) {
+            if (isCluster(msg.getEvent()) && remoteName != null) {
                 msg.setByPass();
 //                msg.setRequestID(++requID);
                 if (StationPropertyWrap.isRouterDebug(msg)) {
@@ -323,7 +326,7 @@ public class NettyClient {
 //                    AppManager.getHostName() + "->" + msg.getIpAddress());
                     StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
                 }
-                int debug = ServerHandler.bypassSendTo(msg, getIps());
+                int debug = ServerHandler.bypassSendTo(msg, remoteName);
                 return 1; // 如果对方未开机，不是错误
             }
             logger.info(new Exception("发送数据失败，[未连接]\n" + msg.toString()));

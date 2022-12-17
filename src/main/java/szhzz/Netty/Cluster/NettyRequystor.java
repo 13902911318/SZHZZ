@@ -82,6 +82,7 @@ public class NettyRequystor {
     public NettyExchangeData getQueryData() {
         NettyExchangeData queryData = StationPropertyWrap.getStationLevelQuery();
         queryData.setIpAddress(getIpAddress());
+        queryData.setHostName(stationName); //仅仅只是借用， NettyExchangeData.encode() 将会覆盖为本地名称
         return queryData;
     }
 
