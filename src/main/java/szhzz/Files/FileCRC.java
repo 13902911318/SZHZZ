@@ -111,8 +111,8 @@ public class FileCRC {
         String md5 = getFileMD5String(big);
 
         long end = System.currentTimeMillis();
-        System.out.println("md5:" + md5);
-        System.out.println("time:" + ((end - begin)) + "ms");
+        // System.out.println("md5:" + md5);
+        // System.out.println("time:" + ((end - begin)) + "ms");
 
     }
 

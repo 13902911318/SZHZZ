@@ -63,14 +63,14 @@ public class SynDatabase {
                 String update = CreateInsert(tableName, columns);
                 PreparedStatement ps = dbTaget.prepareStatement(update);
 
-                System.out.println(" Copied rows From " + tableName);
+                // System.out.println(" Copied rows From " + tableName);
                 while (rs.next()) {
                     for (int i = 1; i <= columns.size(); i++) {
                         ps.setObject(i, rs.getObject(i));
                     }
                     ps.executeUpdate();
                     if (++rows % 5000 == 0f) {
-                        System.out.println(" Copied " + rows + " rows From " + tableName);
+                        // System.out.println(" Copied " + rows + " rows From " + tableName);
                     }
                 }
             }
@@ -127,7 +127,7 @@ public class SynDatabase {
 
         String Insert = CreateInsert_2(tableName, columns);
 
-        System.out.println(" Copied rows From " + tableName);
+        // System.out.println(" Copied rows From " + tableName);
         try {
             while (st.next()) {
                 StringBuffer values = new StringBuffer();
@@ -140,7 +140,7 @@ public class SynDatabase {
                 String sql = Insert + "VALUES (" + values.toString() + ")";
                 dbTaget.executeUpdate(sql);
                 if (++rows % 5000 == 0f) {
-                    System.out.println(" Copied " + rows + " rows From " + tableName);
+                    // System.out.println(" Copied " + rows + " rows From " + tableName);
                 }
             }
         } finally {

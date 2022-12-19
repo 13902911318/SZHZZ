@@ -94,11 +94,11 @@ public class getPingYin {
     public static void main(String[] args) {
 
         String cnStr = "招商银行";
-        System.out.println(getPingYin(cnStr));
-        System.out.println(getPinYinHeadChar(cnStr));
+        // System.out.println(getPingYin(cnStr));
+        // System.out.println(getPinYinHeadChar(cnStr));
         cnStr = "重庆水务";
-        System.out.println(getPingYin(cnStr));
-        System.out.println(getPinYinHeadChar(cnStr));
+        // System.out.println(getPingYin(cnStr));
+        // System.out.println(getPinYinHeadChar(cnStr));
     }
 
 }

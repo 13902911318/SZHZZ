@@ -40,7 +40,7 @@ public class ConnectionParam implements Serializable {
      * setDebug() 显示详细的调试信息
      */
     public static void setDebug(boolean d) {
-        if (debug != d) System.out.println("Connection pool debug=" + (d ? "ON" : "OFF"));
+        if (debug != d) // System.out.println("Connection pool debug=" + (d ? "ON" : "OFF"));
         debug = d;
     }
 

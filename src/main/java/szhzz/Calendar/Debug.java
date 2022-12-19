@@ -9,6 +9,6 @@ package szhzz.Calendar;
  */
 public class Debug {
     public static void main(String[] args) {
-        System.out.println(new MyDate("2013-01-01").getDaysDiff("2011-01-01"));
+        // System.out.println(new MyDate("2013-01-01").getDaysDiff("2011-01-01"));
     }
 }

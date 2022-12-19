@@ -100,7 +100,7 @@ public class Copydir {
                 String currentFile = file2 + "/" + aFile.getName();
                 if (isFinished(currentFile)) continue;
 
-                System.out.println("DIR " + currentFile);
+                // System.out.println("DIR " + currentFile);
                 copyDirectiory(file1 + "/" + aFile.getName(), currentFile);
                 addFinished(currentFile);
             }
@@ -145,14 +145,14 @@ public class Copydir {
 
         if (fDest.exists()) {
             if (isAddOnly()) {
-                System.out.println("Skip " + fDest.getAbsolutePath());
+                // System.out.println("Skip " + fDest.getAbsolutePath());
                 return;
             } else if (fSource.lastModified() <= fDest.lastModified()) // ont newer
                 return;
         }
 
         try {
-            System.out.println("Copy To " + fDest);
+            // System.out.println("Copy To " + fDest);
             FileInputStream input = new FileInputStream(fSource);
             FileOutputStream output = new FileOutputStream(fDest);
 

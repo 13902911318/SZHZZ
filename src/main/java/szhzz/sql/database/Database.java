@@ -299,7 +299,7 @@ public class Database {
                     con.close();
                 con = null;
             } catch (SQLException ie) {
-                System.out.println("This should never happen! Please make a bug report!");
+                // System.out.println("This should never happen! Please make a bug report!");
                 //e.printStackTrace();
                 DBException d = new DBException(e);
                 //logger.error(d);

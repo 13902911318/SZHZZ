@@ -31,7 +31,7 @@ public class DirectoryZip {
     public void zip(String inputFileName, String outputFileName) throws Exception {
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputFileName));
         zip(out, new File(inputFileName), "");
-        System.out.println("zip done");
+        // System.out.println("zip done");
         out.close();
     }
 
@@ -52,7 +52,7 @@ public class DirectoryZip {
             out.putNextEntry(new ZipEntry(base));
             FileInputStream in = new FileInputStream(f);
             int b;
-            System.out.println(base);
+            // System.out.println(base);
             while ((b = in.read()) != -1) {
                 out.write(b);
             }

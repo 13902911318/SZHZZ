@@ -11,9 +11,9 @@ public class WakeOnLan {
     public static void main(String[] args) {
 
         if (args.length != 2) {
-            System.out.println("Usage: java WakeOnLan <broadcast-ip> <mac-address>");
-            System.out.println("Example: java WakeOnLan 192.168.0.255 00:0D:61:08:22:4A");
-            System.out.println("Example: java WakeOnLan 192.168.0.255 00-0D-61-08-22-4A");
+            // System.out.println("Usage: java WakeOnLan <broadcast-ip> <mac-address>");
+            // System.out.println("Example: java WakeOnLan 192.168.0.255 00:0D:61:08:22:4A");
+            // System.out.println("Example: java WakeOnLan 192.168.0.255 00-0D-61-08-22-4A");
             System.exit(1);
         }
 
@@ -41,9 +41,9 @@ public class WakeOnLan {
             socket.send(packet);
             socket.close();
 
-            System.out.println("Wake-on-LAN packet sent.");
+            // System.out.println("Wake-on-LAN packet sent.");
         } catch (Exception e) {
-            System.out.println("Failed to send Wake-on-LAN packet: + e");
+            // System.out.println("Failed to send Wake-on-LAN packet: + e");
             //System.exit(1);
         }
 

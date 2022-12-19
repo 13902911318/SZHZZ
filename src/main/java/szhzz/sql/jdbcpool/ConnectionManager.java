@@ -206,11 +206,12 @@ public class ConnectionManager {
 
 
     private static void pr(String msg) {
-        if (ConnectionParam.isDebug()) System.out.println(">>ConnectionManager " + msg);
+        if (ConnectionParam.isDebug());
+        // System.out.println(">>ConnectionManager " + msg);
     }
 
     private static void pr(String msg, Throwable e) {
-        System.out.println(">>ConnectionManager " + msg);
+        // System.out.println(">>ConnectionManager " + msg);
         e.printStackTrace();
     }
 

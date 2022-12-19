@@ -15,7 +15,7 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         UnixTime m = (UnixTime) msg; // (1)
 
-        System.out.println(m);
+        // System.out.println(m);
         ctx.close();
 
 

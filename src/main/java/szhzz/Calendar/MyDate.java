@@ -431,7 +431,7 @@ public class MyDate implements Serializable {
         test1.print();
         MyDate test2 = new MyDate("2008-3-30");
         test2.print();
-        System.out.println(test1.compareDays(test2));
+        // System.out.println(test1.compareDays(test2));
     }
 
 
@@ -579,7 +579,7 @@ public class MyDate implements Serializable {
         int day;
         if (readOnly) {
             logger.error(new Error("READONLY TODAY CAN NOT BE CHANGED!"));
-            System.out.println("READONLY TODAY CAN NOT BE CHANGED!");
+            // System.out.println("READONLY TODAY CAN NOT BE CHANGED!");
             System.exit(1);
             return false;
         }

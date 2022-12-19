@@ -32,10 +32,10 @@ public final class TextTransfer implements ClipboardOwner {
                 result = (String) contents.getTransferData(DataFlavor.stringFlavor);
             } catch (UnsupportedFlavorException ex) {
                 //highly unlikely since we are using a standard DataFlavor
-                System.out.println(ex);
+                // System.out.println(ex);
                 ex.printStackTrace();
             } catch (IOException ex) {
-                System.out.println(ex);
+                // System.out.println(ex);
                 ex.printStackTrace();
             }
         }

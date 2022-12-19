@@ -44,9 +44,9 @@ public class GB2Alpha {
 
     public static void main(String[] args) {
         GB2Alpha obj1 = new GB2Alpha();
-        System.out.println(obj1.String2Alpha("测试：中华人民共和国！"));
-        System.out.println(obj1.String2Alpha("裴贺先"));
-        System.out.println(obj1.String2Alpha("招商银行"));
+        // System.out.println(obj1.String2Alpha("测试：中华人民共和国！"));
+        // System.out.println(obj1.String2Alpha("裴贺先"));
+        // System.out.println(obj1.String2Alpha("招商银行"));
     }
 
     //主函数,输入字符,得到他的声母,

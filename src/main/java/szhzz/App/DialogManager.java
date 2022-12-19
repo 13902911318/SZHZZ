@@ -108,6 +108,7 @@ public class DialogManager {
         statusView.setVisible(true);
         statusView.loadPref();
         statusView.setAlwaysOnTop(force);
+
     }
 
     public StatusView getStatuesView() {

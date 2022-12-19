@@ -27,7 +27,7 @@ public class CharsetDetector {
                 InputStreamReader reader = new InputStreamReader(new FileInputStream(f), charset);
                 int c = 0;
                 while ((c = reader.read()) != -1) {
-                    System.out.print((char) c);
+                    // System.out.print((char) c);
                 }
                 reader.close();
             } catch (FileNotFoundException fnfe) {
@@ -37,7 +37,7 @@ public class CharsetDetector {
             }
 
         } else {
-            System.out.println("Unrecognized charset.");
+            // System.out.println("Unrecognized charset.");
         }
     }
 

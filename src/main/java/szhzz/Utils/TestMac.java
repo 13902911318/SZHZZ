@@ -16,9 +16,9 @@ import java.io.LineNumberReader;
 
 public class TestMac {
     public static void main(String[] args) {
-        System.out.println("Operation System=" + getOsName());
-        System.out.println("Mac Address=" + getMACAddress());
-        System.out.println("通过ip获取mac" + getMACAddress("192.168.0.100"));
+        // System.out.println("Operation System=" + getOsName());
+        // System.out.println("Mac Address=" + getMACAddress());
+        // System.out.println("通过ip获取mac" + getMACAddress("192.168.0.100"));
     }
 
     public static String getOsName() {
@@ -37,7 +37,7 @@ public class TestMac {
                 BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), "GB2312"));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    System.out.println(line);
+                    // System.out.println(line);
                     if (line.indexOf("物理地址") > 0) {
                         int index = line.indexOf(":");
                         index += 2;
@@ -82,7 +82,7 @@ public class TestMac {
             for (int i = 1; i < 100; i++) {
                 str = input.readLine();
                 if (str != null) {
-                    System.out.println(str);
+                    // System.out.println(str);
                     if (str.indexOf("物理地址") > 1) {
                         strMAC = str.substring(str.indexOf("-") - 2,
                                 str.length());

@@ -365,7 +365,7 @@ public class AlarmClock implements DawCountdown {
         if (App != null) {
             AppManager.logit(msg);
         } else {
-            System.out.println(msg);
+            // System.out.println(msg);
         }
     }
 

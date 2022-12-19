@@ -41,7 +41,7 @@ public class Makedirs {
             if (aFile.isDirectory()) {
                 String currentFile = file1 + "\\" + aFile.getName();
 
-                System.out.println("DIR " + currentFile);
+                // System.out.println("DIR " + currentFile);
                 DrillDirectiory(file1 + "\\" + aFile.getName());
             }
         }

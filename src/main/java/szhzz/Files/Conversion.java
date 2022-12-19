@@ -135,7 +135,7 @@ public class Conversion extends JFrame implements ActionListener {
         jTextField1.setBounds(80, 50, 330, 30);
 
         if (jTextField1.getText().trim().length() == 0) {
-            System.out.println("!!!");
+            // System.out.println("!!!");
             jTextField1.setEditable(false);
             jCheckBox1.setSelected(true);
         }

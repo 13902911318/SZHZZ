@@ -32,28 +32,28 @@ public class ZipDirectory {
         File directoryToZip = new File("D:\\Utilities\\HDTunePro_v4.6");
 
         List<File> fileList = new ArrayList<File>();
-        System.out.println("---Getting references to all files in: " + directoryToZip.getCanonicalPath());
+        // System.out.println("---Getting references to all files in: " + directoryToZip.getCanonicalPath());
         getAllFiles(directoryToZip, fileList);
-        System.out.println("---Creating zip file");
+        // System.out.println("---Creating zip file");
         writeZipFile(directoryToZip, fileList);
-        System.out.println("---Done");
+        // System.out.println("---Done");
     }
 
     public static void getAllFiles(File dir, List<File> fileList) {
-        try {
+//        try {
             File[] files = dir.listFiles();
             for (File file : files) {
                 fileList.add(file);
                 if (file.isDirectory()) {
-                    System.out.println("directory:" + file.getCanonicalPath());
+                    // System.out.println("directory:" + file.getCanonicalPath());
                     getAllFiles(file, fileList);
                 } else {
-                    System.out.println("     file:" + file.getCanonicalPath());
+                    // System.out.println("     file:" + file.getCanonicalPath());
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static void writeZipFile(File directoryToZip, List<File> fileList) {
@@ -86,7 +86,7 @@ public class ZipDirectory {
         // to the directory being zipped, so chop off the rest of the path
         String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
                 file.getCanonicalPath().length());
-        System.out.println("Writing '" + zipFilePath + "' to zip file");
+        // System.out.println("Writing '" + zipFilePath + "' to zip file");
         ZipEntry zipEntry = new ZipEntry(zipFilePath);
         zos.putNextEntry(zipEntry);
 

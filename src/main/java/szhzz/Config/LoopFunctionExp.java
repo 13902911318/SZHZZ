@@ -251,7 +251,7 @@ public class LoopFunctionExp {
         LoopFunctionExp f = new LoopFunctionExp("AMTUN(1:20:1 , -9:9:1 , A;B;C , avg;opt)");
 
         while (f.nextLoop()) {
-            System.out.println(f.getNextExpress());
+            // System.out.println(f.getNextExpress());
         }
 //        System.out.println("===============================");
 //        f.setCurrentParam("AMTUN(C,15,8, avg)");

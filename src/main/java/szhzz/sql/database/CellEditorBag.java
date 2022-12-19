@@ -111,7 +111,7 @@ class NumberEditor extends DefaultCellEditor { //
             return o;
         } else {
             if (DEBUG) {
-                System.out.println("getCellEditorValue: o isn't a Number");
+                // System.out.println("getCellEditorValue: o isn't a Number");
             }
             try {
                 if (o != null) {

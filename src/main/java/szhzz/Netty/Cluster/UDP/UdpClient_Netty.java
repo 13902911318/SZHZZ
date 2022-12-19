@@ -144,7 +144,7 @@ public class UdpClient_Netty extends UdpClient_Abstract {
                 setCircleTime(10 * 1000);
             } else {
                 close();
-                System.out.println("Test finished");
+                // System.out.println("Test finished");
                 System.exit(0);
             }
         }

@@ -48,7 +48,7 @@ public class Chelper {
         }
         catch (Exception e)
         {
-            System.out.println("Error while encrypting: " + e.toString());
+            // System.out.println("Error while encrypting: " + e.toString());
         }
         return null;
     }
@@ -65,7 +65,7 @@ public class Chelper {
         }
         catch (Exception e)
         {
-            System.out.println("Error while decrypting: " + e.toString());
+            // System.out.println("Error while decrypting: " + e.toString());
         }
         return null;
     }
@@ -94,9 +94,9 @@ public class Chelper {
         String encryptedString = Chelper.encrypt(originalString, secretKey) ;
         String decryptedString = Chelper.decrypt(encryptedString, secretKey) ;
 
-        System.out.println(originalString);
-        System.out.println(encryptedString);
-        System.out.println(decryptedString);
+        // System.out.println(originalString);
+        // System.out.println(encryptedString);
+        // System.out.println(decryptedString);
     }
 
 }

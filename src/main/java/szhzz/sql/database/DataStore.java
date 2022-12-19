@@ -896,20 +896,20 @@ public class DataStore {
         maxColNameLen += 2;
 
         if (null != deletedRows) {
-            System.out.println("");
-            System.out.println("");
-            System.out.println("Data    RecordTitle = " + Name);
-            System.out.println("Total   rows = " + (this.getRowCount() + deletedRows.getRowCount()));
-            System.out.println("Deleted rows = " + deletedRows.getRowCount());
+            // System.out.println("");
+            // System.out.println("");
+            // System.out.println("Data    RecordTitle = " + Name);
+            // System.out.println("Total   rows = " + (this.getRowCount() + deletedRows.getRowCount()));
+            // System.out.println("Deleted rows = " + deletedRows.getRowCount());
             deletedRows.printout();
-            System.out.println("");
-            System.out.println("");
+            // System.out.println("");
+            // System.out.println("");
         }
 
 
-        System.out.println("***********************************");
-        System.out.println(" ");
-        System.out.println("Column Count:" + this.getColumnCount());
+        // System.out.println("***********************************");
+        // System.out.println(" ");
+        // System.out.println("Column Count:" + this.getColumnCount());
         for (int c = 0; c < this.getColumnCount(); c++) {
 
 //            System.out.print(
@@ -917,21 +917,21 @@ public class DataStore {
 //                            uitils.fill(colTypeString(c), " ", maxColTypeLen));
 
             listValidater(c);
-            System.out.println("");
+            // System.out.println("");
         }
-        System.out.println(" ");
-        System.out.println("Row Count:" + this.getRowCount());
+        // System.out.println(" ");
+        // System.out.println("Row Count:" + this.getRowCount());
 
         for (int r = 0; r < this.getRowCount(); r++) {
             scrollToRow(r);
-            System.out.println("----------------------------");
-            System.out.println("Row: " + (r + 1));
-            System.out.println("JDBCRow: " + getJDBCRowNumber());
+            // System.out.println("----------------------------");
+            // System.out.println("Row: " + (r + 1));
+            // System.out.println("JDBCRow: " + getJDBCRowNumber());
 
-            System.out.println("is New Row ?: " + this.isNewRow(r));
-            System.out.println("is Modified Row ?: " + this.isModified(r));
-            System.out.println("is Deleted Row ?: " + this.isDeletrow(r));
-            System.out.println("");
+            // System.out.println("is New Row ?: " + this.isNewRow(r));
+            // System.out.println("is Modified Row ?: " + this.isModified(r));
+            // System.out.println("is Deleted Row ?: " + this.isDeletrow(r));
+            // System.out.println("");
 
             for (int c = 0; c < this.getColumnCount(); c++) {
                 col = this.getColumnName(c);
@@ -954,12 +954,12 @@ public class DataStore {
     private void listValidater(int col) {
         if (columnValidater.containsKey(new Integer(col))) {
             Vector v = columnValidater.get(new Integer(col));
-            System.out.print("  Validaters:{");
-            for (int i = 0; i < v.size(); i++) {
-                if (i > 0) System.out.print("; ");
-                System.out.print(((DataValidater) v.get(i)).name());
-            }
-            System.out.print("}");
+            // System.out.print("  Validaters:{");
+//            for (int i = 0; i < v.size(); i++) {
+//                if (i > 0) // System.out.print("; ");
+//                // System.out.print(((DataValidater) v.get(i)).name());
+//            }
+            // System.out.print("}");
         }
     }
 

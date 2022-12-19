@@ -20,7 +20,7 @@ public class FileZiper {
     ZipEntry currentEntry = null;
 
     public static void main(String args[]) {
-        System.out.println(new File("I:\\Downloads\\操作系统\\MAC\\IBM.txt").getName());
+        // System.out.println(new File("I:\\Downloads\\操作系统\\MAC\\IBM.txt").getName());
     }
 
     public void setZipOut(String outputFileName) {

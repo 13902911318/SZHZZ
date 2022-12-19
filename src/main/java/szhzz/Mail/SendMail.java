@@ -72,10 +72,10 @@ public class SendMail implements Runnable {
 //            if (themail.addFileAffix(configData.getVHIReportFoulder() + "/Page.htm") == false) return;
             themail.setNamePass("13902911308@139.com", "w13902911308");
             //themail.setCopyTo("wxm5599@sina.com");
-            if (themail.sendout() == false)
-                System.out.println("Send error");
+//            if (themail.sendout() == false)
+                // System.out.println("Send error");
 
-            System.out.println("Send OK");
+            // System.out.println("Send OK");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,7 +122,7 @@ public class SendMail implements Runnable {
      * @param need boolean
      */
     public void setNeedAuth(boolean need) {
-        System.out.println("设置smtp身份认证：mail.smtp.auth = " + need);
+        // System.out.println("设置smtp身份认证：mail.smtp.auth = " + need);
         if (properties == null) properties = (Properties) System.getProperties().clone(); //获得系统属性对象
 
         if (need) {

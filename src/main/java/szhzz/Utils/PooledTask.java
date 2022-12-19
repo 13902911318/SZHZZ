@@ -86,9 +86,9 @@ public class PooledTask {
                     if (ThreadsCount == 0) {
                         break;
                     }
-                    System.out.println("Waitting On Finish ...");
+                    // System.out.println("Waitting On Finish ...");
                 } catch (InterruptedException ex) {
-                    System.out.println("Interrupted ");
+                    // System.out.println("Interrupted ");
                 }
             }
         }

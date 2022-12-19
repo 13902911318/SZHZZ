@@ -70,7 +70,7 @@ public class delFolder {
                 }
                 if (aFile.isDirectory()) {
                     delDir(aFile);
-                    System.out.println("Delete " + aFile.getAbsolutePath());
+                    // System.out.println("Delete " + aFile.getAbsolutePath());
                 }
                 aFile.delete();
             }

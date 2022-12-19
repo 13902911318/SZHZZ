@@ -126,9 +126,9 @@ public class Utilities {
                 throw new IOException("FileCopy: "
                         + "destination file is unwriteable: " + toFileName);
             if (!ovewrite) {
-                System.out.print("Overwrite existing file " + toFile.getName()
-                        + "? (Y/N): ");
-                System.out.flush();
+                // System.out.print("Overwrite existing file " + toFile.getName()
+//                        + "? (Y/N): ");
+//                System.out.flush();
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         System.in));
                 String response = in.readLine();

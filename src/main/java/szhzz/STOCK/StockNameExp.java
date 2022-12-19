@@ -529,7 +529,7 @@ public class StockNameExp {
                 if (MarketInformation.isManaged(stockCode)) {
                     count++;
                     String name = MarketInformation.getProductName(MarketInformation.getBlockOrMarket(stockCode, false));
-                    System.out.println(stockCode + "\t" + getStockName(stockCode) + "\t<-" + name);
+                    // System.out.println(stockCode + "\t" + getStockName(stockCode) + "\t<-" + name);
                 }
 //                if(MarketInformation.isMarketAStockOrIndex(stockCode) && !MarketInformation.isManaged(stockCode)){
 //                    count++;
@@ -547,6 +547,6 @@ public class StockNameExp {
             Database.closeResultSet(rs);
             DbStack.closeDB(db);
         }
-        System.out.println("count=" + count);
+        // System.out.println("count=" + count);
     }
 }

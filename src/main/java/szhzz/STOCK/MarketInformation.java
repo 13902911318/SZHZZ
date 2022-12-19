@@ -1239,7 +1239,7 @@ public class MarketInformation {
 
 
     public static void main(String[] args) {
-        System.out.println(isMarketA("SZ395004"));
+        // System.out.println(isMarketA("SZ395004"));
 
     }
 }

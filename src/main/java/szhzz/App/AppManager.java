@@ -480,8 +480,8 @@ public class AppManager implements DataConsumer {
 
         this.file = configFolder + "/" + appClass.getSimpleName() + ".ini";
 
-        System.out.println(new File(".").getAbsolutePath());
-        System.out.println(new File(file).getAbsolutePath());
+        // System.out.println(new File(".").getAbsolutePath());
+        // System.out.println(new File(file).getAbsolutePath());
 
         cfg = new ConfigF();
         cfg.load(this.file);
@@ -500,8 +500,8 @@ public class AppManager implements DataConsumer {
 
         this.file = cfg.getConfigUrl();
         prepareIDs();
-        System.out.println(new File(".").getAbsolutePath());
-        System.out.println(new File(file).getAbsolutePath());
+        // System.out.println(new File(".").getAbsolutePath());
+        // System.out.println(new File(file).getAbsolutePath());
     }
 
     public void save() {
@@ -660,7 +660,8 @@ public class AppManager implements DataConsumer {
         if (StatuBar != null) {
             StatuBar.setText(msg);
         } else {
-            if (echo) System.out.println(msg);
+            if (echo);
+            // System.out.println(msg);
         }
     }
 
@@ -871,7 +872,7 @@ public class AppManager implements DataConsumer {
         logger.info("程序退出 " + Database.getConnectCount() + " Database.Quit() ...");
         Database.Quit();
         logger.info("程序正常退出");
-        System.out.println("程序正常退出");
+        // System.out.println("程序正常退出");
         return true;
     }
 

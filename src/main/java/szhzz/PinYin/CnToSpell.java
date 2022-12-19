@@ -35,7 +35,7 @@ public class CnToSpell {
             spellMap = new LinkedHashMap(400);
         }
         initialize();
-        System.out.println("Chinese transfer Spell Done.");
+        // System.out.println("Chinese transfer Spell Done.");
     }
 
     private CnToSpell() {
@@ -586,17 +586,17 @@ public class CnToSpell {
     public static void main(String[] args) {
         String str = null;
         str = "谢海101普降喜雨";
-        System.out.println("Spell=" + CnToSpell.getFullSpell(str));
+        // System.out.println("Spell=" + CnToSpell.getFullSpell(str));
 
         str = "张牙舞爪》。，";
-        System.out.println("Spell=" + CnToSpell.getFullSpell(str));
+        // System.out.println("Spell=" + CnToSpell.getFullSpell(str));
 
 
         str = "猪油，猪八戒。";
-        System.out.println("Spell=" + CnToSpell.getFullSpell(str));
+        // System.out.println("Spell=" + CnToSpell.getFullSpell(str));
 
         str = "招商银行";
-        System.out.println("Spell=" + CnToSpell.getPinYinHeadChar(str).toUpperCase());
+        // System.out.println("Spell=" + CnToSpell.getPinYinHeadChar(str).toUpperCase());
 
     }
 }

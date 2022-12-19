@@ -76,7 +76,7 @@ public class ClusterServer {
         ServerSocket socketConnection = null;
         socketConnection = new ServerSocket(11111);
 
-        System.out.println("Server Waiting");
+        // System.out.println("Server Waiting");
 
         Socket pipe = socketConnection.accept();
 
