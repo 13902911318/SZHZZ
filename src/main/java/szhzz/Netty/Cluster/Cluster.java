@@ -53,7 +53,7 @@ public class Cluster {
     //    static String proxy = "";
     static Boolean routerDebug = null;
 
-    HashMap<String, String> location = new HashMap<>();
+//    HashMap<String, String> location = new HashMap<>();
     String localName = "";
     static final String noDefined = "No defined";
     private String clusterName = "Cluster";
@@ -234,7 +234,7 @@ public class Cluster {
                     clusterServer.startServer();
                     break;
                 }
-                location.put(child.getProperty("IP", ""), child.getProperty("P", noDefined));
+//                location.put(child.getProperty("IP", ""), child.getProperty("P", noDefined));
             }
 
 
@@ -261,8 +261,6 @@ public class Cluster {
                     }
 
                     ClusterClients.getInstance().registerClient(computer, address.split(";"));
-
-                    AppManager.logit("启动客户端 " + computer);
 
                     NettyRequystor remote = new NettyRequystor(computer);
                     remote.setReader(BusinessRuse.getInstance(), 5);
@@ -590,34 +588,37 @@ public class Cluster {
     }
 
     public void reStart() {
-        if (clusterCfg == null || clusterCfg.getChildrenNames() == null) return;
-        if (connectionListener != null) return;
+        this.clusterCfg = getConfig();
+        this.clusterCfg.reLoad();
 
-        for (String computer : clusterCfg.getChildrenNames()) {
-            Config child = clusterCfg.getChild(computer);
-            if (child.getIntVal("Level", 0) <= 0) {
-                continue;
-            }
-
-            if (!computer.equalsIgnoreCase(getHostName())) {
-                String address;
-                String ipString = "";
-                if (isSameLocation(child.getProperty("Public-IP", noDefined))) {
-                    address = child.getProperty("IP", "") + ":" + serverPort;
-//                        ipString += ";" + child.getProperty("VPN", "");
-                } else {
-                    // NAT address
-                    ipString = NatIp(computer, child.getProperty("IP", ""));
-                    address = ipString + ":" + NatPort(computer, serverPort);
-                    ipString = child.getProperty("VPN-IP");
-                    if (ipString != null) {
-                        address += ";" + ipString + ":" + serverPort;
+        if (this.clusterCfg.getChildrenNames() != null) {
+            for (String computer : this.clusterCfg.getChildrenNames()) {
+                Config child = this.clusterCfg.getChild(computer);
+                if (child.getIntVal("Level", 0) > 0 && !computer.equalsIgnoreCase(getHostName())) {
+                    String ipString = "";
+                    String address;
+                    if (this.isSameLocation(child.getProperty("Public-IP", "No defined"))) {
+                        //同一局域网内
+                        address = child.getProperty("IP", "") + ":" + this.serverPort;
+                    } else {
+                        //外网链接
+                        ipString = this.NatIp(computer, child.getProperty("IP", ""));
+                        address = ipString + ":" + this.NatPort(computer, this.serverPort);
+                        ipString = child.getProperty("VPN-IP");
+                        if (ipString != null) {
+                            address = address + ";" + ipString + ":" + this.serverPort;
+                        }
                     }
+
+                    ClusterClients.getInstance().registerClient(computer, address.split(";")); // 地址发生变化后会重启。否则保持原有链接
                 }
-                ClusterClients.getInstance().registerClient(computer, address.split(";"));
-                AppManager.logit("启动客户端 " + computer + " " + serverPort);
             }
         }
+        if (connectionListener == null) {
+            connectionListener = new ConnectionListener();
+            connectionListener.setCircleTime(10 * 1000);
+        }
+
     }
 
 

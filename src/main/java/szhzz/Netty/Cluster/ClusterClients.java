@@ -219,15 +219,20 @@ public class ClusterClients {
                 client.setConnectionTimeout(connectionTimeout);
                 client.setTimer(circleTime);
                 clients.put(computerName, client);
-                App.logit(computerName + " " + client.getHost() + " to be connect");
+                AppManager.logit("启动客户端 " + computerName + " " + client.getHost());
+                client.start();
+
             } catch (Exception e) {
                 logger.error(e);
             }
         }else{
-            client.disconnectFromServer();
-            client.setHosts(address);
+            if(!client.isSameHosts(address)) { //仅地址改变的链接需要重启
+                client.disconnectFromServer();
+                client.setHosts(address);
+                client.start(10*1000);
+                AppManager.logit("重启客户端 " + computerName + " " + client.getHost());
+            }
         }
-        client.start();
         return client;
     }
 

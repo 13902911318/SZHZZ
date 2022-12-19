@@ -91,6 +91,13 @@ public class NettyClient {
         return hosts;
     }
 
+    public boolean isSameHosts(String[] hosts) {
+        if(hosts == null) return this.hosts == null;
+        for (String host: hosts             ) {
+            if(!this.hosts.contains(host)) return false;
+        }
+        return true;
+    }
 
     public void setHosts(String[] hosts) {
         this.hosts.clear();
@@ -361,6 +368,11 @@ public class NettyClient {
     };
 
     public void start() {
+        autoReconnect = true;
+        ConnectionListener.setCircleTime(100);
+    }
+
+    public void start(int delayMMs) {
         autoReconnect = true;
         ConnectionListener.setCircleTime(100);
     }
