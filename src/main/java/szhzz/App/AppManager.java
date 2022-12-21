@@ -2,6 +2,7 @@ package szhzz.App;
 
 
 import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
+import EDU.oswego.cs.dl.util.concurrent.SynchronizedLong;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
@@ -91,7 +92,7 @@ public class AppManager implements DataConsumer {
     private MailMsg mailMsg = null;
     private static HashSet<String> localIPs = null;
     private Boolean openEmail = null;
-    private static long systemTimeDiff = 0L;
+    private static SynchronizedLong systemTimeDiff = new SynchronizedLong(0);
     private static String currentDisk = null;
     private static Class appClass = null;
     private static Boolean autoShutdown = false;
@@ -109,11 +110,11 @@ public class AppManager implements DataConsumer {
     }
 
     public static long getSystemTimeDiff() {
-        return systemTimeDiff;
+        return systemTimeDiff.get();
     }
 
     public static void setSystemTimeDiff(long systemTimeDiff) {
-        AppManager.systemTimeDiff = systemTimeDiff;
+        AppManager.systemTimeDiff.set(systemTimeDiff);
     }
 
     public boolean isSilentTime() {

@@ -42,7 +42,7 @@ public abstract class Config {
     private DataModel dataModel = null;
     private boolean cfgDirty = false;
     private boolean reloadProtect = false;
-    private Hashtable<String, Config> children = null;
+    private Hashtable<String, Config> children = new Hashtable<>();
     private LinkedList<String> childrenIndex = null;
     private boolean autoSave = false; //未实现
     private boolean isSafe = false; //
@@ -631,29 +631,27 @@ public abstract class Config {
     }
 
     public Set<String> getChildrenNames() {
-        if (children == null) return null;
+//        if (children == null) return null;
         return children.keySet();
     }
 
     public Config getChild(String sectionName) {
         Config c = null;
-        if (children != null) {
+//        if (children != null) {
             c = children.get(sectionName);
-        }
+//        }
         return c == null ? newChild(sectionName) : c;
     }
 
     public void loadDataVal(BufferedReader in) {
         String tk;
         try {
+            children.clear();
+            childrenIndex = new LinkedList<String>();
             while ((tk = in.readLine()) != null) {
                 String trim = tk.trim();
 //                if(trim.startsWith("[*"))continue;  //不使用的单元
                 while (trim.startsWith("[") && trim.endsWith("]")) {
-                    if (children == null) {
-                        children = new Hashtable<>();
-                        childrenIndex = new LinkedList<String>();
-                    }
                     Config cfg = new ConfigF();
                     String name = trim.replace("[", "").replace("]", "").toUpperCase();
                     trim = cfg.loadChild(in);

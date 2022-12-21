@@ -93,7 +93,7 @@ public class AlarmClock implements DawCountdown {
             if (o instanceof String) {
                 Vector<TimerEvent> tbd = new Vector<>();
                 for (Object obj : alarmPool) {
-                    if (((TimerEvent) obj).getCaseName().equals(o) ) {
+                    if (((TimerEvent) obj).getCaseName().equals(o)) {
                         tbd.add((TimerEvent) obj);
                         this.logIt(o + " Removed");
                     }
@@ -444,7 +444,8 @@ public class AlarmClock implements DawCountdown {
         }
 
         public long getLeftMSeconds() {
-            return (getIndex() - Calendar.getInstance().getTimeInMillis());
+            return getIndex() - (Calendar.getInstance().getTimeInMillis() + AppManager.getSystemTimeDiff());
+//            System.currentTimeMillis()
         }
 
 

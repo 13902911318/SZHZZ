@@ -46,7 +46,7 @@ public class NtpClient {
         timeClient.setDefaultTimeout(defaultTimeOut);
         TimeInfo timeInfo = timeClient.getTime(timeServerAddress);
         timeInfo.computeDetails();
-        offset = timeInfo.getOffset();
+        offset = timeInfo.getOffset();  // 标准时间 - System.currentTimeMillis()
         return offset;
     }
 
