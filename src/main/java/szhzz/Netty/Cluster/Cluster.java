@@ -53,7 +53,7 @@ public class Cluster {
     //    static String proxy = "";
     static Boolean routerDebug = null;
 
-//    HashMap<String, String> location = new HashMap<>();
+    //    HashMap<String, String> location = new HashMap<>();
     String localName = "";
     static final String noDefined = "No defined";
     private String clusterName = "Cluster";
@@ -244,27 +244,12 @@ public class Cluster {
                 if (child.getIntVal("Level", 0) <= 0) {
                     continue;
                 }
-                String address = "";
                 if (!computer.equalsIgnoreCase(getHostName())) {
-                    String ipString = "";
-                    if (isSameLocation(child.getProperty("Public-IP", noDefined))) {
-                        address = child.getProperty("IP", "") + ":" + serverPort;
-//                        ipString += ";" + child.getProperty("VPN", "");
-                    } else {
-                        ipString = NatIp(computer, child.getProperty("IP", ""));
-                        address = ipString + ":" + NatPort(computer, serverPort);
-                        ipString = child.getProperty("VPN-IP");
-                        if (ipString != null) {
-                            address += ";" + ipString + ":" + serverPort;
-                        }
-//                        ipString += ";" + child.getProperty("IP", "");
-                    }
-
+                    String address = getLocalAddress(computer);
                     ClusterClients.getInstance().registerClient(computer, address.split(";"));
 
                     NettyRequystor remote = new NettyRequystor(computer);
                     remote.setReader(BusinessRuse.getInstance(), 5);
-//                    remote.setQueryData(StationPropertyWrap.getStationLevelQuery());
                     remoteClients.add(remote);
                 }
             }
@@ -595,21 +580,7 @@ public class Cluster {
             for (String computer : this.clusterCfg.getChildrenNames()) {
                 Config child = this.clusterCfg.getChild(computer);
                 if (child.getIntVal("Level", 0) > 0 && !computer.equalsIgnoreCase(getHostName())) {
-                    String ipString = "";
-                    String address;
-                    if (this.isSameLocation(child.getProperty("Public-IP", "No defined"))) {
-                        //同一局域网内
-                        address = child.getProperty("IP", "") + ":" + this.serverPort;
-                    } else {
-                        //外网链接
-                        ipString = this.NatIp(computer, child.getProperty("IP", ""));
-                        address = ipString + ":" + this.NatPort(computer, this.serverPort);
-                        ipString = child.getProperty("VPN-IP");
-                        if (ipString != null) {
-                            address = address + ";" + ipString + ":" + this.serverPort;
-                        }
-                    }
-
+                    String address = getLocalAddress(computer);
                     ClusterClients.getInstance().registerClient(computer, address.split(";")); // 地址发生变化后会重启。否则保持原有链接
                 }
             }
@@ -621,6 +592,28 @@ public class Cluster {
 
     }
 
+    public String getLocalAddress(String computer) {
+        String ipString = "";
+        String address = "";
+        Config child = clusterCfg.getChild(computer);
+        if (this.isSameLocation(child.getProperty("Public-IP", "No defined"))) {
+            //同一局域网内
+            String[] ips = child.getProperty("IP", "").split(";");
+            for (String ip : ips) {
+                if (address.length() > 0) address += ";";
+                address += ip + ":" + this.serverPort;
+            }
+        } else {
+            //外网链接
+            ipString = this.NatIp(computer, child.getProperty("IP", ""));
+            address = ipString + ":" + this.NatPort(computer, this.serverPort);
+            ipString = child.getProperty("VPN-IP");
+            if (ipString != null) {
+                address = address + ";" + ipString + ":" + this.serverPort;
+            }
+        }
+        return address;
+    }
 
     public Config getChildCfg(String computerName) {
         return getConfig().getChild(computerName);

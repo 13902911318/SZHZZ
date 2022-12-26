@@ -444,7 +444,7 @@ public class AlarmClock implements DawCountdown {
         }
 
         public long getLeftMSeconds() {
-            return getIndex() - (Calendar.getInstance().getTimeInMillis() + AppManager.getSystemTimeDiff());
+            return (getIndex() - Calendar.getInstance().getTimeInMillis()) ;  //+ AppManager.getSystemTimeDiff()) 会导致与程序的其它部分基准不同
 //            System.currentTimeMillis()
         }
 

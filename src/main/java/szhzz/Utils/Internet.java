@@ -63,7 +63,7 @@ public class Internet {
             }
             //System.out.println(inputLine.toString());
         } catch (Exception e) {
-            logger.error(e);
+            //logger.error(e);
         } finally {
             if (in != null) {
                 try {
