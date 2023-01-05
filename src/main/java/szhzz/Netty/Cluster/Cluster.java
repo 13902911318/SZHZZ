@@ -350,7 +350,7 @@ public class Cluster {
         ss.level = 0;
         ss.connected = requystor.isConnected();
         ss.ipAddress = requystor.getIpAddress();
-        ss.offline = false;
+        ss.offline = !requystor.isConnected();
         ss.onTrade = false;
         ss.mack = ""; //requystor.getMack()
         ss.tradeProxy = "";
