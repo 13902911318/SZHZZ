@@ -86,6 +86,14 @@ public class AlarmClock implements DawCountdown {
         timeup();
         return a;
     }
+    public synchronized Object setAlarm(int hour, int minute, int seconds, int millis, Runnable requestor, boolean loop, int priority ,boolean precise) {
+        alarmTime a = new alarmTime(hour, minute, seconds, millis, requestor, loop, priority, precise);
+        a.setAlarmClock(this);
+        alarmPool.add(a);
+        logIt("Added " + a + " Left time " + toTimeString(a.getLeftMSeconds()));
+        timeup();
+        return a;
+    }
 
 
     public synchronized void removeAlarm(Object o) {
@@ -402,16 +410,22 @@ public class AlarmClock implements DawCountdown {
         //        String caseName = "No named";
         boolean exclude = true;
         boolean isRunning = false;
+        boolean precise = false;
 
         //        alarmTime(int hour, int minuts, int seconds, Runnable requestor, boolean loop, int priorol) {
 //            setup(hour, minuts, seconds, 0, requestor, loop, priorol);
 //        }
-//
+
         alarmTime(int hour, int minuts, int seconds, int millis, Runnable requestor, boolean loop, int priority) {
-            setup(hour, minuts, seconds, millis, requestor, loop, priority);
+            setup( hour,  minuts,  seconds,  millis,  requestor,  loop, priority, false);
         }
 
-        private void setup(int hour, int minuts, int seconds, int millis, Runnable requestor, boolean loop, int priority) {
+        alarmTime(int hour, int minuts, int seconds, int millis, Runnable requestor, boolean loop, int priority, boolean precise) {
+            setup( hour,  minuts,  seconds,  millis,  requestor,  loop, priority, precise);
+        }
+
+
+        private void setup(int hour, int minuts, int seconds, int millis, Runnable requestor, boolean loop, int priority, boolean precise) {
             //           caseName = requestor.toString();
             if (requestor instanceof TaskExclutable) {
                 exclude = ((TaskExclutable) requestor).isExclude();
@@ -429,6 +443,7 @@ public class AlarmClock implements DawCountdown {
 
             setPriority(priority);
             this.requestor = requestor;
+            this.precise = precise;
             this.setLoop(loop);
 
         }
@@ -444,8 +459,11 @@ public class AlarmClock implements DawCountdown {
         }
 
         public long getLeftMSeconds() {
-            return (getIndex() - Calendar.getInstance().getTimeInMillis()) ;  //+ AppManager.getSystemTimeDiff()) 会导致与程序的其它部分基准不同
-//            System.currentTimeMillis()
+            if(precise){
+                return getIndex() - (Calendar.getInstance().getTimeInMillis() + AppManager.getSystemTimeDiff()); // 会导致与程序的其它部分基准不同
+            }else{
+                return getIndex() - Calendar.getInstance().getTimeInMillis() ;
+            }
         }
 
 

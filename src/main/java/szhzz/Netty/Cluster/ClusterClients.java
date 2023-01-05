@@ -75,8 +75,8 @@ public class ClusterClients {
         if (client == null) {
             return false;
         }
-        client.send(msg);
-        return true;
+
+        return client.send(msg) > 0;
     }
 
     public boolean query(NettyRequystor requestor) {

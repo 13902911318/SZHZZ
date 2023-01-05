@@ -334,7 +334,7 @@ public class NettyClient {
                     StationPropertyWrap.addRouter(msg, "1. " + AppManager.getHostName() + "." + this.getClass().getSimpleName() + ".send");
                 }
                 int debug = ServerHandler.bypassSendTo(msg, remoteName);
-                return 1; // 如果对方未开机，不是错误
+                return debug; // 如果对方未开机，不是错误
             }
             logger.info(new Exception("发送数据失败，[未连接]\n" + msg.toString()));
         }

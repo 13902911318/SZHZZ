@@ -736,6 +736,15 @@ public class AppManager implements DataConsumer {
         return alarmClock.setAlarm(hour, minute, seconds, millis, requestor, loop, priorol);
     }
 
+    public Object addAlarmClock(int hour, int minute, int seconds, int millis, Runnable requestor, boolean loop, int priorol, boolean precise) {
+        if (alarmClock == null) {
+            alarmClock = AlarmClock.getInstance();
+            alarmClock.setApp(this);
+        }
+
+        return alarmClock.setAlarm(hour, minute, seconds, millis, requestor, loop, priorol, precise);
+    }
+
     public void suspendAllAlarmClock(boolean suspend) {
         if (alarmClock != null) {
             alarmClock.suspendAll(suspend);

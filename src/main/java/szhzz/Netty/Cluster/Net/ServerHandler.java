@@ -99,7 +99,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<NettyExchangeData
      */
     public static int bypassSendTo(NettyExchangeData msg, String distHostName) {
         Channel channel = getBypassChannel(distHostName);
-        if (channel != null) {
+        if (channel != null && channel.isWritable()) {
             if(StationPropertyWrap.isRouterDebug(msg)) {
                 StationPropertyWrap.addRouter(msg, "2. " + AppManager.getHostName() + ".ServerHandler.bypassSendTo");
                 logger.info("标志 2 ID=" + msg.getRequestID() + " " +
