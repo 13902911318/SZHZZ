@@ -95,12 +95,12 @@ public class ClusterClients {
 
                     return true;
                 } else {
-                    AppManager.getApp().logEvent(" Query(FunID=" + requestor.getFunID() + ") Error ");
+                    AppManager.logit(" Query(FunID=" + requestor.getFunID() + ") Error ");
                 }
             }
-            return w_RequestID > 0;
+            return false;
         } else {
-            AppManager.getApp().logEvent(" Query(" + requestor.getFunID() + ") Data == null Error ");
+            AppManager.logit(" Query(" + requestor.getFunID() + ") Data == null Error ");
         }
         return false;
     }
