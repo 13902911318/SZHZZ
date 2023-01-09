@@ -95,7 +95,7 @@ public class ClusterClients {
 
                     return true;
                 } else {
-                    AppManager.logit(" Query(FunID=" + requestor.getFunID() + ") Error ");
+                    //AppManager.logit(" Query(FunID=" + requestor.getFunID() + ") Error ");
                 }
             }
             return false;
