@@ -97,8 +97,10 @@ public class NettyExchangeData extends ExchangeData {
         if (language.equals(l) || "ASC_II".equals(l)) {
             return true;
         } else {
-            logger.error(new Exception("语言编码冲突"));
-            logger.info(this.toString());
+            if(!isEmpty()){
+                logger.error(new Exception("语言编码冲突"));
+                logger.info(this.toString());
+            }
             return false;
         }
     }

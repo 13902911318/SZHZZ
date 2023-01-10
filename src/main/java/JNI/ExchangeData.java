@@ -344,7 +344,14 @@ public class ExchangeData implements Serializable {
     }
 
     public boolean isEmpty() {
-        return (table == null || table.size() == 0);
+        if (table == null || table.size() == 0) return true;
+
+        for (ArrayList row : table) {
+            for (Object o : row) {
+                if(!o.toString().trim().isEmpty()) return false; //只要有单元不为空， 整体即不为空
+            }
+        }
+        return true;
     }
 
 

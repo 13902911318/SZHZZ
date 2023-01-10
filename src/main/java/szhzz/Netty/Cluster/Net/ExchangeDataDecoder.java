@@ -7,6 +7,7 @@ import szhzz.Netty.Cluster.BusinessRuse;
 import szhzz.Netty.Cluster.ExchangeDataType.NettyExchangeData;
 import szhzz.Utils.DawLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +22,9 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
         decode_(ctx, msg, out);
     }
 
+    boolean isEmpty(NettyExchangeData node) {
+        return node == null || node.isEmpty();
+    }
 
     protected void decode_(ChannelHandlerContext ctx, String msg, List<Object> out) throws Exception {
         // System.out.println(msg);
@@ -30,7 +34,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
         }
         if (msg.startsWith("TRUCRIPT-KEY")) {
             String returnKey = BusinessRuse.getInstance().getPassword(msg);
-            if(returnKey != null && ctx.channel().isWritable()){
+            if (returnKey != null && ctx.channel().isWritable()) {
                 ctx.channel().writeAndFlush(returnKey + "\r\n");
             }
             return;
@@ -39,7 +43,7 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
 //        System.out.println(msg);
 
         if (NettyExchangeData.isBeggingOfData(msg)) {
-            if (data != null) {
+            if (!isEmpty(data)) {
 //                System.out.println("数据序列错误");
 //                logger.info("ID=" + data.getSerialNo(), new Exception("数据序列错误!") );
                 if (data.isSameCharset()) {
@@ -53,14 +57,14 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
             }
             data = new NettyExchangeData();
         } else if (NettyExchangeData.isEndOfDate(msg)) {
-            if (data != null) {
+            if (!isEmpty(data)) {
                 if (data.isSameCharset()) {
                     out.add(data);
                 } else {
                     logger.error(data.toString(), new Exception("中文编码错误!"));
                 }
             } else {
-                logger.error( " 错误的信息结尾 " + msg);
+                logger.error(" 错误的信息结尾 " + msg);
             }
             data = null;
         } else {
@@ -76,5 +80,11 @@ public class ExchangeDataDecoder extends MessageToMessageDecoder<String> {
             }
         }
 
+    }
+
+    public static void main(String[] args) {
+        String s = "\tk\n"  ;
+        s = s.replaceAll("\t|\n", "");
+        System.out.println(s);
     }
 }
